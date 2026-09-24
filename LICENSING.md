@@ -11,5 +11,9 @@ The Apache License 2.0 applies to `.lean` files only. The presence of [`LICENSE`
 repository root does not extend it to any other file. Every Lean file carries the Apache header in
 its first five lines.
 
+Provenance: the Lean code continues QECLean, which began at Bosonic Systems Corporation and was
+first committed as `616b81d` on May 13, 2026, under the Apache License 2.0. The attribution is in
+[`NOTICE`](NOTICE), which travels with any redistribution under section 4(d) of the License.
+
 Dependencies: Lean 4 and Mathlib are Apache 2.0 and are fetched by `lake`, not vendored; nothing of
 theirs is redistributed here.

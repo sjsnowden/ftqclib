@@ -6,7 +6,9 @@ higher-order Fourier analysis and coding theory. The default build targets conta
 the headline theorems depend only on the standard three axioms (`propext`, `Classical.choice`,
 `Quot.sound`).
 
-ftqclib continues the Lean code of QECLean, by sjsnowden and SamBosonic.
+ftqclib continues the Lean code of QECLean, which began at Bosonic Systems Corporation. That work
+was first committed as `616b81d` on May 13, 2026, under the Apache License 2.0, and ftqclib builds on
+it under the same license. See [`NOTICE`](NOTICE).
 
 ## Libraries
 
