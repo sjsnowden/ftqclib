@@ -1,0 +1,6 @@
+# Lake / Lean build artifacts
+/.lake
+build/
+*.olean
+*.ilean
+*.hash

@@ -1,0 +1,23 @@
+name = "ftqclib"
+version = "0.1.0"
+keywords = ["math", "quantum-error-correction", "stabilizer-codes", "coding-theory"]
+defaultTargets = ["FTQCLib", "ECCLib"]
+
+[leanOptions]
+pp.unicode.fun = true
+relaxedAutoImplicit = false
+weak.linter.mathlibStandardSet = true
+maxSynthPendingDepth = 3
+
+[[require]]
+name = "mathlib"
+scope = "leanprover-community"
+rev = "v4.29.1"
+
+[[lean_lib]]
+name = "FTQCLib"
+
+# A self-contained, Mathlib-only library: higher-order Fourier analysis and coding theory.
+# Imports no FTQCLib modules.
+[[lean_lib]]
+name = "ECCLib"
