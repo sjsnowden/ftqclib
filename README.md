@@ -27,11 +27,15 @@ lake build
 ```
 
 The toolchain is pinned in `lean-toolchain` and Mathlib in `lakefile.toml`. `lake build` builds both
-libraries. Check the axioms behind any result with `#print axioms <name>`.
+libraries in full: every module under `FTQCLib/` and `ECCLib/`, not only the ones the root files
+import. Check the axioms behind any result with `#print axioms <name>`.
 
 Modules whose name ends in `Check` hold executable checks (`#guard`, `#guard_msgs`, `decide`) of the
-module they accompany. Files under `FTQCLib/Explore/` are standalone explorations outside the default
-target; build one with `lake build FTQCLib.Explore.<File>`.
+module they accompany. Files under `FTQCLib/Explore/` are standalone explorations that nothing
+imports; `lake build` compiles them too, or build one alone with `lake build FTQCLib.Explore.<File>`.
+The kernel-heavy certificate `FTQCLibHeavy/GTwoCert.lean` is in its own library, left out of the
+default targets because it runs for more than 18 minutes and past 49 GiB of memory; build it on
+demand with `lake build FTQCLibHeavy`.
 
 ## License
 

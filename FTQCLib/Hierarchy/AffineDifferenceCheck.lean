@@ -281,7 +281,8 @@ Classical.choice, Quot.sound] -/
 #print axioms isF2Affine_eval_of_effectiveLevel_le_one
 
 /-- info: 'FTQCLib.Hierarchy.DiagPhase.shiftDeriv_effectiveLevel_le_one' depends on axioms: [propext,
-Classical.choice, Quot.sound] -/
+ Classical.choice,
+ Quot.sound] -/
 #guard_msgs in
 #print axioms shiftDeriv_effectiveLevel_le_one
 

@@ -48,6 +48,8 @@ Conventions:
   - `GTwo.lean` (axiom-clean) — `𝔤₂(𝔽₂)` from root data alone; `g2` = the generated subalgebra of
     gl₁₄(𝔽₂); independence via an explicit probe matrix and its inverse; `⁅h_β,x_α⁆ = x_α ≠ 0` +
     the `GroupDoors` dichotomy ⇒ `g2_not_nilpotent`.
-  - `GTwoCert.lean` (built on demand) — the closure equations (= the table's Jacobi identity;
+  - `FTQCLibHeavy/GTwoCert.lean` (outside this directory; built on demand with
+    `lake build FTQCLibHeavy`) — the closure equations (= the table's Jacobi identity;
     g2 = the 14-dimensional span). Verified by compiled evaluation; the kernel `decide` is a long,
-    memory-heavy job. Imported by nothing; build it on an otherwise idle machine.
+    memory-heavy job (more than 18 minutes and past 49 GiB on a 24-core machine without finishing).
+    Imported by nothing; build it on an otherwise idle machine.

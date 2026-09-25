@@ -14,10 +14,22 @@ name = "mathlib"
 scope = "leanprover-community"
 rev = "v4.29.1"
 
+# `FTQCLib.*` selects the root module and every submodule, so `lake build` compiles every file
+# under `FTQCLib/`, not only what `FTQCLib.lean` imports. A stale `#guard_msgs` anywhere then
+# fails the next build.
 [[lean_lib]]
 name = "FTQCLib"
+globs = ["FTQCLib.*"]
 
 # A self-contained, Mathlib-only library: higher-order Fourier analysis and coding theory.
 # Imports no FTQCLib modules.
 [[lean_lib]]
 name = "ECCLib"
+globs = ["ECCLib.*"]
+
+# Kernel-heavy certificates, deliberately left out of `defaultTargets`: `FTQCLibHeavy.GTwoCert`
+# alone ran for more than 18 minutes and past 49 GiB on a 24-core machine without finishing.
+# Build on demand with `lake build FTQCLibHeavy`.
+[[lean_lib]]
+name = "FTQCLibHeavy"
+roots = ["FTQCLibHeavy.GTwoCert"]

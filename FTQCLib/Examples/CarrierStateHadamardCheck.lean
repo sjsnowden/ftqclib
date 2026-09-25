@@ -320,7 +320,8 @@ Classical.choice, Quot.sound] -/
 #print axioms yWeight_pauliSwapOn
 
 /-- info: 'FTQCLib.Frame.Walkthrough.pauliAct_pauliSwapOn_walshTransform' depends on axioms: [propext,
-Classical.choice, Quot.sound] -/
+ Classical.choice,
+ Quot.sound] -/
 #guard_msgs in
 #print axioms pauliAct_pauliSwapOn_walshTransform
 

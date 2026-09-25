@@ -21,7 +21,7 @@ the G₂ Cartan matrix `[[2,−1],[−3,2]]` has odd off-diagonal entries, so pa
 survive mod 2 and give `⁅h, x⁆ = x` on root vectors (`(ad h)^k x = x ≠ 0` forever).
 `FTQCLib/Explore/GTwo.lean` builds `𝔤₂(𝔽₂)` from its root data alone and machine-checks the
 eigenvector — `lie_Hg_Xg` + `Xg_ne_zero` + this file's dichotomy give `g2_not_nilpotent` and
-`not_nilpotent_of_surjective_g2`; the exact-dimension/closure refinement is in `GTwoCert.lean`
+`not_nilpotent_of_surjective_g2`; the exact-dimension/closure refinement is in `FTQCLibHeavy/GTwoCert.lean`
 (kernel-heavy, verified by compiled evaluation, built on demand). (G₂'s special prime is 3, not 2 —
 the char-2 special isogenies are B/C/F₄.) The decisive statement is the **dichotomy lemma**
 (`eq_zero_of_lie_eq_self`): *in any nilpotent Lie algebra, `⁅h, x⁆ = x` forces `x = 0`* — so no
