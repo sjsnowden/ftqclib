@@ -59,13 +59,6 @@ theorem frameCliffordAction_L (g : cliffordSubgroup n) (S : FramePureSignedStab 
     (g • S).L = Submodule.map (cliffordToSymplectic g.2).toLinearMap S.L :=
   rfl
 
-/-- The conjugation sign is a fourth root of unity (it is `±1`, `cliffordSign_mul_self`). -/
-theorem isMu4_cliffordSign {U : QubitSpace n ≃ₗ[ℂ] QubitSpace n} (hU : IsCliffordOperator U)
-    (p : Pauli n) : IsMu4 (cliffordSign hU p) := by
-  rcases mul_self_eq_one_iff.mp (cliffordSign_mul_self hU p) with h | h
-  · rw [h]; exact isMu4_one
-  · rw [h]; exact isMu4_neg_one
-
 /-- **The action transports the sign by the Heisenberg cocycle.** On `L`, `χ` becomes `χ ∘ Φ⁻¹` plus
 the `ZMod 4` sign cocycle `clog ∘ cliffordSign`. Together with `frameCliffordAction_L` this pins the
 floor-chart morphisms down as the full symplectic-plus-sign Clifford action on `(L,χ)`. The cocycle

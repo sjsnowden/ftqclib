@@ -62,10 +62,6 @@ theorem eval_X_diag {N m : ℕ} (i : Fin N) (v : Fin N → ZMod 2) :
   unfold DiagPhase.eval DiagPhase.liftBinary
   rw [MvPolynomial.eval_X]
 
-theorem signOf_zero' : signOf 0 = 1 := if_pos rfl
-
-theorem signOf_one' : signOf 1 = -1 := if_neg one_ne_zero
-
 /-- The adjoined difference of `X₀` at precision `m`: `1 + 2^{m−1}·w₀`. -/
 theorem lastDiff_hSumExp_X {m : ℕ} (w : Fin 1 → ZMod 2) (y : Fin 0 → ZMod 2) :
     (lastDiff (hSumExp (h := 0) (0 : Fin 1) (MvPolynomial.X 0 : DiagPhase (1 + 0) m))).eval
@@ -158,13 +154,13 @@ theorem amp_hKX : amp hKX = walshTransform 0 (amp (ofKernelState KX)) :=
 /-- The Walsh transform of the uniform amplitude at `0`. -/
 theorem walsh_KX_zero : walshTransform 0 (amp (ofKernelState KX)) 0 = Real.sqrt 2 := by
   unfold walshTransform
-  rw [amp_KX, amp_KX, Pi.zero_apply, signOf_zero', one_mul, one_add_one_eq_two]
+  rw [amp_KX, amp_KX, Pi.zero_apply, signOf_zero, one_mul, one_add_one_eq_two]
   exact one_div_sqrt_two_mul_two
 
 /-- The Walsh transform of the uniform amplitude at `1`. -/
 theorem walsh_KX_one : walshTransform 0 (amp (ofKernelState KX)) (Pi.single 0 1) = 0 := by
   unfold walshTransform
-  rw [amp_KX, amp_KX, Pi.single_eq_same, signOf_one']
+  rw [amp_KX, amp_KX, Pi.single_eq_same, signOf_one]
   ring
 
 /-- `hKX`: the amplitude at `0` is `√2`. -/
@@ -267,7 +263,7 @@ theorem amp_hKM : amp hKM = walshTransform 0 (amp (ofKernelState KM)) :=
 /-- The Walsh transform of `(−1)^{w₀}` at `0`. -/
 theorem walsh_KM_zero : walshTransform 0 (amp (ofKernelState KM)) 0 = 0 := by
   unfold walshTransform
-  rw [amp_KM, amp_KM, Pi.zero_apply, signOf_zero', Function.update_self, Function.update_self,
+  rw [amp_KM, amp_KM, Pi.zero_apply, signOf_zero, Function.update_self, Function.update_self,
     ZMod.val_zero, Nat.cast_zero, charOf_zero, show ((1 : ZMod 2).val : ℕ) = 1 by decide,
     Nat.cast_one, charOf_one_one]
   ring
@@ -276,7 +272,7 @@ theorem walsh_KM_zero : walshTransform 0 (amp (ofKernelState KM)) 0 = 0 := by
 theorem walsh_KM_one :
     walshTransform 0 (amp (ofKernelState KM)) (Pi.single 0 1) = Real.sqrt 2 := by
   unfold walshTransform
-  rw [amp_KM, amp_KM, Pi.single_eq_same, signOf_one', Function.update_self, Function.update_self,
+  rw [amp_KM, amp_KM, Pi.single_eq_same, signOf_one, Function.update_self, Function.update_self,
     ZMod.val_zero, Nat.cast_zero, charOf_zero, show ((1 : ZMod 2).val : ℕ) = 1 by decide,
     Nat.cast_one, charOf_one_one, neg_one_mul, neg_neg, one_add_one_eq_two]
   exact one_div_sqrt_two_mul_two
@@ -410,7 +406,7 @@ theorem eval_hKS_Q (w : Fin (1 + 0) → ZMod 2) :
 theorem amp_hKS_zero : amp hKS 0 = (1 + Complex.I) / (Real.sqrt 2 : ℂ) := by
   rw [amp_hKS]
   unfold walshTransform
-  rw [amp_KS, amp_KS, Pi.zero_apply, signOf_zero', Function.update_self, Function.update_self,
+  rw [amp_KS, amp_KS, Pi.zero_apply, signOf_zero, Function.update_self, Function.update_self,
     ZMod.val_zero, Nat.cast_zero, charOf_zero, show ((1 : ZMod 2).val : ℕ) = 1 by decide,
     Nat.cast_one, charOf_two_one]
   ring
@@ -419,7 +415,7 @@ theorem amp_hKS_zero : amp hKS 0 = (1 + Complex.I) / (Real.sqrt 2 : ℂ) := by
 theorem amp_hKS_one : amp hKS (Pi.single 0 1) = (1 - Complex.I) / (Real.sqrt 2 : ℂ) := by
   rw [amp_hKS]
   unfold walshTransform
-  rw [amp_KS, amp_KS, Pi.single_eq_same, signOf_one', Function.update_self, Function.update_self,
+  rw [amp_KS, amp_KS, Pi.single_eq_same, signOf_one, Function.update_self, Function.update_self,
     ZMod.val_zero, Nat.cast_zero, charOf_zero, show ((1 : ZMod 2).val : ℕ) = 1 by decide,
     Nat.cast_one, charOf_two_one]
   ring
@@ -685,7 +681,7 @@ theorem amp_hKY_ne :
     amp hKY (Pi.single 0 1) ≠ walshTransform 0 (amp (ofKernelState KY)) (Pi.single 0 1) := by
   have hw : walshTransform 0 (amp (ofKernelState KY)) (Pi.single 0 1) = 0 := by
     unfold walshTransform
-    rw [amp_KY, amp_KY, Pi.single_eq_same, signOf_one']
+    rw [amp_KY, amp_KY, Pi.single_eq_same, signOf_one]
     ring
   rw [hw, amp_pos hKY_support_one]
   change ampCore 1 0 _ ((Real.sqrt 2 : ℂ) * 1) _ ≠ 0
@@ -916,13 +912,13 @@ theorem amp_hFloor_KZ : amp (hFloor 0 KZ) = walshTransform 0 (amp (ofKernelState
 #guard_msgs (whitespace := lax) in
 #print axioms eval_X_diag
 
-/-- info: 'FTQCLib.Frame.Walkthrough.signOf_zero'' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+/-- info: 'FTQCLib.Frame.Walkthrough.signOf_zero' depends on axioms: [propext, Classical.choice, Quot.sound] -/
 #guard_msgs (whitespace := lax) in
-#print axioms signOf_zero'
+#print axioms signOf_zero
 
-/-- info: 'FTQCLib.Frame.Walkthrough.signOf_one'' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+/-- info: 'FTQCLib.Frame.Walkthrough.signOf_one' depends on axioms: [propext, Classical.choice, Quot.sound] -/
 #guard_msgs (whitespace := lax) in
-#print axioms signOf_one'
+#print axioms signOf_one
 
 /-- info: 'FTQCLib.Frame.Walkthrough.lastDiff_hSumExp_X' depends on axioms: [propext, Classical.choice, Quot.sound] -/
 #guard_msgs (whitespace := lax) in

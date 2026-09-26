@@ -60,6 +60,12 @@ theorem carrierNormSq_eq_inner (S : KernelSumState n) :
 /-- The Walsh sign `(-1)^b` as a complex number. -/
 noncomputable def signOf (b : ZMod 2) : ℂ := if b = 0 then 1 else -1
 
+/-- `signOf 0 = 1`. -/
+theorem signOf_zero : signOf 0 = 1 := if_pos rfl
+
+/-- `signOf 1 = −1`. -/
+theorem signOf_one : signOf 1 = -1 := if_neg one_ne_zero
+
 /-- The single-bit **Walsh transform** of an amplitude function `f` at output bit `k`:
 `(W f)(w) = (1/√2)·(f(w[k←0]) + (-1)^{w_k}·f(w[k←1]))`. This is exactly what `H` on bit `k` does to an
 amplitude function. -/

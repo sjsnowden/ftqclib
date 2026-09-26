@@ -41,11 +41,6 @@ lemma cliffordSign_pm_one {U : QubitSpace n ≃ₗ[ℂ] QubitSpace n}
     cliffordSign hU p = 1 ∨ cliffordSign hU p = -1 :=
   mul_self_eq_one_iff.mp (cliffordSign_mul_self hU p)
 
-lemma isMu4_cliffordSign {U : QubitSpace n ≃ₗ[ℂ] QubitSpace n}
-    (hU : IsCliffordOperator U) (p : Pauli n) :
-    IsMu4 (cliffordSign hU p) := by
-  rcases cliffordSign_pm_one hU p with h | h <;> rw [h] <;> unfold IsMu4 <;> tauto
-
 /-- The `clog`-transported cocycle law for any Clifford operator's sign character. -/
 lemma clog_sign_valid {U : QubitSpace n ≃ₗ[ℂ] QubitSpace n}
     (hU : IsCliffordOperator U) (a b : Pauli n) :

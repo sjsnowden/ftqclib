@@ -39,8 +39,9 @@ open FTQCLib FTQCLib.Pauli FTQCLib.Hierarchy FTQCLib.Stabilizer
 
 /-! ## The Lagrangians -/
 
-/-- `⟨Y₀⟩` on one qubit: equal X- and Z-entries. -/
-def lagY : Submodule (ZMod 2) (Pauli 1) where
+/-- `⟨Y₀⟩` on one qubit, presented by its constraint: equal X- and Z-entries. (`CarrierStateCheck`'s
+`lagY` is the same subspace presented as a span.) -/
+def lagYByConstraint : Submodule (ZMod 2) (Pauli 1) where
   carrier := {p | p.X 0 = p.Z 0}
   zero_mem' := rfl
   add_mem' := fun hp hq => by
@@ -50,7 +51,8 @@ def lagY : Submodule (ZMod 2) (Pauli 1) where
     simp only [Set.mem_setOf_eq, X_smul, Z_smul, Pi.smul_apply] at *
     rw [hp]
 
-@[simp] theorem mem_lagY {p : Pauli 1} : p ∈ lagY ↔ p.X 0 = p.Z 0 := Iff.rfl
+@[simp] theorem mem_lagYByConstraint {p : Pauli 1} : p ∈ lagYByConstraint ↔ p.X 0 = p.Z 0 :=
+  Iff.rfl
 
 /-- `⟨X₀⟩` on one qubit: no Z-part. -/
 def lagX1 : Submodule (ZMod 2) (Pauli 1) where
@@ -65,8 +67,10 @@ def lagX1 : Submodule (ZMod 2) (Pauli 1) where
 
 @[simp] theorem mem_lagX1 {p : Pauli 1} : p ∈ lagX1 ↔ p.Z 0 = 0 := Iff.rfl
 
-/-- The graph-state Lagrangian `⟨X₀Z₁, Z₀X₁⟩`: each Z-entry equals the other X-entry. -/
-def graphL : Submodule (ZMod 2) (Pauli 2) where
+/-- The graph-state Lagrangian `⟨X₀Z₁, Z₀X₁⟩`, presented by its constraint: each Z-entry equals the
+other X-entry. (`CarrierFloorChartCheck`'s `graphL` is the same subspace with the constraint written
+X-entry first.) -/
+def graphLByConstraint : Submodule (ZMod 2) (Pauli 2) where
   carrier := {p | p.Z 0 = p.X 1 ∧ p.Z 1 = p.X 0}
   zero_mem' := ⟨rfl, rfl⟩
   add_mem' := fun hp hq => ⟨by simp only [X_add, Z_add, Pi.add_apply]; rw [hp.1, hq.1],
@@ -74,10 +78,12 @@ def graphL : Submodule (ZMod 2) (Pauli 2) where
   smul_mem' := fun c _ hp => ⟨by simp only [X_smul, Z_smul, Pi.smul_apply]; rw [hp.1],
     by simp only [X_smul, Z_smul, Pi.smul_apply]; rw [hp.2]⟩
 
-@[simp] theorem mem_graphL {p : Pauli 2} : p ∈ graphL ↔ p.Z 0 = p.X 1 ∧ p.Z 1 = p.X 0 := Iff.rfl
+@[simp] theorem mem_graphLByConstraint {p : Pauli 2} :
+    p ∈ graphLByConstraint ↔ p.Z 0 = p.X 1 ∧ p.Z 1 = p.X 0 :=
+  Iff.rfl
 
 /-- The graph-state Lagrangian is isotropic. -/
-theorem graphL_isStabilizer : IsStabilizer graphL := by
+theorem graphLByConstraint_isStabilizer : IsStabilizer graphLByConstraint := by
   intro p hp q hq
   unfold omega
   rw [Fin.sum_univ_two, Fin.sum_univ_two, hp.1, hp.2, hq.1, hq.2]
@@ -99,19 +105,21 @@ def lagXX : Submodule (ZMod 2) (Pauli 2) where
 /-! ## Rotate, aligned: `⟨Y₀⟩` -/
 
 /-- `Y₀` is an aligned reader of bit `0` in `⟨Y₀⟩`. -/
-theorem alignedRotate_lagY : AlignedRotate lagY 0 :=
-  ⟨paulix 0 + pauliz 0, ⟨mem_lagY.mpr (by decide), by decide⟩, by decide⟩
+theorem alignedRotate_lagYByConstraint : AlignedRotate lagYByConstraint 0 :=
+  ⟨paulix 0 + pauliz 0, ⟨mem_lagYByConstraint.mpr (by decide), by decide⟩, by decide⟩
 
 /-- Through the theorem: the swapped shadow of `⟨Y₀⟩` is its shadow, at every word. -/
-theorem shadow_swap_lagY (v : Fin 1 → ZMod 2) :
-    v ∈ Submodule.map xProj (Submodule.map (pauliSwapOn {0}) lagY) ↔ v ∈ Submodule.map xProj lagY :=
-  mem_xProj_map_pauliSwapOn_iff_of_alignedRotate alignedRotate_lagY v
+theorem shadow_swap_lagYByConstraint (v : Fin 1 → ZMod 2) :
+    v ∈ Submodule.map xProj (Submodule.map (pauliSwapOn {0}) lagYByConstraint) ↔
+      v ∈ Submodule.map xProj lagYByConstraint :=
+  mem_xProj_map_pauliSwapOn_iff_of_alignedRotate alignedRotate_lagYByConstraint v
 
 /-- By witness: the word `1` is in the swapped shadow (the swap fixes `Y₀`). -/
-theorem one_mem_shadow_swap_lagY :
-    (![1] : Fin 1 → ZMod 2) ∈ Submodule.map xProj (Submodule.map (pauliSwapOn {0}) lagY) :=
+theorem one_mem_shadow_swap_lagYByConstraint :
+    (![1] : Fin 1 → ZMod 2) ∈
+      Submodule.map xProj (Submodule.map (pauliSwapOn {0}) lagYByConstraint) :=
   Submodule.mem_map.mpr ⟨pauliSwapOn {0} (paulix 0 + pauliz 0),
-    Submodule.mem_map_of_mem (mem_lagY.mpr (by decide)), by decide⟩
+    Submodule.mem_map_of_mem (mem_lagYByConstraint.mpr (by decide)), by decide⟩
 
 /-! ## Rotate, not aligned: `⟨X₀⟩` -/
 
@@ -137,38 +145,42 @@ theorem one_not_mem_shadow_swap_lagX1 :
 /-! ## Collapse, aligned: the graph state at bit `0` -/
 
 /-- `X₀Z₁ = ⟨e₀, σ + e₀⟩` with `σ = (1,1)` lies in the graph Lagrangian. -/
-theorem alignedCollapse_graphL : AlignedCollapse graphL 0 ![1, 1] :=
-  mem_graphL.mpr ⟨by decide, by decide⟩
+theorem alignedCollapse_graphLByConstraint : AlignedCollapse graphLByConstraint 0 ![1, 1] :=
+  mem_graphLByConstraint.mpr ⟨by decide, by decide⟩
 
 /-- Through the theorem: the swapped shadow is the shadow cut by `v₀ + v₁ = 0`. -/
-theorem shadow_swap_graphL (v : Fin 2 → ZMod 2) :
-    v ∈ Submodule.map xProj (Submodule.map (pauliSwapOn {0}) graphL)
-      ↔ v ∈ Submodule.map xProj graphL ∧ dotF2 ![1, 1] v = 0 :=
-  mem_xProj_map_pauliSwapOn_iff_of_alignedCollapse alignedCollapse_graphL (by decide)
-    (orth_of_alignedCollapse graphL_isStabilizer alignedCollapse_graphL) v
+theorem shadow_swap_graphLByConstraint (v : Fin 2 → ZMod 2) :
+    v ∈ Submodule.map xProj (Submodule.map (pauliSwapOn {0}) graphLByConstraint)
+      ↔ v ∈ Submodule.map xProj graphLByConstraint ∧ dotF2 ![1, 1] v = 0 :=
+  mem_xProj_map_pauliSwapOn_iff_of_alignedCollapse alignedCollapse_graphLByConstraint (by decide)
+    (orth_of_alignedCollapse graphLByConstraint_isStabilizer alignedCollapse_graphLByConstraint) v
 
 /-- The word `11` is in the shadow of the graph Lagrangian (`Y₀Y₁` reads it). -/
-theorem eleven_mem_shadow_graphL :
-    (![1, 1] : Fin 2 → ZMod 2) ∈ Submodule.map xProj graphL :=
-  Submodule.mem_map.mpr ⟨⟨![1, 1], ![1, 1]⟩, mem_graphL.mpr ⟨rfl, rfl⟩, by decide⟩
+theorem eleven_mem_shadow_graphLByConstraint :
+    (![1, 1] : Fin 2 → ZMod 2) ∈ Submodule.map xProj graphLByConstraint :=
+  Submodule.mem_map.mpr
+    ⟨⟨![1, 1], ![1, 1]⟩, mem_graphLByConstraint.mpr ⟨rfl, rfl⟩, by decide⟩
 
 /-- Through the theorem: `11` survives the collapse cut. -/
-theorem eleven_mem_shadow_swap_graphL :
-    (![1, 1] : Fin 2 → ZMod 2) ∈ Submodule.map xProj (Submodule.map (pauliSwapOn {0}) graphL) :=
-  (shadow_swap_graphL _).mpr ⟨eleven_mem_shadow_graphL, by decide⟩
+theorem eleven_mem_shadow_swap_graphLByConstraint :
+    (![1, 1] : Fin 2 → ZMod 2) ∈
+      Submodule.map xProj (Submodule.map (pauliSwapOn {0}) graphLByConstraint) :=
+  (shadow_swap_graphLByConstraint _).mpr ⟨eleven_mem_shadow_graphLByConstraint, by decide⟩
 
-/-- **Agreement.** By witness: the swap at `0` of `Z₀X₁ ∈ graphL` is `X₀X₁`, whose X-part is
-`11`. -/
-theorem eleven_mem_shadow_swap_graphL_witness :
-    (![1, 1] : Fin 2 → ZMod 2) ∈ Submodule.map xProj (Submodule.map (pauliSwapOn {0}) graphL) :=
+/-- **Agreement.** By witness: the swap at `0` of `Z₀X₁ ∈ graphLByConstraint` is `X₀X₁`, whose
+X-part is `11`. -/
+theorem eleven_mem_shadow_swap_graphLByConstraint_witness :
+    (![1, 1] : Fin 2 → ZMod 2) ∈
+      Submodule.map xProj (Submodule.map (pauliSwapOn {0}) graphLByConstraint) :=
   Submodule.mem_map.mpr ⟨pauliSwapOn {0} ⟨![0, 1], ![1, 0]⟩,
-    Submodule.mem_map_of_mem (mem_graphL.mpr ⟨rfl, rfl⟩), by decide⟩
+    Submodule.mem_map_of_mem (mem_graphLByConstraint.mpr ⟨rfl, rfl⟩), by decide⟩
 
 /-- Through the theorem: `10` is cut away. -/
-theorem ten_not_mem_shadow_swap_graphL :
-    (![1, 0] : Fin 2 → ZMod 2) ∉ Submodule.map xProj (Submodule.map (pauliSwapOn {0}) graphL) := by
+theorem ten_not_mem_shadow_swap_graphLByConstraint :
+    (![1, 0] : Fin 2 → ZMod 2) ∉
+      Submodule.map xProj (Submodule.map (pauliSwapOn {0}) graphLByConstraint) := by
   intro h
-  have h' := ((shadow_swap_graphL _).mp h).2
+  have h' := ((shadow_swap_graphLByConstraint _).mp h).2
   exact absurd h' (by decide)
 
 /-! ## Collapse, stale `L`: `⟨X₀, X₁⟩` with the same datum -/
@@ -248,27 +260,29 @@ theorem pauliz_mem_swap_lagX1 : pauliz 0 ∈ Submodule.map (pauliSwapOn {(0 : Fi
 
 /-- **The Bell record at the Lagrangian.** The swap's image of the graph Lagrangian is its
 conditioning by `Z^{(1,1)} = Z₀Z₁`. -/
-theorem swap_graphL_eq_pauliCondition :
-    Submodule.map (pauliSwapOn {(0 : Fin 2)}) graphL = pauliCondition graphL (zPauli ![1, 1]) :=
-  map_pauliSwapOn_eq_pauliCondition graphL_isStabilizer alignedCollapse_graphL rfl
+theorem swap_graphLByConstraint_eq_pauliCondition :
+    Submodule.map (pauliSwapOn {(0 : Fin 2)}) graphLByConstraint =
+      pauliCondition graphLByConstraint (zPauli ![1, 1]) :=
+  map_pauliSwapOn_eq_pauliCondition graphLByConstraint_isStabilizer
+    alignedCollapse_graphLByConstraint rfl
 
 /-- `Z^{(1,1)} = Z₀ + Z₁`. -/
 theorem zPauli_one_one : zPauli ![1, 1] = pauliz (0 : Fin 2) + pauliz 1 := by
   ext i <;> fin_cases i <;> rfl
 
 /-- `Z₀Z₁` is in the swap's image of the graph Lagrangian — the Bell record's Lagrangian. -/
-theorem zz_mem_swap_graphL :
-    pauliz 0 + pauliz 1 ∈ Submodule.map (pauliSwapOn {(0 : Fin 2)}) graphL := by
-  rw [swap_graphL_eq_pauliCondition, ← zPauli_one_one]
+theorem zz_mem_swap_graphLByConstraint :
+    pauliz 0 + pauliz 1 ∈ Submodule.map (pauliSwapOn {(0 : Fin 2)}) graphLByConstraint := by
+  rw [swap_graphLByConstraint_eq_pauliCondition, ← zPauli_one_one]
   exact pauliCondition_mem _ _
 
 /-- `X₀X₁` is in the conditioning of the graph Lagrangian by `Z₀Z₁`: through the identity it is the
 swap of `Z₀X₁`. -/
-theorem xx_mem_pauliCondition_graphL :
-    paulix 0 + paulix 1 ∈ pauliCondition graphL (zPauli ![1, 1]) := by
-  rw [← swap_graphL_eq_pauliCondition]
-  exact Submodule.mem_map.mpr ⟨pauliz 0 + paulix 1, mem_graphL.mpr ⟨by decide, by decide⟩,
-    by ext i <;> fin_cases i <;> decide⟩
+theorem xx_mem_pauliCondition_graphLByConstraint :
+    paulix 0 + paulix 1 ∈ pauliCondition graphLByConstraint (zPauli ![1, 1]) := by
+  rw [← swap_graphLByConstraint_eq_pauliCondition]
+  exact Submodule.mem_map.mpr ⟨pauliz 0 + paulix 1,
+    mem_graphLByConstraint.mpr ⟨by decide, by decide⟩, by ext i <;> fin_cases i <;> decide⟩
 
 /-- **Control (stale `L`, first half).** On `⟨X₀, X₁⟩` the identity's hypothesis is not met
 (`not_alignedCollapse_lagXX`); `X₁` is in the swap's image. -/
@@ -423,61 +437,61 @@ Classical.choice, Quot.sound] -/
 #guard_msgs (whitespace := lax) in
 #print axioms orth_of_alignedCollapse
 
-/-- info: 'FTQCLib.Frame.Walkthrough.mem_lagY' depends on axioms: [propext, Classical.choice,
+/-- info: 'FTQCLib.Frame.Walkthrough.mem_lagYByConstraint' depends on axioms: [propext, Classical.choice,
 Quot.sound] -/
 #guard_msgs (whitespace := lax) in
-#print axioms mem_lagY
+#print axioms mem_lagYByConstraint
 
 /-- info: 'FTQCLib.Frame.Walkthrough.mem_lagX1' depends on axioms: [propext, Classical.choice,
 Quot.sound] -/
 #guard_msgs (whitespace := lax) in
 #print axioms mem_lagX1
 
-/-- info: 'FTQCLib.Frame.Walkthrough.mem_graphL' depends on axioms: [propext, Classical.choice,
+/-- info: 'FTQCLib.Frame.Walkthrough.mem_graphLByConstraint' depends on axioms: [propext, Classical.choice,
 Quot.sound] -/
 #guard_msgs (whitespace := lax) in
-#print axioms mem_graphL
+#print axioms mem_graphLByConstraint
 
 /-- info: 'FTQCLib.Frame.Walkthrough.mem_lagXX' depends on axioms: [propext, Classical.choice,
 Quot.sound] -/
 #guard_msgs (whitespace := lax) in
 #print axioms mem_lagXX
 
-/-- info: 'FTQCLib.Frame.Walkthrough.lagY' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+/-- info: 'FTQCLib.Frame.Walkthrough.lagYByConstraint' depends on axioms: [propext, Classical.choice, Quot.sound] -/
 #guard_msgs (whitespace := lax) in
-#print axioms lagY
+#print axioms lagYByConstraint
 
 /-- info: 'FTQCLib.Frame.Walkthrough.lagX1' depends on axioms: [propext, Classical.choice, Quot.sound] -/
 #guard_msgs (whitespace := lax) in
 #print axioms lagX1
 
-/-- info: 'FTQCLib.Frame.Walkthrough.graphL' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+/-- info: 'FTQCLib.Frame.Walkthrough.graphLByConstraint' depends on axioms: [propext, Classical.choice, Quot.sound] -/
 #guard_msgs (whitespace := lax) in
-#print axioms graphL
+#print axioms graphLByConstraint
 
-/-- info: 'FTQCLib.Frame.Walkthrough.graphL_isStabilizer' depends on axioms: [propext,
+/-- info: 'FTQCLib.Frame.Walkthrough.graphLByConstraint_isStabilizer' depends on axioms: [propext,
 Classical.choice, Quot.sound] -/
 #guard_msgs (whitespace := lax) in
-#print axioms graphL_isStabilizer
+#print axioms graphLByConstraint_isStabilizer
 
 /-- info: 'FTQCLib.Frame.Walkthrough.lagXX' depends on axioms: [propext, Classical.choice, Quot.sound] -/
 #guard_msgs (whitespace := lax) in
 #print axioms lagXX
 
-/-- info: 'FTQCLib.Frame.Walkthrough.alignedRotate_lagY' depends on axioms: [propext, Classical.choice,
+/-- info: 'FTQCLib.Frame.Walkthrough.alignedRotate_lagYByConstraint' depends on axioms: [propext, Classical.choice,
 Quot.sound] -/
 #guard_msgs (whitespace := lax) in
-#print axioms alignedRotate_lagY
+#print axioms alignedRotate_lagYByConstraint
 
-/-- info: 'FTQCLib.Frame.Walkthrough.shadow_swap_lagY' depends on axioms: [propext, Classical.choice,
+/-- info: 'FTQCLib.Frame.Walkthrough.shadow_swap_lagYByConstraint' depends on axioms: [propext, Classical.choice,
 Quot.sound] -/
 #guard_msgs (whitespace := lax) in
-#print axioms shadow_swap_lagY
+#print axioms shadow_swap_lagYByConstraint
 
-/-- info: 'FTQCLib.Frame.Walkthrough.one_mem_shadow_swap_lagY' depends on axioms: [propext,
+/-- info: 'FTQCLib.Frame.Walkthrough.one_mem_shadow_swap_lagYByConstraint' depends on axioms: [propext,
 Classical.choice, Quot.sound] -/
 #guard_msgs (whitespace := lax) in
-#print axioms one_mem_shadow_swap_lagY
+#print axioms one_mem_shadow_swap_lagYByConstraint
 
 /-- info: 'FTQCLib.Frame.Walkthrough.not_alignedRotate_lagX1' depends on axioms: [propext,
 Classical.choice, Quot.sound] -/
@@ -489,35 +503,35 @@ Classical.choice, Quot.sound] -/
 #guard_msgs (whitespace := lax) in
 #print axioms one_not_mem_shadow_swap_lagX1
 
-/-- info: 'FTQCLib.Frame.Walkthrough.alignedCollapse_graphL' depends on axioms: [propext,
+/-- info: 'FTQCLib.Frame.Walkthrough.alignedCollapse_graphLByConstraint' depends on axioms: [propext,
 Classical.choice, Quot.sound] -/
 #guard_msgs (whitespace := lax) in
-#print axioms alignedCollapse_graphL
+#print axioms alignedCollapse_graphLByConstraint
 
-/-- info: 'FTQCLib.Frame.Walkthrough.shadow_swap_graphL' depends on axioms: [propext,
+/-- info: 'FTQCLib.Frame.Walkthrough.shadow_swap_graphLByConstraint' depends on axioms: [propext,
 Classical.choice, Quot.sound] -/
 #guard_msgs (whitespace := lax) in
-#print axioms shadow_swap_graphL
+#print axioms shadow_swap_graphLByConstraint
 
-/-- info: 'FTQCLib.Frame.Walkthrough.eleven_mem_shadow_graphL' depends on axioms: [propext,
+/-- info: 'FTQCLib.Frame.Walkthrough.eleven_mem_shadow_graphLByConstraint' depends on axioms: [propext,
 Classical.choice, Quot.sound] -/
 #guard_msgs (whitespace := lax) in
-#print axioms eleven_mem_shadow_graphL
+#print axioms eleven_mem_shadow_graphLByConstraint
 
-/-- info: 'FTQCLib.Frame.Walkthrough.eleven_mem_shadow_swap_graphL' depends on axioms: [propext,
+/-- info: 'FTQCLib.Frame.Walkthrough.eleven_mem_shadow_swap_graphLByConstraint' depends on axioms: [propext,
 Classical.choice, Quot.sound] -/
 #guard_msgs (whitespace := lax) in
-#print axioms eleven_mem_shadow_swap_graphL
+#print axioms eleven_mem_shadow_swap_graphLByConstraint
 
-/-- info: 'FTQCLib.Frame.Walkthrough.eleven_mem_shadow_swap_graphL_witness' depends on axioms:
+/-- info: 'FTQCLib.Frame.Walkthrough.eleven_mem_shadow_swap_graphLByConstraint_witness' depends on axioms:
 [propext, Classical.choice, Quot.sound] -/
 #guard_msgs (whitespace := lax) in
-#print axioms eleven_mem_shadow_swap_graphL_witness
+#print axioms eleven_mem_shadow_swap_graphLByConstraint_witness
 
-/-- info: 'FTQCLib.Frame.Walkthrough.ten_not_mem_shadow_swap_graphL' depends on axioms: [propext,
+/-- info: 'FTQCLib.Frame.Walkthrough.ten_not_mem_shadow_swap_graphLByConstraint' depends on axioms: [propext,
 Classical.choice, Quot.sound] -/
 #guard_msgs (whitespace := lax) in
-#print axioms ten_not_mem_shadow_swap_graphL
+#print axioms ten_not_mem_shadow_swap_graphLByConstraint
 
 /-- info: 'FTQCLib.Frame.Walkthrough.not_alignedCollapse_lagXX' depends on axioms: [propext,
 Classical.choice, Quot.sound] -/
@@ -611,25 +625,25 @@ Quot.sound] -/
 #guard_msgs (whitespace := lax) in
 #print axioms pauliz_mem_swap_lagX1
 
-/-- info: 'FTQCLib.Frame.Walkthrough.swap_graphL_eq_pauliCondition' depends on axioms: [propext, Classical.choice,
+/-- info: 'FTQCLib.Frame.Walkthrough.swap_graphLByConstraint_eq_pauliCondition' depends on axioms: [propext, Classical.choice,
 Quot.sound] -/
 #guard_msgs (whitespace := lax) in
-#print axioms swap_graphL_eq_pauliCondition
+#print axioms swap_graphLByConstraint_eq_pauliCondition
 
 /-- info: 'FTQCLib.Frame.Walkthrough.zPauli_one_one' depends on axioms: [propext, Classical.choice,
 Quot.sound] -/
 #guard_msgs (whitespace := lax) in
 #print axioms zPauli_one_one
 
-/-- info: 'FTQCLib.Frame.Walkthrough.zz_mem_swap_graphL' depends on axioms: [propext, Classical.choice,
+/-- info: 'FTQCLib.Frame.Walkthrough.zz_mem_swap_graphLByConstraint' depends on axioms: [propext, Classical.choice,
 Quot.sound] -/
 #guard_msgs (whitespace := lax) in
-#print axioms zz_mem_swap_graphL
+#print axioms zz_mem_swap_graphLByConstraint
 
-/-- info: 'FTQCLib.Frame.Walkthrough.xx_mem_pauliCondition_graphL' depends on axioms: [propext, Classical.choice,
+/-- info: 'FTQCLib.Frame.Walkthrough.xx_mem_pauliCondition_graphLByConstraint' depends on axioms: [propext, Classical.choice,
 Quot.sound] -/
 #guard_msgs (whitespace := lax) in
-#print axioms xx_mem_pauliCondition_graphL
+#print axioms xx_mem_pauliCondition_graphLByConstraint
 
 /-- info: 'FTQCLib.Frame.Walkthrough.x1_mem_swap_lagXX' depends on axioms: [propext, Classical.choice,
 Quot.sound] -/

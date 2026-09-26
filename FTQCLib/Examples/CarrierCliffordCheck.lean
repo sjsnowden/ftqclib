@@ -509,7 +509,7 @@ theorem amp_bell3_00 : amp bell3 ![0, 0] = Real.sqrt 2 := by
   have f0 : (Function.update (![0, 0] : Fin 2 → ZMod 2) 0 1) 0 = 1 := by decide
   have f1 : (Function.update (![0, 0] : Fin 2 → ZMod 2) 0 1) 1 = 0 := by decide
   have g0 : (![0, 0] : Fin 2 → ZMod 2) 0 = 0 := by decide
-  rw [e0, e1, f0, f1, g0, signOf_zero', ZMod.val_zero, show ((1 : ZMod 2).val : ℕ) = 1 by decide]
+  rw [e0, e1, f0, f1, g0, signOf_zero, ZMod.val_zero, show ((1 : ZMod 2).val : ℕ) = 1 by decide]
   simp only [Nat.cast_zero, Nat.cast_one, mul_zero, one_mul, charOf_zero, one_add_one_eq_two]
   exact one_div_sqrt_two_mul_two
 
@@ -523,7 +523,7 @@ theorem amp_bell3_01 : amp bell3 ![0, 1] = 0 := by
   have f0 : (Function.update (![0, 1] : Fin 2 → ZMod 2) 0 1) 0 = 1 := by decide
   have f1 : (Function.update (![0, 1] : Fin 2 → ZMod 2) 0 1) 1 = 1 := by decide
   have g0 : (![0, 1] : Fin 2 → ZMod 2) 0 = 0 := by decide
-  rw [e0, e1, f0, f1, g0, signOf_zero', ZMod.val_zero, show ((1 : ZMod 2).val : ℕ) = 1 by decide]
+  rw [e0, e1, f0, f1, g0, signOf_zero, ZMod.val_zero, show ((1 : ZMod 2).val : ℕ) = 1 by decide]
   simp only [Nat.cast_zero, Nat.cast_one, zero_mul, one_mul, charOf_zero, charOf_one_one]
   ring
 
@@ -642,7 +642,7 @@ theorem amp_bell12_00 : amp bell12 ![0, 0] = 1 / (Real.sqrt 2 : ℂ) := by
   unfold walshTransform
   have h1 : Function.update (0 : Fin 2 → ZMod 2) 0 0 = 0 := by decide
   have h2 : Function.update (0 : Fin 2 → ZMod 2) 0 1 ≠ 0 := by decide
-  rw [h1, amp_K00_zero, amp_K00_ne _ h2, Pi.zero_apply, signOf_zero', mul_zero, add_zero, mul_one]
+  rw [h1, amp_K00_zero, amp_K00_ne _ h2, Pi.zero_apply, signOf_zero, mul_zero, add_zero, mul_one]
 
 /-- The Bell pair: the amplitude at `11` is `1/√2`. -/
 theorem amp_bell12_11 : amp bell12 ![1, 1] = 1 / (Real.sqrt 2 : ℂ) := by
@@ -653,7 +653,7 @@ theorem amp_bell12_11 : amp bell12 ![1, 1] = 1 / (Real.sqrt 2 : ℂ) := by
   have h1 : Function.update (![1, 0] : Fin 2 → ZMod 2) 0 0 = 0 := by decide
   have h2 : Function.update (![1, 0] : Fin 2 → ZMod 2) 0 1 ≠ 0 := by decide
   have h3 : (![1, 0] : Fin 2 → ZMod 2) 0 = 1 := by decide
-  rw [h1, amp_K00_zero, amp_K00_ne _ h2, h3, signOf_one', mul_zero, add_zero, mul_one]
+  rw [h1, amp_K00_zero, amp_K00_ne _ h2, h3, signOf_one, mul_zero, add_zero, mul_one]
 
 /-- The Bell pair: the amplitude at `01` is `0`. -/
 theorem amp_bell12_01 : amp bell12 ![0, 1] = 0 := by
@@ -828,7 +828,7 @@ theorem amp_rot5_00 : amp rot5 ![0, 0] = (1 + Complex.I) / (Real.sqrt 2 : ℂ) :
   rw [h1, h2, amp_K5 _ (by decide), amp_K5 _ (by decide)]
   have g0 : (![0, 0] : Fin 2 → ZMod 2) 0 = 0 := by decide
   have g1 : (![1, 0] : Fin 2 → ZMod 2) 0 = 1 := by decide
-  rw [g0, g1, signOf_zero', ZMod.val_zero, show ((1 : ZMod 2).val : ℕ) = 1 by decide,
+  rw [g0, g1, signOf_zero, ZMod.val_zero, show ((1 : ZMod 2).val : ℕ) = 1 by decide,
     Nat.cast_zero, Nat.cast_one, mul_zero, mul_one, charOf_zero, charOf_three_two, one_mul]
   ring
 
@@ -841,7 +841,7 @@ theorem amp_rot5_10 : amp rot5 ![1, 0] = (1 - Complex.I) / (Real.sqrt 2 : ℂ) :
   rw [h1, h2, amp_K5 _ (by decide), amp_K5 _ (by decide)]
   have g0 : (![0, 0] : Fin 2 → ZMod 2) 0 = 0 := by decide
   have g1 : (![1, 0] : Fin 2 → ZMod 2) 0 = 1 := by decide
-  rw [g0, g1, signOf_one', ZMod.val_zero, show ((1 : ZMod 2).val : ℕ) = 1 by decide,
+  rw [g0, g1, signOf_one, ZMod.val_zero, show ((1 : ZMod 2).val : ℕ) = 1 by decide,
     Nat.cast_zero, Nat.cast_one, mul_zero, mul_one, charOf_zero, charOf_three_two]
   ring
 
@@ -881,7 +881,7 @@ theorem amp_hRaise_K5_ne :
     rw [h1, h2, amp_K5 _ (by decide), amp_K5 _ (by decide)]
     have g0 : (![0, 0] : Fin 2 → ZMod 2) 0 = 0 := by decide
     have g1 : (![1, 0] : Fin 2 → ZMod 2) 0 = 1 := by decide
-    rw [g0, g1, Pi.zero_apply, signOf_zero', ZMod.val_zero,
+    rw [g0, g1, Pi.zero_apply, signOf_zero, ZMod.val_zero,
       show ((1 : ZMod 2).val : ℕ) = 1 by decide, Nat.cast_zero, Nat.cast_one, mul_zero, mul_one,
       charOf_zero, charOf_three_two, one_mul]
     ring

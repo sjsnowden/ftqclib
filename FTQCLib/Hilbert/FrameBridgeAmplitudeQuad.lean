@@ -396,3 +396,18 @@ theorem stabilizerState_isLevel2Kernel_unconditional (S : SignedStab n)
     (amplitudePhaseForm_holds (cosetAmplitudeQuadForm_holds n)) S hL
 
 end FTQCLib.Frame
+
+namespace FTQCLib.Hilbert
+
+open FTQCLib.Frame FTQCLib.Pauli
+
+variable {n : ℕ}
+
+/-- The conjugation sign is a fourth root of unity (it is `±1`, `cliffordSign_mul_self`). -/
+theorem isMu4_cliffordSign {U : QubitSpace n ≃ₗ[ℂ] QubitSpace n} (hU : IsCliffordOperator U)
+    (p : Pauli n) : IsMu4 (cliffordSign hU p) := by
+  rcases mul_self_eq_one_iff.mp (cliffordSign_mul_self hU p) with h | h
+  · rw [h]; exact isMu4_one
+  · rw [h]; exact isMu4_neg_one
+
+end FTQCLib.Hilbert

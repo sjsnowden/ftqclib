@@ -60,16 +60,6 @@ theorem amp_bellState_zeroone' : amp bellState ![0, 1] = 0 := by
   rw [← h] at h1
   exact absurd h1 (by decide)
 
-/-- The Walsh signs. -/
-theorem signOf_zero' : signOf (0 : ZMod 2) = 1 := by
-  unfold signOf
-  rw [if_pos rfl]
-
-/-- The Walsh signs. -/
-theorem signOf_one' : signOf (1 : ZMod 2) = -1 := by
-  unfold signOf
-  rw [if_neg (by decide)]
-
 /-! ## Control — the X-supported hypothesis of `amp_applyHFiner` is load-bearing -/
 
 /-- **Control — `hk` is load-bearing.** Bell's bit `0` is not X-supported. `applyHFiner 0` keeps
@@ -92,7 +82,7 @@ example :
     show Function.update (![0, 1] : Fin 2 → ZMod 2) 0 1 = ![1, 1] from by decide,
     amp_bellState_zeroone', amp_bellState_oneone']
   change (0 : ℂ) ≠ (1 / (Real.sqrt 2 : ℂ)) * (0 + signOf 0 * 1)
-  rw [signOf_zero', one_mul, zero_add, mul_one]
+  rw [signOf_zero, one_mul, zero_add, mul_one]
   exact (one_div_ne_zero (Complex.ofReal_ne_zero.mpr (Real.sqrt_ne_zero'.mpr (by norm_num)))).symm
 
 /-- The control's premise: `1 ≤ m` holds at Bell, so the refuted hypothesis is `hk`. -/
@@ -154,7 +144,7 @@ example :
     show Function.update (![0, 1] : Fin 2 → ZMod 2) 0 1 = ![1, 1] from by decide,
     show (![1, 1] : Fin 2 → ZMod 2) 0 = 1 from by decide,
     show (![0, 1] : Fin 2 → ZMod 2) 0 = 0 from by decide,
-    amp_bellState_zeroone', amp_bellState_oneone', signOf_zero', signOf_one']
+    amp_bellState_zeroone', amp_bellState_oneone', signOf_zero, signOf_one]
   have h2 : (1 / (Real.sqrt 2 : ℂ)) * (1 / (Real.sqrt 2 : ℂ)) = 1 / 2 := by
     rw [div_mul_div_comm, one_mul, ← Complex.ofReal_mul,
       Real.mul_self_sqrt (by norm_num : (0 : ℝ) ≤ 2)]

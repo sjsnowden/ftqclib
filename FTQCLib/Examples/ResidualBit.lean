@@ -144,12 +144,6 @@ theorem update_add_single_one {u : Fin n → ZMod 2} {k : Fin n} (huk : u k = 0)
     rw [Function.update_self, add_single_apply_self huk]
   · rw [Function.update_of_ne hj]
 
-/-- `signOf 0 = 1`. -/
-theorem signOf_zero : signOf 0 = 1 := if_pos rfl
-
-/-- `signOf 1 = −1`. -/
-theorem signOf_one : signOf 1 = -1 := if_neg one_ne_zero
-
 /-- **The `e_k` pairing.** At a pair `u, u + e_k` on the support (`u k = 0`), the Walsh transform of
 a height-zero record is the scale times the character at `u` times `1 ± charOf Δ`, where `Δ` is the
 exponent's difference along `e_k`. -/

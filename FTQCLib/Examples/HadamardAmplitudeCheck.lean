@@ -72,11 +72,6 @@ theorem update_oneone_zero : Function.update (![1, 1] : Fin 2 → ZMod 2) 0 0 = 
 theorem update_oneone_one : Function.update (![1, 1] : Fin 2 → ZMod 2) 0 1 = ![1, 1] := by
   decide
 
-/-- The Walsh sign at a set bit. -/
-theorem signOf_one : signOf (1 : ZMod 2) = -1 := by
-  unfold signOf
-  rw [if_neg (by decide)]
-
 /-- The referee on the Bell input at `11`: `−1/√2`. -/
 theorem walsh_amp_bellState_oneone :
     walshTransform 0 (amp bellState) ![1, 1] = -(1 / (Real.sqrt 2 : ℂ)) := by

@@ -153,7 +153,7 @@ theorem amp_hh_Kpp_00 : amp (runNormal hhWord (ofKernelState Kpp)) ![0, 0] = 2 :
   have e1 : (Function.update (![0, 0] : Fin 2 → ZMod 2) 1 1) 0 = 0 := by decide
   have g1 : (![0, 0] : Fin 2 → ZMod 2) 1 = 0 := by decide
   have hs : (Real.sqrt 2 : ℂ) ≠ 0 := Complex.ofReal_ne_zero.mpr (Real.sqrt_ne_zero'.mpr two_pos)
-  rw [e0, e1, g1, if_pos rfl, signOf_zero', one_mul, ← two_mul, mul_comm (2 : ℂ), ← mul_assoc,
+  rw [e0, e1, g1, if_pos rfl, signOf_zero, one_mul, ← two_mul, mul_comm (2 : ℂ), ← mul_assoc,
     one_div_mul_cancel hs, one_mul]
 
 /-- Two H's on `Kpp`: the amplitude at `01` is `0`. -/
@@ -162,7 +162,7 @@ theorem amp_hh_Kpp_01 : amp (runNormal hhWord (ofKernelState Kpp)) ![0, 1] = 0 :
   have e0 : (Function.update (![0, 1] : Fin 2 → ZMod 2) 1 0) 0 = 0 := by decide
   have e1 : (Function.update (![0, 1] : Fin 2 → ZMod 2) 1 1) 0 = 0 := by decide
   have g1 : (![0, 1] : Fin 2 → ZMod 2) 1 = 1 := by decide
-  rw [e0, e1, g1, if_pos rfl, signOf_one']
+  rw [e0, e1, g1, if_pos rfl, signOf_one]
   ring
 
 /-- Two H's on the graph state: two H's through the composite stay on the floor at height `0`. -/
@@ -272,23 +272,23 @@ theorem not_wf_X_three :
 /-! ## The rejection is not a formality: the class rule on a level-three exponent -/
 
 /-- The uniform record on one qubit at precision three, stabilizer `⟨X₀⟩`. -/
-noncomputable def KT : KernelState 1 := ⟨3, 0, 1, lagX, 0⟩
+noncomputable def KXThree : KernelState 1 := ⟨3, 0, 1, lagX, 0⟩
 
-/-- `KT` denotes the constant `1`. -/
-theorem amp_KT (w : Fin 1 → ZMod 2) : amp (ofKernelState KT) w = 1 := by
-  rw [amp_ofKernelState_pos KT (lagX_support w)]
+/-- `KXThree` denotes the constant `1`. -/
+theorem amp_KXThree (w : Fin 1 → ZMod 2) : amp (ofKernelState KXThree) w = 1 := by
+  rw [amp_ofKernelState_pos KXThree (lagX_support w)]
   change (1 : ℂ) * charOf 3 (DiagPhase.eval (0 : DiagPhase 1 3) w) = 1
   rw [show DiagPhase.eval (0 : DiagPhase 1 3) w = 0 by unfold DiagPhase.eval; simp, charOf_zero,
     one_mul]
 
 /-- The amplitude after the class rule on `X₀`: `ζ₈^{w₀}`. -/
-theorem amp_applyDiagPolar_KT (w : Fin 1 → ZMod 2) :
-    amp (applyDiagPolar (ofKernelState KT) (MvPolynomial.X 0)) w
+theorem amp_applyDiagPolar_KXThree (w : Fin 1 → ZMod 2) :
+    amp (applyDiagPolar (ofKernelState KXThree) (MvPolynomial.X 0)) w
       = charOf 3 (((w 0).val : ℕ) : ZMod (2 ^ 3)) := by
   rw [amp_applyDiagPolar]
   change charOf 3 (DiagPhase.eval (MvPolynomial.X (0 : Fin 1) : DiagPhase 1 3) w) *
-    amp (ofKernelState KT) w = _
-  rw [amp_KT, mul_one, DiagPhase.eval_X]
+    amp (ofKernelState KXThree) w = _
+  rw [amp_KXThree, mul_one, DiagPhase.eval_X]
 
 /-- The `(0,0)` entry of the polar matrix of `X₀`'s normal form: the diagonal bit reads
 `2 · 1 ≠ 0` in `ZMod 8`. -/
@@ -309,9 +309,9 @@ theorem polarMatrix_X_three :
   exact polarMatrix_X_three_00
 
 /-- `Y₀` is in the sheared Lagrangian: the class rule sends `⟨X₀⟩` to `⟨Y₀⟩`. -/
-theorem mem_L_applyDiagPolar_KT :
+theorem mem_L_applyDiagPolar_KXThree :
     (paulix 0 + pauliz 0 : Pauli 1) ∈
-      (applyDiagPolar (ofKernelState KT) (MvPolynomial.X 0)).L := by
+      (applyDiagPolar (ofKernelState KXThree) (MvPolynomial.X 0)).L := by
   change (paulix 0 + pauliz 0 : Pauli 1) ∈
     Submodule.map (zShearBy (Matrix.mulVecLin
       (polarMatrix (boolReduce (MvPolynomial.X (0 : Fin 1) : DiagPhase 1 3))))) lagX
@@ -324,10 +324,10 @@ theorem mem_L_applyDiagPolar_KT :
 `⟨X₀⟩` to `⟨Y₀⟩`, and the amplitude `(1, ζ₈)` is not a sign eigenvector of `Y₀`: the scalar the
 record would need is `ζ₈^7`, and the two signs are `ζ₈^0` and `ζ₈^4`. The output is a carrier, not
 a floor — so the level check the alphabet applies is doing work. -/
-theorem not_isFloor_applyDiagPolar_KT :
-    ¬ IsFloor (applyDiagPolar (ofKernelState KT) (MvPolynomial.X 0)) := by
+theorem not_isFloor_applyDiagPolar_KXThree :
+    ¬ IsFloor (applyDiagPolar (ofKernelState KXThree) (MvPolynomial.X 0)) := by
   intro hF
-  obtain ⟨s, hs⟩ := hF.2 _ mem_L_applyDiagPolar_KT
+  obtain ⟨s, hs⟩ := hF.2 _ mem_L_applyDiagPolar_KXThree
   have h := congrFun hs 0
   have hy : yWeight (paulix 0 + pauliz 0 : Pauli 1) = 1 := by decide
   have hz : zDot (paulix 0 + pauliz 0 : Pauli 1)
@@ -342,7 +342,7 @@ theorem not_isFloor_applyDiagPolar_KT :
   have hn : ((-1 : ℂ)) = charOf 3 4 := by
     rw [show (4 : ZMod (2 ^ 3)) = (2 : ZMod (2 ^ 3)) ^ (3 - 1) * ((1 : ℕ) : ZMod (2 ^ 3)) by decide,
       charOf_two_pow_mul (by omega), pow_one]
-  rw [pauliAct, hy, hz, hw1, amp_applyDiagPolar_KT, amp_applyDiagPolar_KT,
+  rw [pauliAct, hy, hz, hw1, amp_applyDiagPolar_KXThree, amp_applyDiagPolar_KXThree,
     show (((Pi.single 0 1 : Fin 1 → ZMod 2) 0).val : ℕ) = 1 by decide,
     show (((0 : Fin 1 → ZMod 2) 0).val : ℕ) = 0 by decide, hsgn, pow_one, pow_one, hI, hn,
     Nat.cast_zero, charOf_zero, mul_one, ← charOf_add, ← charOf_add] at h
@@ -736,35 +736,35 @@ Quot.sound] -/
 #guard_msgs (whitespace := lax) in
 #print axioms not_wf_X_three
 
-/-- info: 'FTQCLib.Frame.Walkthrough.KT' depends on axioms: [propext, Classical.choice,
+/-- info: 'FTQCLib.Frame.Walkthrough.KXThree' depends on axioms: [propext, Classical.choice,
 Quot.sound] -/
 #guard_msgs (whitespace := lax) in
-#print axioms KT
+#print axioms KXThree
 
-/-- info: 'FTQCLib.Frame.Walkthrough.amp_KT' depends on axioms: [propext, Classical.choice,
+/-- info: 'FTQCLib.Frame.Walkthrough.amp_KXThree' depends on axioms: [propext, Classical.choice,
 Quot.sound] -/
 #guard_msgs (whitespace := lax) in
-#print axioms amp_KT
+#print axioms amp_KXThree
 
-/-- info: 'FTQCLib.Frame.Walkthrough.amp_applyDiagPolar_KT' depends on axioms: [propext, Classical.choice,
+/-- info: 'FTQCLib.Frame.Walkthrough.amp_applyDiagPolar_KXThree' depends on axioms: [propext, Classical.choice,
 Quot.sound] -/
 #guard_msgs (whitespace := lax) in
-#print axioms amp_applyDiagPolar_KT
+#print axioms amp_applyDiagPolar_KXThree
 
 /-- info: 'FTQCLib.Frame.Walkthrough.polarMatrix_X_three' depends on axioms: [propext, Classical.choice,
 Quot.sound] -/
 #guard_msgs (whitespace := lax) in
 #print axioms polarMatrix_X_three
 
-/-- info: 'FTQCLib.Frame.Walkthrough.mem_L_applyDiagPolar_KT' depends on axioms: [propext, Classical.choice,
+/-- info: 'FTQCLib.Frame.Walkthrough.mem_L_applyDiagPolar_KXThree' depends on axioms: [propext, Classical.choice,
 Quot.sound] -/
 #guard_msgs (whitespace := lax) in
-#print axioms mem_L_applyDiagPolar_KT
+#print axioms mem_L_applyDiagPolar_KXThree
 
-/-- info: 'FTQCLib.Frame.Walkthrough.not_isFloor_applyDiagPolar_KT' depends on axioms: [propext, Classical.choice,
+/-- info: 'FTQCLib.Frame.Walkthrough.not_isFloor_applyDiagPolar_KXThree' depends on axioms: [propext, Classical.choice,
 Quot.sound] -/
 #guard_msgs (whitespace := lax) in
-#print axioms not_isFloor_applyDiagPolar_KT
+#print axioms not_isFloor_applyDiagPolar_KXThree
 
 /-- info: 'FTQCLib.Frame.Walkthrough.sLetter_one_wf' depends on axioms: [propext, Classical.choice,
 Quot.sound] -/
