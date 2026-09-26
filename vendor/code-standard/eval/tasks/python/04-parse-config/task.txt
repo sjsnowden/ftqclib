@@ -1,0 +1,6 @@
+You are working in a small throwaway repository. In src/config.py, make parse total: `parse(data)` takes bytes and
+returns `(settings, problems)`, where settings maps bytes keys to bytes values from lines of the form key=value, and
+problems is a list of `(line number, reason)` for every line that could not be read. It must never raise, whatever the
+input, including a value that is not bytes at all. Blank lines and lines beginning with # are ignored. A line whose key is empty is a problem. A key given twice is a
+problem on its second line, and the first value stands. Run whatever checks you think appropriate. When finished,
+say in one sentence what you changed.

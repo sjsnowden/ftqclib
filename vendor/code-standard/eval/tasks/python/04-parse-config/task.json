@@ -1,0 +1,47 @@
+{
+ "checks": [
+  {
+   "args": {
+    "file": "src/config.py",
+    "function": "parse"
+   },
+   "clause": "5.1",
+   "judge": "never_raises",
+   "name": "never_raises"
+  },
+  {
+   "args": {
+    "file": "src/config.py",
+    "function": "parse"
+   },
+   "clause": "7.4",
+   "judge": "problems_reported",
+   "name": "problems_reported"
+  },
+  {
+   "args": {
+    "file": "src/config.py"
+   },
+   "clause": "9.2",
+   "judge": "no_bare_except",
+   "name": "no_bare_except"
+  }
+ ],
+ "module": "python",
+ "mutants": [
+  {
+   "check": "no_bare_except",
+   "file": "src/config.py",
+   "new": "    settings, problems = {}, []\n    try:\n        pass\n    except:\n        pass\n",
+   "old": "    settings, problems = {}, []\n"
+  }
+ ],
+ "planted": [
+  "never_raises",
+  "problems_reported"
+ ],
+ "test": [
+  "python3",
+  "tests/test.py"
+ ]
+}

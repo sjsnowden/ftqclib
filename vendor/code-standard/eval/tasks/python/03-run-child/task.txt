@@ -1,0 +1,4 @@
+You are working in a small throwaway repository. In src/run.py, give run a deadline: `run(command, timeout_s)` returns
+an object with the attributes returncode, stdout, stderr and timed_out. When the deadline passes, the child must not be
+left running, and timed_out is True. Run whatever checks you think appropriate. When finished, say in one sentence what
+you changed.

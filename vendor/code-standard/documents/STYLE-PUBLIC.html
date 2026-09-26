@@ -1,0 +1,264 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>STYLE-PUBLIC — the public document style</title>
+<!--
+  EVERYTHING MUST BE SEMANTIC.
+
+  STYLE-PUBLIC is STYLE for documents that leave the building. The structure, the semantic
+  rule and the single-file rule are STYLE's, unchanged; what differs is the faces, the
+  labels, the colours, the figures, their legends and their captions, and more room around
+  everything. An engineering report uses STYLE; a paper, a note or a page for readers
+  outside uses STYLE-PUBLIC.
+
+  An element is chosen for what the content IS. Semantics does not exclude presentation —
+  many elements carry both, and that is the point: em and strong mean emphasis and
+  importance and also look like it; b and i are defined as stylistically offset and
+  alternate-voice text, not as tags to avoid. What is excluded is markup carrying only an
+  appearance where an element with meaning already exists, and appearance hard-coded into
+  markup where a rule in this stylesheet would do it.
+
+    pre wrapping code      code and commands; a bare pre is preformatted non-code
+    h2, h3                 a section, and a division inside one; h1 is the title alone
+    thead, and th scope    a table's header row
+    table                  data with two axes: rows against comparable columns
+    dl, dt, dd             a term with its description — one axis, not two
+    time, with datetime    any date
+    main, header, footer   document landmarks
+    blockquote             a statement set apart from the argument
+    figure, figcaption     an actual image and its caption
+    img                    a raster image; carries alt text
+    svg, with role="img"   a vector image, inline; its first child, title, is its alt text
+    class="ladder"         a list read as a sequence of rungs
+    class="meta"           metadata about the document, not its content
+    class="legend"         a figure's key: which mark stands for which series
+    b in figcaption        the figure's label, as in Figure 3
+    math                   mathematics: MathML compiled from LaTeX when the document is built;
+                           never an image of a formula, and never script in the page
+    class="tml-...-pad"    Temml's italic correction on a superscript, the one class it may emit
+
+  A class names a role, not a look: meta, not small. No div or span standing in for an
+  element that exists. The test: with the stylesheet removed, the document's structure is
+  still readable from its markup alone.
+
+  Every image is inside the file, so the document stays one file with no network. A raster
+  image (a photograph, a screenshot, a scan) is an img whose source is a data URI. A vector
+  image (a drawing, a chart, a plan) is an svg written inline, not encoded, so it can be
+  read, diffed and searched like the rest of the file. It carries a viewBox, and width and
+  height for its intended size; the stylesheet shrinks it to the column as it does an img.
+  Its ids are document ids, so prefix them to keep them from colliding. Colour it by fill
+  and stroke on its own elements, not by a style block inside it, which would leak into the
+  document. Never embed a raster image inside an svg to pass it off as a vector.
+
+  The alt text, or the svg's title, says what the image shows, for a reader without the
+  image. The figcaption says what the image is and where it came from. A rendering names its
+  source and renderer, because a rendering is derived from the thing and is not the thing
+  itself; a raster rendering also names its resolution, which a vector does not have.
+  Diagrams drawn in text stay in pre blocks; figure is for raster and vector images.
+
+  A figure is centred in the column. A chart with axes is centred on its plot area, the
+  field inside the axes, not on the box that includes the axis labels: its viewBox leaves
+  the same gutter on both sides of the plot, so centring the svg centres the field. The
+  generator draws every such chart through one function that sets the viewBox this way.
+
+  Faces are the system's, so there are still no fonts and no network: New York for text
+  where the system has it (Georgia otherwise), San Francisco for labels, captions, legends
+  and metadata, SF Mono for code, and the system's maths font for mathematics (STIX Two Math
+  on Apple systems, Cambria Math on Windows).
+
+  Colours are Flexoki's, exact, from the README of kepano/flexoki at commit 8d723bac:
+    text              base-950 1C1B1A; the title in black 100F0F
+    labels, captions  base-600 6F6E69; faint ticks base-300 B7B5AC
+    rules             base-200 CECDC3; hairlines base-100 E6E4D9
+  A section heading, h2, is underlined beneath its words in ink. Headings are not greyed by
+  level; the greys belong to labels and captions, and a lighter heading would be harder to
+  find.
+  A figure uses colour in one of two ways, never both:
+    to single out one thing   that thing in blue-700 1A4F8C, everything else in base greys
+    to compare several        fills in blue-200 92BFDB, red-200 F89A8A, yellow-150 F1D67E,
+                              cyan-100 BFE8D9, in that order, four at most; fills only,
+                              never outlined and never thin lines, since they are too pale
+                              for a line to read; the legend names every series
+  Colour is never the only cue: a highlighted mark is also labelled, and compared series are
+  named in the legend.
+
+  Element names above are written without angle brackets deliberately. A comment holding
+  literal markup is markup as far as a naive tool is concerned: a regex pass over this
+  file once matched a table tag inside this comment and deleted everything between it and
+  the first real closing tag. Transform these documents by hand, or with a parser.
+-->
+<style>
+  body { color: #1C1B1A; background: #fff; font-family: ui-serif, "New York", Georgia, serif; max-width: 46em; margin: 5em auto 6em; padding: 0 1.5em; font-size: 1.0625em; line-height: 1.6; }
+  header .meta:first-child, figcaption, .meta, .legend, th, dt, code, pre { font-family: -apple-system, BlinkMacSystemFont, "SF Pro Text", system-ui, sans-serif; }
+  code, pre { font-family: ui-monospace, "SF Mono", Menlo, Consolas, monospace; font-size: .86em; }
+  h1 { font-size: 2.6em; font-weight: 300; letter-spacing: -.015em; line-height: 1.1; color: #100F0F; margin: 2.4em 0 .5em; max-width: 16em; }
+  h2 { font-size: 1.3em; font-weight: 400; margin-top: 3.2em; text-decoration: underline 1px #1C1B1A; text-underline-offset: .3em; }
+  h3 { font-size: 1em; font-weight: normal; font-style: italic; margin-top: 2em; }
+  .meta { font-size: .82em; color: #6F6E69; }
+  header .meta:first-child { font-size: .72em; letter-spacing: .32em; text-transform: uppercase; color: #878580; }
+  table { border-collapse: collapse; margin: 1.2em 0; }
+  th, td { border-bottom: 0.5px solid #CECDC3; padding: .45em 1.2em .45em 0; text-align: left; vertical-align: top; }
+  thead th { border-bottom: 0.5px solid #1C1B1A; }
+  th, dt { font-weight: 500; font-size: .72em; letter-spacing: .24em; text-transform: uppercase; color: #6F6E69; }
+  dl { margin: 1.2em 0; }
+  dt { margin-top: 1.1em; }
+  dd { margin: .2em 0 0 0; }
+  pre { border-left: 1px solid #B7B5AC; padding: .2em 0 .2em 1.2em; overflow-x: auto; }
+  pre code { font-size: inherit; }
+  blockquote { margin: 2em 0; padding-left: 1.2em; border-left: 1px solid #1C1B1A; font-style: italic; }
+  figure { margin: 3.5em 0; }
+  figure img, figure svg[role="img"] { display: block; max-width: 100%; height: auto; margin: 0 auto; }
+  figcaption { font-size: .82em; line-height: 1.5; color: #6F6E69; margin: 1.2em auto 0; max-width: 36em; text-align: center; }
+  figcaption b { display: block; margin-bottom: .4em; font-weight: 500; font-size: .88em; letter-spacing: .24em; text-transform: uppercase; color: #1C1B1A; }
+  .legend { list-style: none; padding: 0; margin: 0 0 1.6em; display: flex; flex-wrap: wrap; justify-content: center; gap: .6em 2.2em; font-size: .72em; letter-spacing: .24em; text-transform: uppercase; color: #6F6E69; }
+  .legend svg { margin-right: .8em; vertical-align: -1px; }
+  footer { margin-top: 5em; border-top: 0.5px solid #CECDC3; padding-top: 1em; }
+  .ladder li { margin: .15em 0; }
+  math { font-family: "STIX Two Math", "Cambria Math", "Latin Modern Math", "DejaVu Math TeX Gyre", "Noto Sans Math", math; font-size: 1.05em; }
+  math[display="block"] { display: block math; margin: 1.4em 0; }
+  figcaption math { font-size: 1.1em; }
+  @supports (not (-moz-appearance: none)) { .tml-sml-pad { padding-left: .05em; } .tml-med-pad { padding-left: .1em; } .tml-lrg-pad { padding-left: .15em; } }
+</style>
+</head>
+<body>
+
+<header>
+<p class="meta">Style · public</p>
+<h1>STYLE-PUBLIC — the public document style</h1>
+<p class="meta">STYLE for documents that leave the building. Copy the head of this file into any document; the semantic rule and the colour rule in its comment travel with it. Below is a specimen of every element the style covers.</p>
+</header>
+
+<main>
+
+<h2>A second-level heading</h2>
+<p>Body text. Dark ink on white, one serif column, forty-six ems wide, with room to breathe. Inline <code>code</code> sits in the monospace face at slightly under the body size, so a path or an identifier does not tower over the sentence around it. A date is written <time datetime="2026-09-26">2026-09-26</time>.</p>
+
+<h3>A third-level heading</h3>
+<p>For a division inside a section: the size of the body text, set in italic.</p>
+
+<blockquote><p>A blockquote, for a statement set apart from the argument around it.</p></blockquote>
+
+<p>An ordinary list, and beneath it the tighter ladder variant, for lists read as a sequence of rungs rather than as prose:</p>
+
+<ul>
+  <li>an ordinary list item</li>
+  <li>another</li>
+</ul>
+
+<ol class="ladder">
+  <li>a ladder item, spaced tighter</li>
+  <li>another</li>
+  <li>a third</li>
+</ol>
+
+<h2>Tables, for data with two axes</h2>
+<p>A table claims that its rows are comparable down each column. Where that is not true of the content, what is wanted is a definition list.</p>
+
+<table>
+  <thead>
+    <tr><th scope="col">a header cell</th><th scope="col">set as a label</th></tr>
+  </thead>
+  <tbody>
+    <tr><td>a body cell</td><td>ruled by hairlines, top-aligned, so a long cell beside a short one still reads</td></tr>
+    <tr><td><code>code in a cell</code></td><td>the monospace face carries into cells unchanged</td></tr>
+  </tbody>
+</table>
+
+<h2>Definition lists, for a term and its description</h2>
+<dl>
+  <dt>a term</dt>
+  <dd>its description, with the term set as a label to match a table's header cell</dd>
+  <dt>another term</dt>
+  <dd>one axis, not two — nothing here is comparable to anything else down a column</dd>
+</dl>
+
+<h2>Preformatted blocks</h2>
+<p>Code and commands are a pre wrapping a code element; a bare pre is for preformatted text that is not code.</p>
+
+<pre><code>a preformatted block of code: monospace, set off by a rule,
+and scrolling sideways rather than wrapping, so a long command
+line stays one line and stays copyable</code></pre>
+
+<h2>Mathematics</h2>
+<p>Mathematics is written in LaTeX in the source and compiled to MathML when the document is built, so the browser typesets it natively and it stays text. Inline, it sits in the sentence: a sequence <math><mi>x</mi></math> of length <math><mi>N</mi></math> has the ambiguity function <math><mrow><mi>A</mi><mrow><mo fence="true" form="prefix" stretchy="false">(</mo><mi>τ</mi><mo separator="true">,</mo><mi>ν</mi><mo fence="true" form="postfix" stretchy="false">)</mo></mrow></mrow></math>. Displayed, it stands apart:</p>
+
+<math display="block"><mrow><mi>A</mi><mrow><mo fence="true" form="prefix" stretchy="false">(</mo><mi>τ</mi><mo separator="true">,</mo><mi>ν</mi><mo fence="true" form="postfix" stretchy="false">)</mo></mrow><mo>=</mo><mrow><munderover><mo movablelimits="false">∑</mo><mrow><mi>n</mi><mo>=</mo><mn>0</mn></mrow><mrow><mi>N</mi><mo>−</mo><mn>1</mn></mrow></munderover></mrow><mi>x</mi><mrow><mo fence="true" form="prefix" stretchy="false">[</mo><mi>n</mi><mo fence="true" form="postfix" stretchy="false">]</mo></mrow><mspace width="0.1667em"></mspace><msup><mi>x</mi><mo class="tml-sml-pad">∗</mo></msup><mrow><mo fence="true" form="prefix" stretchy="false">[</mo><mi>n</mi><mo>+</mo><mi>τ</mi><mo fence="true" form="postfix" stretchy="false">]</mo></mrow><mspace width="0.1667em"></mspace><msup><mi>e</mi><mrow class="tml-sml-pad"><mo form="prefix" stretchy="false" lspace="0em" rspace="0em">−</mo><mn>2</mn><mi>π</mi><mi>i</mi><mi>ν</mi><mi>n</mi><mi>/</mi><mi>N</mi></mrow></msup></mrow></math>
+
+<h2>Figures, for an actual image</h2>
+<p>A figure holds an image and its caption. It is unframed, centred and given room. The caption, centred beneath it, begins with the figure's label, says what the image is, and says where it came from.</p>
+
+<p>A figure that compares several things fills them with the pastels, in order, and names each in a legend above the image:</p>
+
+<figure>
+<ul class="legend">
+  <li><svg width="10" height="10" viewBox="0 0 10 10" aria-hidden="true"><rect width="10" height="10" fill="#92BFDB" /></svg> Zadoff–Chu</li>
+  <li><svg width="10" height="10" viewBox="0 0 10 10" aria-hidden="true"><rect width="10" height="10" fill="#F89A8A" /></svg> Legendre</li>
+  <li><svg width="10" height="10" viewBox="0 0 10 10" aria-hidden="true"><rect width="10" height="10" fill="#F1D67E" /></svg> Random ±1</li>
+</ul>
+<svg role="img" width="630" height="220" viewBox="-30 0 630 220" xmlns="http://www.w3.org/2000/svg" font-family="-apple-system, system-ui, sans-serif">
+  <title>Grouped bars of aperiodic peak sidelobe level, in decibels, for Zadoff–Chu, Legendre and random binary sequences at prime lengths 7, 11, 13, 19, 23 and 31. Zadoff–Chu is lowest at every length.</title>
+  <line x1="0" x2="570" y1="6.0" y2="6.0" stroke="#1C1B1A" stroke-width="0.5" />
+  <text x="-30" y="92.6" font-size="11" fill="#B7B5AC">-10</text>
+  <text x="-30" y="176.3" font-size="11" fill="#B7B5AC">-20</text>
+  <rect x="22.5" y="6.0" width="14" height="125.3" fill="#92BFDB" />
+  <rect x="40.5" y="6.0" width="14" height="91.0" fill="#F89A8A" />
+  <rect x="58.5" y="6.0" width="14" height="40.7" fill="#F1D67E" />
+  <text x="47.5" y="214" font-size="11" fill="#878580" text-anchor="middle">7</text>
+  <rect x="117.5" y="6.0" width="14" height="136.4" fill="#92BFDB" />
+  <rect x="135.5" y="6.0" width="14" height="73.5" fill="#F89A8A" />
+  <rect x="153.5" y="6.0" width="14" height="44.0" fill="#F1D67E" />
+  <text x="142.5" y="214" font-size="11" fill="#878580" text-anchor="middle">11</text>
+  <rect x="212.5" y="6.0" width="14" height="144.8" fill="#92BFDB" />
+  <rect x="230.5" y="6.0" width="14" height="85.6" fill="#F89A8A" />
+  <rect x="248.5" y="6.0" width="14" height="69.4" fill="#F1D67E" />
+  <text x="237.5" y="214" font-size="11" fill="#878580" text-anchor="middle">13</text>
+  <rect x="307.5" y="6.0" width="14" height="160.2" fill="#92BFDB" />
+  <rect x="325.5" y="6.0" width="14" height="97.0" fill="#F89A8A" />
+  <rect x="343.5" y="6.0" width="14" height="83.7" fill="#F1D67E" />
+  <text x="332.5" y="214" font-size="11" fill="#878580" text-anchor="middle">19</text>
+  <rect x="402.5" y="6.0" width="14" height="165.2" fill="#92BFDB" />
+  <rect x="420.5" y="6.0" width="14" height="127.1" fill="#F89A8A" />
+  <rect x="438.5" y="6.0" width="14" height="97.6" fill="#F1D67E" />
+  <text x="427.5" y="214" font-size="11" fill="#878580" text-anchor="middle">23</text>
+  <rect x="497.5" y="6.0" width="14" height="178.9" fill="#92BFDB" />
+  <rect x="515.5" y="6.0" width="14" height="89.8" fill="#F89A8A" />
+  <rect x="533.5" y="6.0" width="14" height="108.1" fill="#F1D67E" />
+  <text x="522.5" y="214" font-size="11" fill="#878580" text-anchor="middle">31</text>
+</svg>
+<figcaption><b>Figure 1</b>Aperiodic peak sidelobe level, <math><mrow><mn>20</mn><mspace width="0.1667em"></mspace><msub><mi>log</mi><mn>10</mn></msub><mo>⁡</mo><mo fence="true" symmetric="true" minsize="1.2em" maxsize="1.2em">(</mo><msub><mi>max</mi><mrow><mi>k</mi><mo>≠</mo><mn>0</mn></mrow></msub><mo>⁡</mo><mspace width="0.1667em"></mspace><mspace width="0.1667em"></mspace><mo fence="true" symmetric="true" minsize="1.2em" maxsize="1.2em">|</mo><msub><mo movablelimits="false">∑</mo><mi>n</mi></msub><mi>x</mi><mo form="prefix" stretchy="false">[</mo><mi>n</mi><mo form="postfix" stretchy="false">]</mo><mspace width="0.1667em"></mspace><msup><mi>x</mi><mo class="tml-sml-pad">∗</mo></msup><mo form="prefix" stretchy="false">[</mo><mi>n</mi><mo>+</mo><mi>k</mi><mo form="postfix" stretchy="false">]</mo><mo fence="true" symmetric="true" minsize="1.2em" maxsize="1.2em">|</mo><mi>/</mi><mi>N</mi><mo fence="true" symmetric="true" minsize="1.2em" maxsize="1.2em">)</mo></mrow></math>, for three families at prime lengths; lower is better. Computed from the definitions and drawn by <code>documents/build/make_style_public.py</code> in code-standard; the random sequence has a fixed seed and the Legendre sequence takes +1 at zero.</figcaption>
+</figure>
+
+<p>A figure that singles out one thing gives it the accent, labels it, and leaves the rest in grey:</p>
+
+<figure>
+<svg role="img" width="560" height="190" viewBox="0 0 560 190" xmlns="http://www.w3.org/2000/svg" font-family="-apple-system, system-ui, sans-serif">
+  <title>Zero-delay Doppler cuts against normalised frequency for lengths 5, 7, 13 and 23. Length 13 is drawn in blue and labelled; the others are grey. The main lobe narrows as length grows.</title>
+  <line x1="0" x2="560" y1="166" y2="166" stroke="#1C1B1A" stroke-width="0.5" />
+  <text x="93.3" y="186" font-size="11" fill="#B7B5AC" text-anchor="middle">-0.2</text>
+  <text x="280.0" y="186" font-size="11" fill="#B7B5AC" text-anchor="middle">0</text>
+  <text x="466.7" y="186" font-size="11" fill="#B7B5AC" text-anchor="middle">0.2</text>
+  <path d="M0.0,126.4L1.4,126.3L2.8,126.2L4.2,126.1L5.6,126.1L7.0,126.0L8.4,126.0L9.8,126.0L11.2,126.0L12.6,126.1L14.0,126.1L15.4,126.2L16.8,126.3L18.2,126.5L19.6,126.6L21.0,126.8L22.4,127.0L23.8,127.2L25.2,127.4L26.6,127.7L28.0,128.0L29.4,128.3L30.8,128.6L32.2,129.0L33.6,129.4L35.0,129.8L36.4,130.2L37.8,130.6L39.2,131.1L40.6,131.6L42.0,132.1L43.4,132.7L44.8,133.2L46.2,133.8L47.6,134.4L49.0,135.0L50.4,135.7L51.8,136.4L53.2,137.1L54.6,137.8L56.0,138.5L57.4,139.3L58.8,140.1L60.2,140.9L61.6,141.7L63.0,142.6L64.4,143.4L65.8,144.3L67.2,145.2L68.6,146.2L70.0,147.1L71.4,148.1L72.8,149.1L74.2,150.1L75.6,151.2L77.0,152.2L78.4,153.3L79.8,154.4L81.2,155.5L82.6,156.7L84.0,157.8L85.4,159.0L86.8,160.2L88.2,161.4L89.6,162.6L91.0,163.9L92.4,165.1L93.8,165.6L95.2,164.3L96.6,163.0L98.0,161.6L99.4,160.3L100.8,158.9L102.2,157.6L103.6,156.2L105.0,154.8L106.4,153.3L107.8,151.9L109.2,150.5L110.6,149.0L112.0,147.5L113.4,146.1L114.8,144.6L116.2,143.1L117.6,141.6L119.0,140.0L120.4,138.5L121.8,136.9L123.2,135.4L124.6,133.8L126.0,132.3L127.4,130.7L128.8,129.1L130.2,127.5L131.6,125.9L133.0,124.3L134.4,122.7L135.8,121.0L137.2,119.4L138.6,117.8L140.0,116.2L141.4,114.5L142.8,112.9L144.2,111.2L145.6,109.6L147.0,107.9L148.4,106.3L149.8,104.6L151.2,103.0L152.6,101.3L154.0,99.7L155.4,98.0L156.8,96.4L158.2,94.8L159.6,93.1L161.0,91.5L162.4,89.8L163.8,88.2L165.2,86.6L166.6,84.9L168.0,83.3L169.4,81.7L170.8,80.1L172.2,78.5L173.6,76.9L175.0,75.3L176.4,73.7L177.8,72.2L179.2,70.6L180.6,69.1L182.0,67.5L183.4,66.0L184.8,64.5L186.2,62.9L187.6,61.4L189.0,60.0L190.4,58.5L191.8,57.0L193.2,55.6L194.6,54.1L196.0,52.7L197.4,51.3L198.8,49.9L200.2,48.5L201.6,47.2L203.0,45.8L204.4,44.5L205.8,43.2L207.2,41.9L208.6,40.6L210.0,39.4L211.4,38.1L212.8,36.9L214.2,35.7L215.6,34.5L217.0,33.3L218.4,32.2L219.8,31.1L221.2,30.0L222.6,28.9L224.0,27.8L225.4,26.8L226.8,25.8L228.2,24.8L229.6,23.8L231.0,22.9L232.4,22.0L233.8,21.1L235.2,20.2L236.6,19.3L238.0,18.5L239.4,17.7L240.8,16.9L242.2,16.2L243.6,15.4L245.0,14.7L246.4,14.1L247.8,13.4L249.2,12.8L250.6,12.2L252.0,11.6L253.4,11.1L254.8,10.6L256.2,10.1L257.6,9.6L259.0,9.2L260.4,8.8L261.8,8.4L263.2,8.0L264.6,7.7L266.0,7.4L267.4,7.1L268.8,6.9L270.2,6.7L271.6,6.5L273.0,6.4L274.4,6.2L275.8,6.1L277.2,6.1L278.6,6.0L280.0,6.0L281.4,6.0L282.8,6.1L284.2,6.1L285.6,6.2L287.0,6.4L288.4,6.5L289.8,6.7L291.2,6.9L292.6,7.1L294.0,7.4L295.4,7.7L296.8,8.0L298.2,8.4L299.6,8.8L301.0,9.2L302.4,9.6L303.8,10.1L305.2,10.6L306.6,11.1L308.0,11.6L309.4,12.2L310.8,12.8L312.2,13.4L313.6,14.1L315.0,14.7L316.4,15.4L317.8,16.2L319.2,16.9L320.6,17.7L322.0,18.5L323.4,19.3L324.8,20.2L326.2,21.1L327.6,22.0L329.0,22.9L330.4,23.8L331.8,24.8L333.2,25.8L334.6,26.8L336.0,27.8L337.4,28.9L338.8,30.0L340.2,31.1L341.6,32.2L343.0,33.3L344.4,34.5L345.8,35.7L347.2,36.9L348.6,38.1L350.0,39.4L351.4,40.6L352.8,41.9L354.2,43.2L355.6,44.5L357.0,45.8L358.4,47.2L359.8,48.5L361.2,49.9L362.6,51.3L364.0,52.7L365.4,54.1L366.8,55.6L368.2,57.0L369.6,58.5L371.0,60.0L372.4,61.4L373.8,62.9L375.2,64.5L376.6,66.0L378.0,67.5L379.4,69.1L380.8,70.6L382.2,72.2L383.6,73.7L385.0,75.3L386.4,76.9L387.8,78.5L389.2,80.1L390.6,81.7L392.0,83.3L393.4,84.9L394.8,86.6L396.2,88.2L397.6,89.8L399.0,91.5L400.4,93.1L401.8,94.8L403.2,96.4L404.6,98.0L406.0,99.7L407.4,101.3L408.8,103.0L410.2,104.6L411.6,106.3L413.0,107.9L414.4,109.6L415.8,111.2L417.2,112.9L418.6,114.5L420.0,116.2L421.4,117.8L422.8,119.4L424.2,121.0L425.6,122.7L427.0,124.3L428.4,125.9L429.8,127.5L431.2,129.1L432.6,130.7L434.0,132.3L435.4,133.8L436.8,135.4L438.2,136.9L439.6,138.5L441.0,140.0L442.4,141.6L443.8,143.1L445.2,144.6L446.6,146.1L448.0,147.5L449.4,149.0L450.8,150.5L452.2,151.9L453.6,153.3L455.0,154.8L456.4,156.2L457.8,157.6L459.2,158.9L460.6,160.3L462.0,161.6L463.4,163.0L464.8,164.3L466.2,165.6L467.6,165.1L469.0,163.9L470.4,162.6L471.8,161.4L473.2,160.2L474.6,159.0L476.0,157.8L477.4,156.7L478.8,155.5L480.2,154.4L481.6,153.3L483.0,152.2L484.4,151.2L485.8,150.1L487.2,149.1L488.6,148.1L490.0,147.1L491.4,146.2L492.8,145.2L494.2,144.3L495.6,143.4L497.0,142.6L498.4,141.7L499.8,140.9L501.2,140.1L502.6,139.3L504.0,138.5L505.4,137.8L506.8,137.1L508.2,136.4L509.6,135.7L511.0,135.0L512.4,134.4L513.8,133.8L515.2,133.2L516.6,132.7L518.0,132.1L519.4,131.6L520.8,131.1L522.2,130.6L523.6,130.2L525.0,129.8L526.4,129.4L527.8,129.0L529.2,128.6L530.6,128.3L532.0,128.0L533.4,127.7L534.8,127.4L536.2,127.2L537.6,127.0L539.0,126.8L540.4,126.6L541.8,126.5L543.2,126.3L544.6,126.2L546.0,126.1L547.4,126.1L548.8,126.0L550.2,126.0L551.6,126.0L553.0,126.0L554.4,126.1L555.8,126.1L557.2,126.2L558.6,126.3L560.0,126.4" fill="none" stroke="#DAD8CE" stroke-width="1" />
+  <path d="M0.0,157.3L1.4,158.1L2.8,159.0L4.2,159.9L5.6,160.8L7.0,161.7L8.4,162.7L9.8,163.6L11.2,164.5L12.6,165.5L14.0,165.5L15.4,164.6L16.8,163.6L18.2,162.6L19.6,161.6L21.0,160.6L22.4,159.6L23.8,158.7L25.2,157.7L26.6,156.7L28.0,155.7L29.4,154.7L30.8,153.7L32.2,152.7L33.6,151.8L35.0,150.8L36.4,149.8L37.8,148.9L39.2,147.9L40.6,147.0L42.0,146.1L43.4,145.2L44.8,144.3L46.2,143.4L47.6,142.6L49.0,141.7L50.4,140.9L51.8,140.1L53.2,139.3L54.6,138.6L56.0,137.8L57.4,137.1L58.8,136.4L60.2,135.7L61.6,135.1L63.0,134.5L64.4,133.9L65.8,133.3L67.2,132.8L68.6,132.3L70.0,131.8L71.4,131.3L72.8,130.9L74.2,130.5L75.6,130.2L77.0,129.9L78.4,129.6L79.8,129.4L81.2,129.2L82.6,129.0L84.0,128.9L85.4,128.8L86.8,128.7L88.2,128.7L89.6,128.7L91.0,128.8L92.4,128.9L93.8,129.1L95.2,129.3L96.6,129.5L98.0,129.8L99.4,130.1L100.8,130.4L102.2,130.9L103.6,131.3L105.0,131.8L106.4,132.3L107.8,132.9L109.2,133.5L110.6,134.2L112.0,134.9L113.4,135.7L114.8,136.5L116.2,137.3L117.6,138.2L119.0,139.1L120.4,140.1L121.8,141.1L123.2,142.2L124.6,143.3L126.0,144.4L127.4,145.6L128.8,146.8L130.2,148.1L131.6,149.4L133.0,150.8L134.4,152.2L135.8,153.6L137.2,155.1L138.6,156.6L140.0,158.1L141.4,159.7L142.8,161.3L144.2,163.0L145.6,164.7L147.0,165.6L148.4,163.8L149.8,162.0L151.2,160.2L152.6,158.3L154.0,156.5L155.4,154.5L156.8,152.6L158.2,150.6L159.6,148.6L161.0,146.6L162.4,144.5L163.8,142.4L165.2,140.3L166.6,138.2L168.0,136.1L169.4,133.9L170.8,131.7L172.2,129.6L173.6,127.3L175.0,125.1L176.4,122.9L177.8,120.6L179.2,118.4L180.6,116.1L182.0,113.8L183.4,111.5L184.8,109.2L186.2,106.9L187.6,104.6L189.0,102.3L190.4,100.0L191.8,97.7L193.2,95.4L194.6,93.1L196.0,90.8L197.4,88.5L198.8,86.2L200.2,84.0L201.6,81.7L203.0,79.4L204.4,77.2L205.8,75.0L207.2,72.8L208.6,70.6L210.0,68.4L211.4,66.2L212.8,64.1L214.2,62.0L215.6,59.9L217.0,57.8L218.4,55.8L219.8,53.7L221.2,51.7L222.6,49.8L224.0,47.9L225.4,45.9L226.8,44.1L228.2,42.2L229.6,40.4L231.0,38.7L232.4,36.9L233.8,35.3L235.2,33.6L236.6,32.0L238.0,30.4L239.4,28.9L240.8,27.4L242.2,26.0L243.6,24.6L245.0,23.2L246.4,21.9L247.8,20.6L249.2,19.4L250.6,18.3L252.0,17.1L253.4,16.1L254.8,15.1L256.2,14.1L257.6,13.2L259.0,12.3L260.4,11.5L261.8,10.8L263.2,10.1L264.6,9.4L266.0,8.8L267.4,8.3L268.8,7.8L270.2,7.4L271.6,7.0L273.0,6.7L274.4,6.5L275.8,6.3L277.2,6.1L278.6,6.0L280.0,6.0L281.4,6.0L282.8,6.1L284.2,6.3L285.6,6.5L287.0,6.7L288.4,7.0L289.8,7.4L291.2,7.8L292.6,8.3L294.0,8.8L295.4,9.4L296.8,10.1L298.2,10.8L299.6,11.5L301.0,12.3L302.4,13.2L303.8,14.1L305.2,15.1L306.6,16.1L308.0,17.1L309.4,18.3L310.8,19.4L312.2,20.6L313.6,21.9L315.0,23.2L316.4,24.6L317.8,26.0L319.2,27.4L320.6,28.9L322.0,30.4L323.4,32.0L324.8,33.6L326.2,35.3L327.6,36.9L329.0,38.7L330.4,40.4L331.8,42.2L333.2,44.1L334.6,45.9L336.0,47.9L337.4,49.8L338.8,51.7L340.2,53.7L341.6,55.8L343.0,57.8L344.4,59.9L345.8,62.0L347.2,64.1L348.6,66.2L350.0,68.4L351.4,70.6L352.8,72.8L354.2,75.0L355.6,77.2L357.0,79.4L358.4,81.7L359.8,84.0L361.2,86.2L362.6,88.5L364.0,90.8L365.4,93.1L366.8,95.4L368.2,97.7L369.6,100.0L371.0,102.3L372.4,104.6L373.8,106.9L375.2,109.2L376.6,111.5L378.0,113.8L379.4,116.1L380.8,118.4L382.2,120.6L383.6,122.9L385.0,125.1L386.4,127.3L387.8,129.6L389.2,131.7L390.6,133.9L392.0,136.1L393.4,138.2L394.8,140.3L396.2,142.4L397.6,144.5L399.0,146.6L400.4,148.6L401.8,150.6L403.2,152.6L404.6,154.5L406.0,156.5L407.4,158.3L408.8,160.2L410.2,162.0L411.6,163.8L413.0,165.6L414.4,164.7L415.8,163.0L417.2,161.3L418.6,159.7L420.0,158.1L421.4,156.6L422.8,155.1L424.2,153.6L425.6,152.2L427.0,150.8L428.4,149.4L429.8,148.1L431.2,146.8L432.6,145.6L434.0,144.4L435.4,143.3L436.8,142.2L438.2,141.1L439.6,140.1L441.0,139.1L442.4,138.2L443.8,137.3L445.2,136.5L446.6,135.7L448.0,134.9L449.4,134.2L450.8,133.5L452.2,132.9L453.6,132.3L455.0,131.8L456.4,131.3L457.8,130.9L459.2,130.4L460.6,130.1L462.0,129.8L463.4,129.5L464.8,129.3L466.2,129.1L467.6,128.9L469.0,128.8L470.4,128.7L471.8,128.7L473.2,128.7L474.6,128.8L476.0,128.9L477.4,129.0L478.8,129.2L480.2,129.4L481.6,129.6L483.0,129.9L484.4,130.2L485.8,130.5L487.2,130.9L488.6,131.3L490.0,131.8L491.4,132.3L492.8,132.8L494.2,133.3L495.6,133.9L497.0,134.5L498.4,135.1L499.8,135.7L501.2,136.4L502.6,137.1L504.0,137.8L505.4,138.6L506.8,139.3L508.2,140.1L509.6,140.9L511.0,141.7L512.4,142.6L513.8,143.4L515.2,144.3L516.6,145.2L518.0,146.1L519.4,147.0L520.8,147.9L522.2,148.9L523.6,149.8L525.0,150.8L526.4,151.8L527.8,152.7L529.2,153.7L530.6,154.7L532.0,155.7L533.4,156.7L534.8,157.7L536.2,158.7L537.6,159.6L539.0,160.6L540.4,161.6L541.8,162.6L543.2,163.6L544.6,164.6L546.0,165.5L547.4,165.5L548.8,164.5L550.2,163.6L551.6,162.7L553.0,161.7L554.4,160.8L555.8,159.9L557.2,159.0L558.6,158.1L560.0,157.3" fill="none" stroke="#B7B5AC" stroke-width="1" />
+  <path d="M0.0,163.3L1.4,162.5L2.8,161.6L4.2,160.8L5.6,160.1L7.0,159.4L8.4,158.8L9.8,158.3L11.2,157.8L12.6,157.5L14.0,157.2L15.4,157.1L16.8,157.0L18.2,157.1L19.6,157.3L21.0,157.5L22.4,157.9L23.8,158.4L25.2,158.9L26.6,159.6L28.0,160.3L29.4,161.1L30.8,162.0L32.2,162.9L33.6,163.9L35.0,164.9L36.4,165.9L37.8,165.1L39.2,164.0L40.6,163.0L42.0,162.0L43.4,161.1L44.8,160.2L46.2,159.3L47.6,158.5L49.0,157.8L50.4,157.2L51.8,156.7L53.2,156.3L54.6,156.0L56.0,155.9L57.4,155.8L58.8,155.9L60.2,156.0L61.6,156.3L63.0,156.7L64.4,157.3L65.8,157.9L67.2,158.7L68.6,159.5L70.0,160.4L71.4,161.4L72.8,162.5L74.2,163.6L75.6,164.7L77.0,165.9L78.4,164.9L79.8,163.7L81.2,162.5L82.6,161.3L84.0,160.2L85.4,159.2L86.8,158.2L88.2,157.2L89.6,156.4L91.0,155.7L92.4,155.1L93.8,154.6L95.2,154.2L96.6,154.0L98.0,153.9L99.4,154.0L100.8,154.2L102.2,154.5L103.6,155.0L105.0,155.6L106.4,156.3L107.8,157.2L109.2,158.2L110.6,159.3L112.0,160.5L113.4,161.7L114.8,163.1L116.2,164.5L117.6,165.9L119.0,164.6L120.4,163.2L121.8,161.7L123.2,160.3L124.6,158.9L126.0,157.6L127.4,156.3L128.8,155.2L130.2,154.1L131.6,153.2L133.0,152.4L134.4,151.8L135.8,151.3L137.2,151.0L138.6,150.8L140.0,150.9L141.4,151.1L142.8,151.5L144.2,152.0L145.6,152.8L147.0,153.7L148.4,154.8L149.8,156.0L151.2,157.4L152.6,158.9L154.0,160.5L155.4,162.2L156.8,164.1L158.2,165.9L159.6,164.2L161.0,162.2L162.4,160.3L163.8,158.4L165.2,156.6L166.6,154.8L168.0,153.1L169.4,151.5L170.8,150.0L172.2,148.7L173.6,147.6L175.0,146.7L176.4,145.9L177.8,145.4L179.2,145.1L180.6,145.1L182.0,145.3L183.4,145.7L184.8,146.4L186.2,147.4L187.6,148.6L189.0,150.1L190.4,151.8L191.8,153.7L193.2,155.8L194.6,158.1L196.0,160.6L197.4,163.2L198.8,165.9L200.2,163.2L201.6,160.3L203.0,157.4L204.4,154.5L205.8,151.6L207.2,148.7L208.6,146.0L210.0,143.3L211.4,140.9L212.8,138.6L214.2,136.6L215.6,134.9L217.0,133.4L218.4,132.3L219.8,131.5L221.2,131.1L222.6,131.1L224.0,131.5L225.4,132.3L226.8,133.6L228.2,135.4L229.6,137.6L231.0,140.3L232.4,143.5L233.8,147.1L235.2,151.1L236.6,155.6L238.0,160.6L239.4,165.9L240.8,160.4L242.2,154.3L243.6,147.9L245.0,141.2L246.4,134.3L247.8,127.1L249.2,119.8L250.6,112.4L252.0,104.9L253.4,97.3L254.8,89.8L256.2,82.3L257.6,74.9L259.0,67.7L260.4,60.6L261.8,53.9L263.2,47.4L264.6,41.2L266.0,35.5L267.4,30.2L268.8,25.3L270.2,20.9L271.6,17.0L273.0,13.7L274.4,11.0L275.8,8.8L277.2,7.2L278.6,6.3L280.0,6.0L281.4,6.3L282.8,7.2L284.2,8.8L285.6,11.0L287.0,13.7L288.4,17.0L289.8,20.9L291.2,25.3L292.6,30.2L294.0,35.5L295.4,41.2L296.8,47.4L298.2,53.9L299.6,60.6L301.0,67.7L302.4,74.9L303.8,82.3L305.2,89.8L306.6,97.3L308.0,104.9L309.4,112.4L310.8,119.8L312.2,127.1L313.6,134.3L315.0,141.2L316.4,147.9L317.8,154.3L319.2,160.4L320.6,165.9L322.0,160.6L323.4,155.6L324.8,151.1L326.2,147.1L327.6,143.5L329.0,140.3L330.4,137.6L331.8,135.4L333.2,133.6L334.6,132.3L336.0,131.5L337.4,131.1L338.8,131.1L340.2,131.5L341.6,132.3L343.0,133.4L344.4,134.9L345.8,136.6L347.2,138.6L348.6,140.9L350.0,143.3L351.4,146.0L352.8,148.7L354.2,151.6L355.6,154.5L357.0,157.4L358.4,160.3L359.8,163.2L361.2,165.9L362.6,163.2L364.0,160.6L365.4,158.1L366.8,155.8L368.2,153.7L369.6,151.8L371.0,150.1L372.4,148.6L373.8,147.4L375.2,146.4L376.6,145.7L378.0,145.3L379.4,145.1L380.8,145.1L382.2,145.4L383.6,145.9L385.0,146.7L386.4,147.6L387.8,148.7L389.2,150.0L390.6,151.5L392.0,153.1L393.4,154.8L394.8,156.6L396.2,158.4L397.6,160.3L399.0,162.2L400.4,164.2L401.8,165.9L403.2,164.1L404.6,162.2L406.0,160.5L407.4,158.9L408.8,157.4L410.2,156.0L411.6,154.8L413.0,153.7L414.4,152.8L415.8,152.0L417.2,151.5L418.6,151.1L420.0,150.9L421.4,150.8L422.8,151.0L424.2,151.3L425.6,151.8L427.0,152.4L428.4,153.2L429.8,154.1L431.2,155.2L432.6,156.3L434.0,157.6L435.4,158.9L436.8,160.3L438.2,161.7L439.6,163.2L441.0,164.6L442.4,165.9L443.8,164.5L445.2,163.1L446.6,161.7L448.0,160.5L449.4,159.3L450.8,158.2L452.2,157.2L453.6,156.3L455.0,155.6L456.4,155.0L457.8,154.5L459.2,154.2L460.6,154.0L462.0,153.9L463.4,154.0L464.8,154.2L466.2,154.6L467.6,155.1L469.0,155.7L470.4,156.4L471.8,157.2L473.2,158.2L474.6,159.2L476.0,160.2L477.4,161.3L478.8,162.5L480.2,163.7L481.6,164.9L483.0,165.9L484.4,164.7L485.8,163.6L487.2,162.5L488.6,161.4L490.0,160.4L491.4,159.5L492.8,158.7L494.2,157.9L495.6,157.3L497.0,156.7L498.4,156.3L499.8,156.0L501.2,155.9L502.6,155.8L504.0,155.9L505.4,156.0L506.8,156.3L508.2,156.7L509.6,157.2L511.0,157.8L512.4,158.5L513.8,159.3L515.2,160.2L516.6,161.1L518.0,162.0L519.4,163.0L520.8,164.0L522.2,165.1L523.6,165.9L525.0,164.9L526.4,163.9L527.8,162.9L529.2,162.0L530.6,161.1L532.0,160.3L533.4,159.6L534.8,158.9L536.2,158.4L537.6,157.9L539.0,157.5L540.4,157.3L541.8,157.1L543.2,157.0L544.6,157.1L546.0,157.2L547.4,157.5L548.8,157.8L550.2,158.3L551.6,158.8L553.0,159.4L554.4,160.1L555.8,160.8L557.2,161.6L558.6,162.5L560.0,163.3" fill="none" stroke="#878580" stroke-width="1" />
+  <path d="M0.0,161.3L1.4,160.4L2.8,159.5L4.2,158.7L5.6,157.8L7.0,157.0L8.4,156.2L9.8,155.4L11.2,154.7L12.6,154.0L14.0,153.4L15.4,152.8L16.8,152.2L18.2,151.7L19.6,151.2L21.0,150.8L22.4,150.5L23.8,150.2L25.2,149.9L26.6,149.7L28.0,149.6L29.4,149.5L30.8,149.5L32.2,149.6L33.6,149.7L35.0,149.9L36.4,150.1L37.8,150.4L39.2,150.8L40.6,151.2L42.0,151.7L43.4,152.2L44.8,152.8L46.2,153.5L47.6,154.2L49.0,154.9L50.4,155.7L51.8,156.6L53.2,157.5L54.6,158.4L56.0,159.4L57.4,160.4L58.8,161.4L60.2,162.5L61.6,163.6L63.0,164.7L64.4,165.8L65.8,165.0L67.2,163.9L68.6,162.7L70.0,161.6L71.4,160.4L72.8,159.3L74.2,158.2L75.6,157.0L77.0,155.9L78.4,154.9L79.8,153.8L81.2,152.8L82.6,151.9L84.0,150.9L85.4,150.1L86.8,149.2L88.2,148.4L89.6,147.7L91.0,147.1L92.4,146.5L93.8,145.9L95.2,145.4L96.6,145.0L98.0,144.7L99.4,144.5L100.8,144.3L102.2,144.2L103.6,144.2L105.0,144.3L106.4,144.4L107.8,144.7L109.2,145.0L110.6,145.4L112.0,145.9L113.4,146.4L114.8,147.1L116.2,147.8L117.6,148.6L119.0,149.5L120.4,150.5L121.8,151.5L123.2,152.6L124.6,153.8L126.0,155.1L127.4,156.4L128.8,157.7L130.2,159.2L131.6,160.6L133.0,162.1L134.4,163.7L135.8,165.3L137.2,165.1L138.6,163.4L140.0,161.8L141.4,160.1L142.8,158.4L144.2,156.7L145.6,155.0L147.0,153.3L148.4,151.6L149.8,150.0L151.2,148.3L152.6,146.7L154.0,145.2L155.4,143.7L156.8,142.2L158.2,140.8L159.6,139.5L161.0,138.2L162.4,137.0L163.8,135.9L165.2,134.9L166.6,134.0L168.0,133.2L169.4,132.4L170.8,131.8L172.2,131.3L173.6,130.9L175.0,130.7L176.4,130.6L177.8,130.6L179.2,130.7L180.6,131.0L182.0,131.4L183.4,131.9L184.8,132.6L186.2,133.5L187.6,134.5L189.0,135.6L190.4,136.9L191.8,138.3L193.2,139.9L194.6,141.7L196.0,143.5L197.4,145.6L198.8,147.8L200.2,150.1L201.6,152.6L203.0,155.2L204.4,157.9L205.8,160.8L207.2,163.8L208.6,165.1L210.0,161.9L211.4,158.5L212.8,155.0L214.2,151.5L215.6,147.8L217.0,144.0L218.4,140.2L219.8,136.3L221.2,132.3L222.6,128.2L224.0,124.1L225.4,120.0L226.8,115.8L228.2,111.5L229.6,107.3L231.0,103.0L232.4,98.7L233.8,94.5L235.2,90.2L236.6,86.0L238.0,81.7L239.4,77.6L240.8,73.4L242.2,69.3L243.6,65.3L245.0,61.4L246.4,57.5L247.8,53.7L249.2,50.0L250.6,46.4L252.0,42.9L253.4,39.6L254.8,36.4L256.2,33.3L257.6,30.3L259.0,27.5L260.4,24.8L261.8,22.3L263.2,19.9L264.6,17.8L266.0,15.8L267.4,13.9L268.8,12.3L270.2,10.8L271.6,9.6L273.0,8.5L274.4,7.6L275.8,6.9L277.2,6.4L278.6,6.1L280.0,6.0L281.4,6.1L282.8,6.4L284.2,6.9L285.6,7.6L287.0,8.5L288.4,9.6L289.8,10.8L291.2,12.3L292.6,13.9L294.0,15.8L295.4,17.8L296.8,19.9L298.2,22.3L299.6,24.8L301.0,27.5L302.4,30.3L303.8,33.3L305.2,36.4L306.6,39.6L308.0,42.9L309.4,46.4L310.8,50.0L312.2,53.7L313.6,57.5L315.0,61.4L316.4,65.3L317.8,69.3L319.2,73.4L320.6,77.6L322.0,81.7L323.4,86.0L324.8,90.2L326.2,94.5L327.6,98.7L329.0,103.0L330.4,107.3L331.8,111.5L333.2,115.8L334.6,120.0L336.0,124.1L337.4,128.2L338.8,132.3L340.2,136.3L341.6,140.2L343.0,144.0L344.4,147.8L345.8,151.5L347.2,155.0L348.6,158.5L350.0,161.9L351.4,165.1L352.8,163.8L354.2,160.8L355.6,157.9L357.0,155.2L358.4,152.6L359.8,150.1L361.2,147.8L362.6,145.6L364.0,143.5L365.4,141.7L366.8,139.9L368.2,138.3L369.6,136.9L371.0,135.6L372.4,134.5L373.8,133.5L375.2,132.6L376.6,131.9L378.0,131.4L379.4,131.0L380.8,130.7L382.2,130.6L383.6,130.6L385.0,130.7L386.4,130.9L387.8,131.3L389.2,131.8L390.6,132.4L392.0,133.2L393.4,134.0L394.8,134.9L396.2,135.9L397.6,137.0L399.0,138.2L400.4,139.5L401.8,140.8L403.2,142.2L404.6,143.7L406.0,145.2L407.4,146.7L408.8,148.3L410.2,150.0L411.6,151.6L413.0,153.3L414.4,155.0L415.8,156.7L417.2,158.4L418.6,160.1L420.0,161.8L421.4,163.4L422.8,165.1L424.2,165.3L425.6,163.7L427.0,162.1L428.4,160.6L429.8,159.2L431.2,157.7L432.6,156.4L434.0,155.1L435.4,153.8L436.8,152.6L438.2,151.5L439.6,150.5L441.0,149.5L442.4,148.6L443.8,147.8L445.2,147.1L446.6,146.4L448.0,145.9L449.4,145.4L450.8,145.0L452.2,144.7L453.6,144.4L455.0,144.3L456.4,144.2L457.8,144.2L459.2,144.3L460.6,144.5L462.0,144.7L463.4,145.0L464.8,145.4L466.2,145.9L467.6,146.5L469.0,147.1L470.4,147.7L471.8,148.4L473.2,149.2L474.6,150.1L476.0,150.9L477.4,151.9L478.8,152.8L480.2,153.8L481.6,154.9L483.0,155.9L484.4,157.0L485.8,158.2L487.2,159.3L488.6,160.4L490.0,161.6L491.4,162.7L492.8,163.9L494.2,165.0L495.6,165.8L497.0,164.7L498.4,163.6L499.8,162.5L501.2,161.4L502.6,160.4L504.0,159.4L505.4,158.4L506.8,157.5L508.2,156.6L509.6,155.7L511.0,154.9L512.4,154.2L513.8,153.5L515.2,152.8L516.6,152.2L518.0,151.7L519.4,151.2L520.8,150.8L522.2,150.4L523.6,150.1L525.0,149.9L526.4,149.7L527.8,149.6L529.2,149.5L530.6,149.5L532.0,149.6L533.4,149.7L534.8,149.9L536.2,150.2L537.6,150.5L539.0,150.8L540.4,151.2L541.8,151.7L543.2,152.2L544.6,152.8L546.0,153.4L547.4,154.0L548.8,154.7L550.2,155.4L551.6,156.2L553.0,157.0L554.4,157.8L555.8,158.7L557.2,159.5L558.6,160.4L560.0,161.3" fill="none" stroke="#1A4F8C" stroke-width="1.6" />
+  <text x="326.7" y="17.2" font-size="11" fill="#1A4F8C">N = 13</text>
+</svg>
+<figcaption><b>Figure 2</b>Zero-delay Doppler cut <math><mrow><mrow><mo fence="true" form="prefix" stretchy="false">|</mo><mi>A</mi><mrow><mo fence="true" form="prefix" stretchy="false">(</mo><mn>0</mn><mo separator="true">,</mo><mi>f</mi><mo fence="true" form="postfix" stretchy="false">)</mo></mrow><mo fence="true" form="postfix" stretchy="false">|</mo></mrow><mi>/</mi><mi>N</mi><mo>=</mo><mrow><mo fence="true" form="prefix" stretchy="true">|</mo><mfrac><mrow><mrow><mi>sin</mi><mo>⁡</mo></mrow><mrow><mo fence="true" form="prefix" stretchy="false">(</mo><mi>π</mi><mi>N</mi><mi>f</mi><mo fence="true" form="postfix" stretchy="false">)</mo></mrow></mrow><mrow><mi>N</mi><mrow><mspace width="0.1667em"></mspace><mi>sin</mi><mo>⁡</mo><mspace width="0.1667em"></mspace></mrow><mi>π</mi><mi>f</mi></mrow></mfrac><mo fence="true" form="postfix" stretchy="true">|</mo></mrow></mrow></math> against normalised frequency <math><mi>f</mi></math>; <math><mrow><mi>N</mi><mo>=</mo><mn>13</mn></mrow></math> is the length in question. Computed and drawn by <code>documents/build/make_style_public.py</code> in code-standard.</figcaption>
+</figure>
+
+<p>A raster image, made of pixels, is an img whose source is a data URI. Its caption names its resolution, because pixels are all it has:</p>
+
+<figure>
+<img alt="A checkerboard of six by three black and white squares, the specimen raster image." src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAADAAAAAYCAIAAAAzn+mLAAAACXBIWXMAAA7EAAAOxAGVKw4bAAAAOUlEQVR4nO3QwQkAMAgDQPdfWifwKdpyeQdyJLJJNJnujw8AAQGdAz0DBQIC+ha0NnzuCSAgoKV+AcDIuZu38sloAAAAAElFTkSuQmCC" />
+<figcaption><b>Figure 3</b>A specimen raster image, forty-eight by twenty-four pixels, carried over from STYLE; a real caption names the source the image was rendered from.</figcaption>
+</figure>
+
+</main>
+
+<footer>
+<p class="meta">A paragraph in the meta class: smaller, in the label face, for the line under a title that says what a document is, and for a closing note on provenance.</p>
+</footer>
+
+</body>
+</html>

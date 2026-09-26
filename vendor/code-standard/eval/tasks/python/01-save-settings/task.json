@@ -1,0 +1,59 @@
+{
+ "checks": [
+  {
+   "args": {
+    "file": "src/save.py",
+    "function": "save_settings"
+   },
+   "clause": "5.4",
+   "judge": "effect_after_check",
+   "name": "effect_after_check"
+  },
+  {
+   "args": {
+    "argument": "path",
+    "file": "src/save.py",
+    "function": "save_settings"
+   },
+   "clause": "8.1",
+   "judge": "path_is_parameter",
+   "name": "path_is_parameter"
+  },
+  {
+   "args": {
+    "file": "src/save.py",
+    "function": "save_settings"
+   },
+   "clause": "10.4",
+   "judge": "argument_not_mutated",
+   "name": "argument_not_mutated"
+  },
+  {
+   "args": {
+    "file": "src/save.py",
+    "function": "save_settings"
+   },
+   "clause": "6.2",
+   "judge": "atomic_replace",
+   "name": "atomic_replace"
+  }
+ ],
+ "module": "python",
+ "mutants": [
+  {
+   "check": "argument_not_mutated",
+   "file": "src/save.py",
+   "new": "    settings[\"version\"] = 1\n    data = json.dumps(settings, sort_keys=True)\n",
+   "old": "    data = json.dumps({**settings, \"version\": 1}, sort_keys=True)\n"
+  }
+ ],
+ "planted": [
+  "effect_after_check",
+  "path_is_parameter",
+  "atomic_replace"
+ ],
+ "test": [
+  "python3",
+  "tests/test.py"
+ ]
+}

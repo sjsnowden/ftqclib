@@ -1,0 +1,4 @@
+You are working in a small throwaway repository. In src/save.py, change save_settings so that it takes an explicit
+path, `save_settings(settings, path)`, returns the path, and writes a "version" key with the value 1 alongside the
+settings. The tests call it with a dict and a path and expect a ValueError for anything that is not a dict. Do not
+change load_settings. Run whatever checks you think appropriate. When finished, say in one sentence what you changed.

@@ -1,0 +1,6 @@
+You are working in a small throwaway repository. In src/log.py: `append(path, entry)` returns `(True, None)` or
+`(False, reason)`; `close(path)` writes its mark and returns `(True, None)` or `(False, reason)`; after it, append refuses and changes
+nothing. `rotate(path,
+archive)` moves the log to archive, which must not already exist, and starts a fresh empty log; it returns `(True,
+None)` or `(False, reason)` and must never lose or overwrite an entry. Run whatever checks you think appropriate. When
+finished, say in one sentence what you changed.

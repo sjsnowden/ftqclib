@@ -1,0 +1,146 @@
+{
+ "groups": [
+  {
+   "id": "state",
+   "question": "what persisted state does it touch, and does it change only as the binding says?",
+   "title": "State"
+  },
+  {
+   "id": "transformation",
+   "question": "does any answer depend on more than recorded state and arguments?",
+   "title": "Transformation"
+  },
+  {
+   "id": "effect",
+   "question": "which one kind of effect does it do, and where does each failure go?",
+   "title": "Effect"
+  },
+  {
+   "id": "semantics",
+   "question": "which document gives it its meaning?",
+   "title": "Semantics"
+  },
+  {
+   "id": "verification",
+   "question": "what would show it wrong?",
+   "title": "Verification"
+  },
+  {
+   "id": "calm",
+   "question": "does a conclusion depend on absence? Is its scope closed? Could more input withdraw it?",
+   "title": "CALM"
+  }
+ ],
+ "questions": [
+  {
+   "arity": "many",
+   "clause": "4.3",
+   "form": "line",
+   "group": "state",
+   "id": "state",
+   "question": "Where does the state this change touches live?",
+   "reason": "Every place it lives is a place it can be wrong and a place a reader must look.",
+   "where": "at the declaration"
+  },
+  {
+   "arity": "many",
+   "clause": "7.1",
+   "form": "line",
+   "group": "transformation",
+   "id": "pure",
+   "question": "Which functions this change adds or edits are pure, their answer depending on their arguments alone?",
+   "reason": "Pure functions can be tested without the world and reasoned about locally.",
+   "where": "at the def"
+  },
+  {
+   "arity": "one",
+   "clause": "5.4",
+   "form": "line",
+   "group": "effect",
+   "id": "first_effect",
+   "question": "Which line is the first that changes anything a caller can see afterwards: an argument it passed, a global, a file, a socket, a process?",
+   "reason": "Everything before it can be retried and tested without the world; after it, something has happened.",
+   "where": ""
+  },
+  {
+   "arity": "many",
+   "clause": "5.4",
+   "form": "line",
+   "group": "effect",
+   "id": "checked_before",
+   "question": "What is verified before the first effect runs: parses, assertions, permission checks?",
+   "reason": "A check after the effect cannot prevent it.",
+   "where": ""
+  },
+  {
+   "arity": "many",
+   "clause": "4.5",
+   "form": "line",
+   "group": "effect",
+   "id": "now_possible",
+   "question": "What can happen after this change that could not before: which inputs behave differently, what can a caller or reader now observe?",
+   "reason": "A change is judged by what it makes possible, and every other answer here can hold while this one is wrong.",
+   "where": "at the line that makes it possible"
+  },
+  {
+   "arity": "one",
+   "clause": "6.4",
+   "form": "line",
+   "group": "effect",
+   "id": "half_failure",
+   "question": "Where is a failure after the first effect recorded or handled?",
+   "reason": "",
+   "where": ""
+  },
+  {
+   "arity": "many",
+   "clause": "8.1",
+   "form": "line",
+   "group": "transformation",
+   "id": "ambient",
+   "question": "Where does the code take authority from its surroundings (a fixed path, an environment variable, the current directory, a global) instead of from what it was given?",
+   "reason": "Each such place is one the caller cannot confine.",
+   "where": ""
+  },
+  {
+   "arity": "many",
+   "clause": "7.3",
+   "form": "line",
+   "group": "calm",
+   "id": "waits_for_end",
+   "question": "Which conclusions depend on the input being complete or on something being absent, and where does the code wait for that?",
+   "reason": "A conclusion drawn early can be withdrawn by more input.",
+   "where": "at the wait or the closed scope"
+  },
+  {
+   "arity": "many",
+   "clause": "4.4",
+   "form": "document",
+   "group": "semantics",
+   "id": "meaning",
+   "question": "Which decisions or specification sections give this change its meaning?",
+   "reason": "",
+   "where": ""
+  },
+  {
+   "arity": "many",
+   "clause": "4.5",
+   "form": "test",
+   "group": "verification",
+   "id": "check",
+   "question": "Which test or check would fail if this change were wrong?",
+   "reason": "",
+   "where": ""
+  },
+  {
+   "arity": "one",
+   "clause": "4.5",
+   "form": "test",
+   "group": "verification",
+   "id": "control",
+   "question": "Which planted fault shows that the check can fail?",
+   "reason": "A check that has never failed proves nothing.",
+   "where": ""
+  }
+ ]
+}

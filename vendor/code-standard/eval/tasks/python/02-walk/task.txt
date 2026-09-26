@@ -1,0 +1,5 @@
+You are working in a small throwaway repository. In src/walk.py, change list_files to `list_files(root, depth_max)`:
+root is a bytes path; it returns `(files, skipped)`, where files is a sorted list of `(path relative to root, as
+bytes; size in bytes)` for the regular files at most depth_max directories below root, and skipped is a sorted list of
+the directories that could not be read. Symbolic links are not listed. Run whatever checks you think appropriate.
+When finished, say in one sentence what you changed.

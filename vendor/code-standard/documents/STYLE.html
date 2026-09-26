@@ -1,0 +1,165 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>STYLE — the common document style</title>
+<!--
+  EVERYTHING MUST BE SEMANTIC.
+
+  An element is chosen for what the content IS. Semantics does not exclude presentation —
+  many elements carry both, and that is the point: em and strong mean emphasis and
+  importance and also look like it; b and i are defined as stylistically offset and
+  alternate-voice text, not as tags to avoid. What is excluded is markup carrying only an
+  appearance where an element with meaning already exists, and appearance hard-coded into
+  markup where a rule in this stylesheet would do it.
+
+    pre wrapping code      code and commands; a bare pre is preformatted non-code
+    h2, h3                 a section, and a division inside one; h1 is the title alone
+    thead, and th scope    a table's header row
+    table                  data with two axes: rows against comparable columns
+    dl, dt, dd             a term with its description — one axis, not two
+    time, with datetime    any date
+    main, header, footer   document landmarks
+    blockquote             a statement set apart from the argument
+    figure, figcaption     an actual image and its caption
+    img                    a raster image; carries alt text
+    svg, with role="img"   a vector image, inline; its first child, title, is its alt text
+    class="ladder"         a list read as a sequence of rungs
+    class="meta"           metadata about the document, not its content
+
+  A class names a role, not a look: meta, not small. No div or span standing in for an
+  element that exists. The test: with the stylesheet removed, the document's structure is
+  still readable from its markup alone.
+
+  Every image is inside the file, so the document stays one file with no network. A raster
+  image (a photograph, a screenshot, a scan) is an img whose source is a data URI. A vector
+  image (a drawing, a chart, a plan) is an svg written inline, not encoded, so it can be
+  read, diffed and searched like the rest of the file. It carries a viewBox, and width and
+  height for its intended size; the stylesheet shrinks it to the column as it does an img.
+  Its ids are document ids, so prefix them to keep them from colliding. Colour it by fill
+  and stroke on its own elements, not by a style block inside it, which would leak into the
+  document. Never embed a raster image inside an svg to pass it off as a vector.
+
+  The alt text, or the svg's title, says what the image shows, for a reader without the
+  image. The figcaption says what the image is and where it came from. A rendering names its
+  source and renderer, because a rendering is derived from the thing and is not the thing
+  itself; a raster rendering also names its resolution, which a vector does not have.
+  Diagrams drawn in text stay in pre blocks; figure is for raster and vector images.
+
+  Element names above are written without angle brackets deliberately. A comment holding
+  literal markup is markup as far as a naive tool is concerned: a regex pass over this
+  file once matched a table tag inside this comment and deleted everything between it and
+  the first real closing tag. Transform these documents by hand, or with a parser.
+-->
+<style>
+  body { color: #000; background: #fff; font-family: Georgia, "Times New Roman", serif; max-width: 46em; margin: 2em auto; padding: 0 1em; line-height: 1.45; }
+  h1, h2 { font-weight: normal; }
+  h1 { font-size: 1.6em; border-bottom: 1px solid #000; padding-bottom: .2em; }
+  h2 { font-size: 1.2em; margin-top: 1.8em; }
+  h3 { font-size: 1em; font-weight: normal; font-style: italic; margin-top: 1.4em; }
+  table { border-collapse: collapse; margin: .6em 0; }
+  th, td { border: 1px solid #000; padding: .25em .6em; text-align: left; vertical-align: top; }
+  th { font-weight: normal; font-style: italic; }
+  dl { margin: .6em 0; }
+  dt { font-style: italic; margin-top: .5em; }
+  dd { margin: .1em 0 0 1.5em; }
+  code, pre { font-family: Consolas, "DejaVu Sans Mono", monospace; font-size: .92em; }
+  pre { border: 1px solid #000; padding: .5em .8em; overflow-x: auto; }
+  pre code { font-size: inherit; }
+  blockquote { margin: .8em 0 .8em 1.5em; padding-left: .8em; border-left: 2px solid #000; }
+  figure { margin: .8em 0; }
+  figure img, figure svg { display: block; max-width: 100%; height: auto; border: 1px solid #000; }
+  figcaption { font-size: .9em; margin-top: .3em; }
+  footer { margin-top: 2em; border-top: 1px solid #000; padding-top: .6em; }
+  .ladder li { margin: .15em 0; }
+  .meta { font-size: .9em; }
+</style>
+</head>
+<body>
+
+<header>
+<h1>STYLE — the common document style</h1>
+<p class="meta">Copy the head of this file into any document — the semantic rule in its comment travels with it. The style is inlined, so every document using it is a single file that renders anywhere, with no stylesheet, no script, no fonts and no network. Below is a specimen of every element the style covers, so the effect is visible without reading the CSS.</p>
+</header>
+
+<main>
+
+<h2>A second-level heading</h2>
+<p>Body text. Black on white, one serif column, forty-six ems wide. Inline <code>code</code> sits in the monospace face at slightly under the body size, so a path or an identifier does not tower over the sentence around it. A date is written <time datetime="2026-09-10">2026-09-10</time>.</p>
+
+<h3>A third-level heading</h3>
+<p>For a division inside a section: the size of the body text, set in italic.</p>
+
+<blockquote><p>A blockquote, for a statement set apart from the argument around it.</p></blockquote>
+
+<p>An ordinary list, and beneath it the tighter ladder variant, for lists read as a sequence of rungs rather than as prose:</p>
+
+<ul>
+  <li>an ordinary list item</li>
+  <li>another</li>
+</ul>
+
+<ol class="ladder">
+  <li>a ladder item, spaced tighter</li>
+  <li>another</li>
+  <li>a third</li>
+</ol>
+
+<h2>Tables, for data with two axes</h2>
+<p>A table claims that its rows are comparable down each column. Where that is not true of the content, what is wanted is a definition list.</p>
+
+<table>
+  <thead>
+    <tr><th scope="col">a header cell</th><th scope="col">italic, not bold</th></tr>
+  </thead>
+  <tbody>
+    <tr><td>a body cell</td><td>ruled in black, top-aligned, so a long cell beside a short one still reads</td></tr>
+    <tr><td><code>code in a cell</code></td><td>the monospace face carries into cells unchanged</td></tr>
+  </tbody>
+</table>
+
+<h2>Definition lists, for a term and its description</h2>
+<dl>
+  <dt>a term</dt>
+  <dd>its description, indented, with the term set in italic to match a table's header cell</dd>
+  <dt>another term</dt>
+  <dd>one axis, not two — nothing here is comparable to anything else down a column</dd>
+</dl>
+
+<h2>Preformatted blocks</h2>
+<p>Code and commands are a pre wrapping a code element; a bare pre is for preformatted text that is not code.</p>
+
+<pre><code>a preformatted block of code: ruled, monospace, and scrolling
+sideways rather than wrapping, so a long command line
+stays one line and stays copyable</code></pre>
+
+<h2>Figures, for an actual image</h2>
+<p>A figure holds an image and its caption, and the image is either raster or vector. Both are inside the file, so the document stays one file, and both are ruled in black like a table and never wider than the column. The alt text, or an svg's title, says what the image shows. The caption says what the image is and where it came from; for a rendering that means the source and the renderer, since a rendering is derived and not the thing itself. A diagram drawn in text is a preformatted block, not a figure.</p>
+
+<p>A raster image, made of pixels, is an img whose source is a data URI. Its caption names its resolution, because pixels are all it has:</p>
+
+<figure>
+<img alt="A checkerboard of six by three black and white squares, the specimen raster image." src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAADAAAAAYCAIAAAAzn+mLAAAACXBIWXMAAA7EAAAOxAGVKw4bAAAAOUlEQVR4nO3QwQkAMAgDQPdfWifwKdpyeQdyJLJJNJnujw8AAQGdAz0DBQIC+ha0NnzuCSAgoKV+AcDIuZu38sloAAAAAElFTkSuQmCC" />
+<figcaption>A specimen raster image, forty-eight by twenty-four pixels, generated by the script that added this section; a real caption names the source the image was rendered from.</figcaption>
+</figure>
+
+<p>A vector image, made of shapes, is an svg written inline, with a viewBox and its intended width and height. It stays sharp at any size and can be read in the source. Its caption has no resolution to name:</p>
+
+<figure>
+<svg role="img" width="240" height="120" viewBox="0 0 240 120" xmlns="http://www.w3.org/2000/svg">
+  <title>A black circle and a black square joined by a line, the specimen vector image.</title>
+  <circle cx="60" cy="60" r="30" fill="#000" />
+  <line x1="90" y1="60" x2="150" y2="60" stroke="#000" stroke-width="2" />
+  <rect x="150" y="30" width="60" height="60" fill="none" stroke="#000" stroke-width="2" />
+</svg>
+<figcaption>A specimen vector image, drawn by hand in this file; a real caption names the source it was drawn or exported from.</figcaption>
+</figure>
+
+</main>
+
+<footer>
+<p class="meta">A paragraph in the meta class: smaller, for the line under a title that says what a document is, and for a closing note on provenance.</p>
+</footer>
+
+</body>
+</html>

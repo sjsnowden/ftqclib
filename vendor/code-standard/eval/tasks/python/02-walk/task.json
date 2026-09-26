@@ -1,0 +1,63 @@
+{
+ "checks": [
+  {
+   "args": {
+    "argument": "depth",
+    "file": "src/walk.py",
+    "function": "list_files"
+   },
+   "clause": "10.1",
+   "judge": "depth_bounded",
+   "name": "depth_bounded"
+  },
+  {
+   "args": {
+    "file": "src/walk.py",
+    "function": "list_files"
+   },
+   "clause": "8.1",
+   "judge": "symlinks_not_followed",
+   "name": "symlinks_not_followed"
+  },
+  {
+   "args": {
+    "file": "src/walk.py",
+    "function": "list_files"
+   },
+   "clause": "5.2",
+   "judge": "names_stay_bytes",
+   "name": "names_stay_bytes"
+  },
+  {
+   "args": {
+    "file": "src/walk.py"
+   },
+   "clause": "9.2",
+   "judge": "no_bare_except",
+   "name": "no_bare_except"
+  }
+ ],
+ "module": "python",
+ "mutants": [
+  {
+   "check": "names_stay_bytes",
+   "file": "src/walk.py",
+   "new": "found.append((os.path.relpath(entry.path, root).decode(\"utf-8\", \"replace\"),",
+   "old": "found.append((os.path.relpath(entry.path, root),"
+  },
+  {
+   "check": "no_bare_except",
+   "file": "src/walk.py",
+   "new": "        except:\n",
+   "old": "        except OSError:\n"
+  }
+ ],
+ "planted": [
+  "depth_bounded",
+  "symlinks_not_followed"
+ ],
+ "test": [
+  "python3",
+  "tests/test.py"
+ ]
+}

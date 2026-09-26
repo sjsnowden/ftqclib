@@ -1,0 +1,55 @@
+{
+ "checks": [
+  {
+   "args": {
+    "file": "src/log.py"
+   },
+   "clause": "RK.3",
+   "judge": "exclusive_create",
+   "name": "exclusive_create"
+  },
+  {
+   "args": {
+    "file": "src/log.py",
+    "function": "rotate"
+   },
+   "clause": "6.2",
+   "judge": "rename_not_copy",
+   "name": "rename_not_copy"
+  },
+  {
+   "args": {
+    "file": "src/log.py"
+   },
+   "clause": "6.2",
+   "judge": "fsync",
+   "name": "fsync"
+  },
+  {
+   "args": {
+    "file": "src/log.py"
+   },
+   "clause": "9.2",
+   "judge": "no_bare_except",
+   "name": "no_bare_except"
+  }
+ ],
+ "module": "python",
+ "mutants": [
+  {
+   "check": "no_bare_except",
+   "file": "src/log.py",
+   "new": "    except:\n        return False\n",
+   "old": "    except FileNotFoundError:\n        return False\n"
+  }
+ ],
+ "planted": [
+  "exclusive_create",
+  "rename_not_copy",
+  "fsync"
+ ],
+ "test": [
+  "python3",
+  "tests/test.py"
+ ]
+}

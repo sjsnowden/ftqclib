@@ -1,0 +1,57 @@
+{
+ "checks": [
+  {
+   "args": {
+    "file": "src/run.py",
+    "function": "run"
+   },
+   "clause": "8.6",
+   "judge": "timeouts",
+   "name": "timeouts"
+  },
+  {
+   "args": {
+    "file": "src/run.py",
+    "function": "run"
+   },
+   "clause": "8.4",
+   "judge": "timeout_handled",
+   "name": "timeout_handled"
+  },
+  {
+   "args": {
+    "file": "src/run.py",
+    "function": "run"
+   },
+   "clause": "8.4",
+   "judge": "popen_owned",
+   "name": "popen_owned"
+  },
+  {
+   "args": {
+    "file": "src/run.py"
+   },
+   "clause": "9.2",
+   "judge": "no_bare_except",
+   "name": "no_bare_except"
+  }
+ ],
+ "module": "python",
+ "mutants": [
+  {
+   "check": "no_bare_except",
+   "file": "src/run.py",
+   "new": "from dataclasses import dataclass\ntry:\n    pass\nexcept:\n    pass\n",
+   "old": "from dataclasses import dataclass\n"
+  }
+ ],
+ "planted": [
+  "timeouts",
+  "timeout_handled",
+  "popen_owned"
+ ],
+ "test": [
+  "python3",
+  "tests/test.py"
+ ]
+}
