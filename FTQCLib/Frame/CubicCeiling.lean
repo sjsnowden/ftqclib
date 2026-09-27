@@ -5,6 +5,7 @@ Authors: Sam Snowden
 -/
 import FTQCLib.Frame.MetaplecticAction
 import FTQCLib.Hierarchy.BooleanMobius
+import FTQCLib.Frame.MobiusProductTower
 
 /-! # The cubic ceiling: transvection sign cochains are Möbius-degree ≤ 3
 
@@ -56,13 +57,13 @@ variable {N : ℕ}
 
 /-- Möbius coefficients are additive in the function (immediate from the alternating-sum form). -/
 theorem mobiusCoeff_add (S : Finset (Fin N)) (f g : (Fin N → ZMod 2) → ZMod 4) :
-    mobiusCoeff S (f + g) = mobiusCoeff S f + mobiusCoeff S g := by
-  simp only [mobiusCoeff_eq_alt_sum, Pi.add_apply, smul_add, Finset.sum_add_distrib]
+    mobiusCoeff S (f + g) = mobiusCoeff S f + mobiusCoeff S g :=
+  MobiusTower.mobiusCoeff_add S f g
 
 /-- `MobiusDegLE` is closed under addition. -/
 theorem MobiusDegLE.add {d : ℕ} {f g : (Fin N → ZMod 2) → ZMod 4}
     (hf : MobiusDegLE d f) (hg : MobiusDegLE d g) : MobiusDegLE d (f + g) :=
-  fun S hS => by rw [mobiusCoeff_add, hf S hS, hg S hS, add_zero]
+  MobiusTower.MobiusDegLE.add hf hg
 
 /-- A function independent of coordinate `j` (flipping the `j`-th bit does not change it). -/
 def IndepOf (j : Fin N) (h : (Fin N → ZMod 2) → ZMod 4) : Prop :=
@@ -167,14 +168,8 @@ theorem betaCore_comp_mobiusDegLE_three {ι : Fin 4 → Fin N} (hι : Function.I
 /-- `MobiusDegLE d` is closed under finite sums. -/
 theorem MobiusDegLE.sum {α : Type*} {d : ℕ} (s : Finset α)
     (f : α → (Fin N → ZMod 2) → ZMod 4) (hf : ∀ i ∈ s, MobiusDegLE d (f i)) :
-    MobiusDegLE d (∑ i ∈ s, f i) := by
-  classical
-  induction s using Finset.induction with
-  | empty => intro S _; simp [mobiusCoeff_eq_alt_sum]
-  | insert i s hi IH =>
-      rw [Finset.sum_insert hi]
-      exact (hf i (Finset.mem_insert_self i s)).add
-        (IH fun j hj => hf j (Finset.mem_insert_of_mem hj))
+    MobiusDegLE d (∑ i ∈ s, f i) :=
+  MobiusTower.MobiusDegLE.sum s f hf
 
 /-- The four bit-slots of qubit `i` inside the `4n`-bit register `Fin (n*4)`. -/
 def qubitInj (i : Fin n) : Fin 4 → Fin (n * 4) := fun j => finProdFinEquiv (i, j)
@@ -278,8 +273,9 @@ parts:
 The product of two degree-≤2 functions with even degree-2 parts is degree ≤ 3: the only degree-4
 contribution to the product is `(deg-2 part)·(deg-2 part) = (2a)·(2b) = 4ab ≡ 0 (mod 4)`. So no
 degree-4 monomial survives. (The key formal ingredient is the Möbius product-convolution
-`mobiusCoeff S (f·g) = Σ_{A∪B=S} mobiusCoeff A f · mobiusCoeff B g`, proved below as
-`mobiusCoeff_mul`; Mathlib does not provide it.) -/
+`mobiusCoeff S (f·g) = Σ_{A∪B=S} mobiusCoeff A f · mobiusCoeff B g`, proved over any commutative
+ring as `FTQCLib.Frame.MobiusTower.mobiusCoeff_mul`; `mobiusCoeff_mul` below and the other product
+lemmas of this section are its `ZMod 4` instances. Mathlib does not provide it.) -/
 def RankOneCubic (v : Pauli n) : Prop :=
   MobiusDegLE 3 (rankOneTerm1 v) ∧ MobiusDegLE 3 (rankOneTerm2 v) ∧ MobiusDegLE 3 (rankOneTerm3 v)
 
@@ -302,190 +298,53 @@ def monomChar (A : Finset (Fin N)) : (Fin N → ZMod 2) → ZMod 4 :=
 
 /-- `monomChar A v = 1` iff every coordinate of `A` is in the support of `v`, else `0`. -/
 theorem monomChar_eval (A : Finset (Fin N)) (v : Fin N → ZMod 2) :
-    monomChar A v = if A ⊆ FTQCLib.Codes.supp v then 1 else 0 := by
-  unfold monomChar
-  by_cases h : A ⊆ FTQCLib.Codes.supp v
-  · rw [if_pos h]
-    apply Finset.prod_eq_one
-    intro i hi
-    have hvi : v i = 1 := by
-      have := h hi
-      simpa [FTQCLib.Codes.supp, Finset.mem_filter] using this
-    rw [hvi]; rfl
-  · rw [if_neg h]
-    obtain ⟨i, hiA, hi⟩ := Finset.not_subset.mp h
-    apply Finset.prod_eq_zero hiA
-    have hvi : v i = 0 := by
-      have hne : v i ≠ 1 := by simpa [FTQCLib.Codes.supp, Finset.mem_filter] using hi
-      have : ∀ x : ZMod 2, x ≠ 1 → x = 0 := by decide
-      exact this _ hne
-    simp [hvi]
+    monomChar A v = if A ⊆ FTQCLib.Codes.supp v then 1 else 0 :=
+  MobiusTower.monomChar_eval (R := ZMod 4) A v
 
 /-- `monomChar A · monomChar B = monomChar (A ∪ B)` (boolean idempotence, via the eval form). -/
 theorem monomChar_mul (A B : Finset (Fin N)) :
-    monomChar A * monomChar B = monomChar (A ∪ B) := by
-  funext v
-  simp only [Pi.mul_apply, monomChar_eval]
-  by_cases hA : A ⊆ FTQCLib.Codes.supp v <;> by_cases hB : B ⊆ FTQCLib.Codes.supp v <;>
-    simp [hA, hB, Finset.union_subset_iff]
+    monomChar A * monomChar B = monomChar (A ∪ B) :=
+  MobiusTower.monomChar_mul (R := ZMod 4) A B
 
 /-- **Alternating powerset sum** in `ZMod 4`: `∑_{U ⊆ D} (-1)^{|D|-|U|} = [D = ∅]`. -/
 theorem altSum (D : Finset (Fin N)) :
-    ∑ U ∈ D.powerset, ((-1 : ZMod 4) ^ (D.card - U.card)) = if D = ∅ then 1 else 0 := by
-  induction D using Finset.induction with
-  | empty => simp
-  | @insert j D hj IH =>
-      have hjne : insert j D ≠ ∅ := Finset.insert_ne_empty j D
-      have hdisj : Disjoint D.powerset (D.powerset.image (insert j)) :=
-        Finset.disjoint_left.mpr (fun U hU hU' => by
-          rw [Finset.mem_powerset] at hU
-          rw [Finset.mem_image] at hU'
-          obtain ⟨V, _, rfl⟩ := hU'
-          exact hj (hU (Finset.mem_insert_self j V)))
-      have hinj : ∀ x ∈ D.powerset, ∀ y ∈ D.powerset, insert j x = insert j y → x = y := by
-        intro x hx y hy hxy
-        rw [Finset.mem_powerset] at hx hy
-        have hjx : j ∉ x := fun h => hj (hx h)
-        have hjy : j ∉ y := fun h => hj (hy h)
-        rw [← Finset.erase_insert hjx, hxy, Finset.erase_insert hjy]
-      have hcard : (insert j D).card = D.card + 1 := Finset.card_insert_of_notMem hj
-      rw [if_neg hjne, Finset.powerset_insert, Finset.sum_union hdisj, Finset.sum_image hinj,
-        hcard]
-      -- second sum: rewrite `(insert j V).card = V.card + 1`
-      have h2 : ∀ V ∈ D.powerset,
-          ((-1 : ZMod 4)) ^ (D.card + 1 - (insert j V).card)
-            = (-1 : ZMod 4) ^ (D.card - V.card) := by
-        intro V hV
-        rw [Finset.mem_powerset] at hV
-        have hjV : j ∉ V := fun h => hj (hV h)
-        rw [Finset.card_insert_of_notMem hjV]
-        congr 1
-        omega
-      rw [Finset.sum_congr rfl h2, ← Finset.sum_add_distrib]
-      apply Finset.sum_eq_zero
-      intro U hU
-      rw [Finset.mem_powerset] at hU
-      have hle : U.card ≤ D.card := Finset.card_le_card hU
-      rw [show D.card + 1 - U.card = (D.card - U.card) + 1 by omega, pow_succ]
-      ring
+    ∑ U ∈ D.powerset, ((-1 : ZMod 4) ^ (D.card - U.card)) = if D = ∅ then 1 else 0 :=
+  MobiusTower.altSum (R := ZMod 4) D
 
 /-- **Möbius coefficient of a monomial:** `mobiusCoeff S (monomChar A) = [A = S]`. -/
 theorem mobiusCoeff_monomChar (A S : Finset (Fin N)) :
-    mobiusCoeff S (monomChar A) = if A = S then 1 else 0 := by
-  rw [mobiusCoeff_eq_alt_sum]
-  have step : ∀ T ∈ S.powerset,
-      ((-1 : ℤ) ^ (S.card - T.card)) • monomChar A (charFn T)
-        = if A ⊆ T then ((-1 : ZMod 4) ^ (S.card - T.card)) else 0 := by
-    intro T _
-    rw [monomChar_eval, supp_charFn]
-    by_cases h : A ⊆ T
-    · rw [if_pos h, if_pos h, zsmul_eq_mul, mul_one]; push_cast; ring
-    · rw [if_neg h, if_neg h, smul_zero]
-  rw [Finset.sum_congr rfl step, ← Finset.sum_filter]
-  by_cases hAS : A ⊆ S
-  · have hbij : (∑ T ∈ (S.powerset).filter (A ⊆ ·), ((-1 : ZMod 4) ^ (S.card - T.card)))
-        = ∑ U ∈ (S \ A).powerset, ((-1 : ZMod 4) ^ ((S \ A).card - U.card)) := by
-      apply Finset.sum_nbij' (fun T => T \ A) (fun U => A ∪ U)
-      · intro T hT
-        rw [Finset.mem_filter, Finset.mem_powerset] at hT
-        rw [Finset.mem_powerset]
-        exact Finset.sdiff_subset_sdiff hT.1 (le_refl A)
-      · intro U hU
-        rw [Finset.mem_powerset] at hU
-        rw [Finset.mem_filter, Finset.mem_powerset]
-        exact ⟨Finset.union_subset hAS (hU.trans Finset.sdiff_subset), Finset.subset_union_left⟩
-      · intro T hT
-        rw [Finset.mem_filter, Finset.mem_powerset] at hT
-        rw [Finset.union_comm]
-        exact Finset.sdiff_union_of_subset hT.2
-      · intro U hU
-        rw [Finset.mem_powerset] at hU
-        have hdisj : Disjoint U A := Finset.sdiff_disjoint.mono_left hU
-        rw [Finset.union_sdiff_left, hdisj.sdiff_eq_left]
-      · intro T hT
-        rw [Finset.mem_filter, Finset.mem_powerset] at hT
-        have h1 : A.card ≤ T.card := Finset.card_le_card hT.2
-        have h2 : T.card ≤ S.card := Finset.card_le_card hT.1
-        rw [Finset.card_sdiff_of_subset hAS, Finset.card_sdiff_of_subset hT.2]
-        congr 1
-        omega
-    rw [hbij, altSum]
-    congr 1
-    rw [eq_iff_iff, Finset.sdiff_eq_empty_iff_subset]
-    exact ⟨fun h => Finset.Subset.antisymm hAS h, fun h => h ▸ Finset.Subset.refl S⟩
-  · rw [Finset.filter_false_of_mem (fun T hT hAT =>
-        hAS (hAT.trans (Finset.mem_powerset.mp hT))), Finset.sum_empty,
-      if_neg (by rintro rfl; exact hAS (Finset.Subset.refl A))]
+    mobiusCoeff S (monomChar A) = if A = S then 1 else 0 :=
+  MobiusTower.mobiusCoeff_monomChar (R := ZMod 4) A S
 
 /-- Möbius coefficient is linear under multiplication by a constant. -/
 theorem mobiusCoeff_const_mul (c : ZMod 4) (h : (Fin N → ZMod 2) → ZMod 4)
     (S : Finset (Fin N)) :
-    mobiusCoeff S (fun w => c * h w) = c * mobiusCoeff S h := by
-  rw [mobiusCoeff_eq_alt_sum, mobiusCoeff_eq_alt_sum, Finset.mul_sum]
-  refine Finset.sum_congr rfl (fun T _ => ?_)
-  simp only [zsmul_eq_mul]
-  ring
+    mobiusCoeff S (fun w => c * h w) = c * mobiusCoeff S h :=
+  MobiusTower.mobiusCoeff_const_mul c h S
 
 /-- Möbius coefficient distributes over a finite sum of functions. -/
 theorem mobiusCoeff_sum {α : Type*} (s : Finset α) (h : α → (Fin N → ZMod 2) → ZMod 4)
     (S : Finset (Fin N)) :
-    mobiusCoeff S (∑ a ∈ s, h a) = ∑ a ∈ s, mobiusCoeff S (h a) := by
-  classical
-  induction s using Finset.induction with
-  | empty => simp [mobiusCoeff_eq_alt_sum]
-  | insert a s ha IH =>
-      rw [Finset.sum_insert ha, Finset.sum_insert ha, mobiusCoeff_add, IH]
+    mobiusCoeff S (∑ a ∈ s, h a) = ∑ a ∈ s, mobiusCoeff S (h a) :=
+  MobiusTower.mobiusCoeff_sum s h S
 
 /-- **Möbius expansion:** `f = ∑_A (mobiusCoeff A f) · monomChar A`. -/
 theorem mobius_expansion (f : (Fin N → ZMod 2) → ZMod 4) :
-    f = ∑ A : Finset (Fin N), (fun w => mobiusCoeff A f * monomChar A w) := by
-  funext w
-  simp only [Finset.sum_apply]
-  rw [eq_sum_mobiusCoeff f w]
-  rw [show (∑ A : Finset (Fin N), mobiusCoeff A f * monomChar A w)
-        = ∑ A : Finset (Fin N), (if A ⊆ FTQCLib.Codes.supp w then mobiusCoeff A f else 0) from
-      Finset.sum_congr rfl (fun A _ => by rw [monomChar_eval, mul_ite, mul_one, mul_zero])]
-  rw [← Finset.sum_filter]
-  congr 1
-  ext A
-  simp [Finset.mem_powerset, Finset.mem_filter]
+    f = ∑ A : Finset (Fin N), (fun w => mobiusCoeff A f * monomChar A w) :=
+  MobiusTower.mobius_expansion f
 
 /-- **The Möbius convolution:**
 `mobiusCoeff S (f·g) = Σ_{A∪B=S} (mobiusCoeff A f)·(mobiusCoeff B g)`. -/
 theorem mobiusCoeff_mul (f g : (Fin N → ZMod 2) → ZMod 4) (S : Finset (Fin N)) :
     mobiusCoeff S (f * g)
       = ∑ A : Finset (Fin N), ∑ B : Finset (Fin N),
-          (if A ∪ B = S then mobiusCoeff A f * mobiusCoeff B g else 0) := by
-  conv_lhs => rw [mobius_expansion f, mobius_expansion g]
-  rw [Finset.sum_mul_sum, mobiusCoeff_sum]
-  refine Finset.sum_congr rfl (fun A _ => ?_)
-  rw [mobiusCoeff_sum]
-  refine Finset.sum_congr rfl (fun B _ => ?_)
-  rw [show ((fun w => mobiusCoeff A f * monomChar A w)
-            * (fun w => mobiusCoeff B g * monomChar B w))
-        = (fun w => (mobiusCoeff A f * mobiusCoeff B g) * monomChar (A ∪ B) w) from ?_]
-  · rw [mobiusCoeff_const_mul, mobiusCoeff_monomChar, mul_ite, mul_one, mul_zero]
-  · funext w
-    have hm := congrFun (monomChar_mul A B) w
-    simp only [Pi.mul_apply] at hm ⊢
-    rw [← hm]; ring
+          (if A ∪ B = S then mobiusCoeff A f * mobiusCoeff B g else 0) :=
+  MobiusTower.mobiusCoeff_mul f g S
 
 /-- **Product degree ≤ sum of degrees.** -/
 theorem mobiusDegLE_mul {a b : ℕ} {f g : (Fin N → ZMod 2) → ZMod 4}
-    (hf : MobiusDegLE a f) (hg : MobiusDegLE b g) : MobiusDegLE (a + b) (f * g) := by
-  intro S hS
-  rw [mobiusCoeff_mul]
-  refine Finset.sum_eq_zero (fun A _ => Finset.sum_eq_zero (fun B _ => ?_))
-  by_cases h : A ∪ B = S
-  · rw [if_pos h]
-    by_cases hA : a < A.card
-    · rw [hf A hA, zero_mul]
-    · by_cases hB : b < B.card
-      · rw [hg B hB, mul_zero]
-      · exfalso
-        have hcard : S.card ≤ A.card + B.card := h ▸ Finset.card_union_le A B
-        omega
-  · rw [if_neg h]
+    (hf : MobiusDegLE a f) (hg : MobiusDegLE b g) : MobiusDegLE (a + b) (f * g) :=
+  MobiusTower.mobiusDegLE_mul hf hg
 
 /-- A handy `ZMod 4` fact: `2x = 0` and `2y = 0` force `xy = 0`. -/
 private theorem even_mul_even_zero : ∀ x y : ZMod 4, 2 * x = 0 → 2 * y = 0 → x * y = 0 := by decide

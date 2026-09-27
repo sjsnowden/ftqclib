@@ -6,8 +6,6 @@ Authors: Sam Snowden
 import FTQCLib.Frame.PrecisionValuation
 import FTQCLib.Hierarchy.DyadicValuation
 
-set_option linter.style.longLine false
-
 /-!
 # The Möbius product up the tower — the ℤ/8 product question, answered
 
@@ -22,6 +20,10 @@ file answers both:
    `MobiusDegLE (d+e) (f·g)` hold over **any commutative ring** — the `ZMod 4` typing of the
    `CubicCeiling` version reflects where it is used, not the mathematics. `ℤ/4`, `ℤ/8`, and every
    `ℤ/2^m` are instances of one theorem.
+   The same section closes `MobiusDegLE` under `mono`, `add`, `const_mul`, `sum`, `pow` and `prod`
+   over `R`, and bounds the degree of a polynomial in a linear form of the bits
+   (`mobiusDegLE_polynomial_eval`) and of a piecewise polynomial selected by `s` bits
+   (`mobiusDegLE_piecewise_polynomial`, degree `≤ s + d`).
 2. **The coefficient arithmetic is the saturating valuation** (§2). Over `ZMod (2^m)` the
    coefficient products obey `twoAdicVal_mul`: the grade is **filtered, not graded** —
    `mul_eq_zero_of_val_saturated` is the general ceiling mechanism.
@@ -48,8 +50,8 @@ variable {N : ℕ} {R : Type*} [CommRing R]
 
 /-! ## §1 — the product layer over an arbitrary commutative ring -/
 
-/-- The **monomial character** into `R`: `monomChar A v = ∏_{i ∈ A} v_i` (each bit lifted `{0,1} ⊆ R`).
-The `R`-valued indicator of `A ⊆ supp v`. -/
+/-- The **monomial character** into `R`: `monomChar A v = ∏_{i ∈ A} v_i`, each bit lifted to
+`{0,1} ⊆ R`. The `R`-valued indicator of `A ⊆ supp v`. -/
 def monomChar (A : Finset (Fin N)) : (Fin N → ZMod 2) → R :=
   fun v => ∏ i ∈ A, ((v i).val : R)
 
@@ -207,8 +209,8 @@ theorem mobius_expansion (f : (Fin N → ZMod 2) → R) :
   simp [Finset.mem_powerset, Finset.mem_filter]
 
 /-- **The Möbius convolution over any commutative ring:**
-`mobiusCoeff S (f·g) = Σ_{A∪B=S} (mobiusCoeff A f)·(mobiusCoeff B g)`. The product calculus exists at
-every rung `ℤ/2^m` — the `ZMod 4` typing of the `CubicCeiling` version is not essential. -/
+`mobiusCoeff S (f·g) = Σ_{A∪B=S} (mobiusCoeff A f)·(mobiusCoeff B g)`. The product calculus exists
+at every rung `ℤ/2^m` — the `ZMod 4` typing of the `CubicCeiling` version is not essential. -/
 theorem mobiusCoeff_mul (f g : (Fin N → ZMod 2) → R) (S : Finset (Fin N)) :
     mobiusCoeff S (f * g)
       = ∑ A : Finset (Fin N), ∑ B : Finset (Fin N),
@@ -248,11 +250,197 @@ theorem mobiusDegLE_mul {d e : ℕ} {f g : (Fin N → ZMod 2) → R}
         omega
   · rw [if_neg h]
 
+/-! ### Closure of `MobiusDegLE` over `R`, and polynomials of a linear form in the bits
+
+The `ZMod 4` closure lemmas of `FTQCLib.Frame.CubicCeiling` (`MobiusDegLE.add`, `MobiusDegLE.sum`)
+hold over any commutative ring; with `mobiusDegLE_mul` they give the degree of a polynomial
+evaluated at a function of degree one — in particular at a linear form `∑ cᵢ vᵢ` in the bits. That
+is the interaction-degree form of the sentence "a polynomial of degree `d` in a bit sum has degree
+`≤ d` in the bits", which is false for `ECCLib.IsPolyDegLE` over `ℤ` or `ℝ`
+(`FTQCLib.Bridge.MobiusDegree`). -/
+
+/-- `MobiusDegLE` is monotone in the degree. -/
+theorem MobiusDegLE.mono {d e : ℕ} {f : (Fin N → ZMod 2) → R} (hf : MobiusDegLE d f)
+    (hde : d ≤ e) : MobiusDegLE e f :=
+  fun S hS => hf S (lt_of_le_of_lt hde hS)
+
+/-- `MobiusDegLE` is closed under addition. -/
+theorem MobiusDegLE.add {d : ℕ} {f g : (Fin N → ZMod 2) → R} (hf : MobiusDegLE d f)
+    (hg : MobiusDegLE d g) : MobiusDegLE d (f + g) :=
+  fun S hS => by rw [mobiusCoeff_add, hf S hS, hg S hS, add_zero]
+
+/-- `MobiusDegLE` is closed under a constant multiple. -/
+theorem MobiusDegLE.const_mul {d : ℕ} {f : (Fin N → ZMod 2) → R} (c : R)
+    (hf : MobiusDegLE d f) : MobiusDegLE d (fun w => c * f w) :=
+  fun S hS => by rw [mobiusCoeff_const_mul, hf S hS, mul_zero]
+
+/-- `MobiusDegLE` is closed under finite sums. -/
+theorem MobiusDegLE.sum {α : Type*} {d : ℕ} (s : Finset α) (f : α → (Fin N → ZMod 2) → R)
+    (hf : ∀ i ∈ s, MobiusDegLE d (f i)) : MobiusDegLE d (∑ i ∈ s, f i) :=
+  fun S hS => by
+    rw [mobiusCoeff_sum]
+    exact Finset.sum_eq_zero fun i hi => hf i hi S hS
+
+/-- A monomial `∏_{i ∈ A} vᵢ` has Möbius degree `≤ |A|`. -/
+theorem mobiusDegLE_monomChar (A : Finset (Fin N)) :
+    MobiusDegLE A.card (monomChar (R := R) A) :=
+  fun S hS => by
+    rw [mobiusCoeff_monomChar, if_neg]
+    rintro rfl
+    exact lt_irrefl _ hS
+
+/-- A constant function has Möbius degree `0`. -/
+theorem mobiusDegLE_const (c : R) : MobiusDegLE 0 (fun _ : Fin N → ZMod 2 => c) := by
+  have h : (fun _ : Fin N → ZMod 2 => c) = fun w => c * monomChar (R := R) ∅ w := by
+    funext w
+    simp [monomChar]
+  rw [h]
+  exact (mobiusDegLE_monomChar ∅).const_mul c
+
+/-- A **linear form in the bits**, `v ↦ ∑ᵢ cᵢ vᵢ` (each bit lifted to `{0, 1} ⊆ R`), has Möbius
+degree `≤ 1`. -/
+theorem mobiusDegLE_one_linear (c : Fin N → R) :
+    MobiusDegLE 1 (fun v : Fin N → ZMod 2 => ∑ i, c i * ((v i).val : R)) := by
+  have h : (fun v : Fin N → ZMod 2 => ∑ i, c i * ((v i).val : R))
+      = ∑ i, fun v => c i * monomChar (R := R) {i} v := by
+    funext v
+    simp [monomChar, Finset.sum_apply]
+  rw [h]
+  exact MobiusDegLE.sum _ _ fun i _ => (mobiusDegLE_monomChar {i}).const_mul (c i)
+
+/-- **Degree of a power:** `deg (f ^ k) ≤ k · deg f`. -/
+theorem MobiusDegLE.pow {d : ℕ} {f : (Fin N → ZMod 2) → R} (hf : MobiusDegLE d f) (k : ℕ) :
+    MobiusDegLE (k * d) (f ^ k) := by
+  induction k with
+  | zero =>
+    have h1 : (f ^ 0) = fun _ => (1 : R) := by funext w; simp
+    rw [zero_mul, h1]
+    exact mobiusDegLE_const 1
+  | succ k ih =>
+    rw [pow_succ, Nat.succ_mul]
+    exact mobiusDegLE_mul ih hf
+
+/-- **A polynomial of degree `≤ d` evaluated at a degree-one function has Möbius degree `≤ d`.**
+With `mobiusDegLE_one_linear`, a polynomial of degree `≤ d` in a linear form of the bits has
+interaction degree `≤ d` in the bits. -/
+theorem mobiusDegLE_polynomial_eval {d : ℕ} (p : Polynomial R) (hp : p.natDegree ≤ d)
+    {f : (Fin N → ZMod 2) → R} (hf : MobiusDegLE 1 f) :
+    MobiusDegLE d (fun v => p.eval (f v)) := by
+  have h : (fun v => p.eval (f v))
+      = ∑ k ∈ Finset.range (p.natDegree + 1), fun v => p.coeff k * (f ^ k) v := by
+    funext v
+    simp [Polynomial.eval_eq_sum_range, Finset.sum_apply]
+  rw [h]
+  refine MobiusDegLE.sum _ _ fun k hk => ?_
+  have hk' : k ≤ d := (Nat.lt_succ_iff.mp (Finset.mem_range.mp hk)).trans hp
+  exact ((hf.pow k).const_mul (p.coeff k)).mono (by simpa using hk')
+
+/-! ### Piecewise polynomials selected by bits
+
+A phase that is a polynomial of degree `≤ d` in a linear form of the bits on each of the `2^s`
+segments picked out by `s` selector bits has Möbius degree `≤ s + d`: each segment indicator is a
+product of `s` factors `vₖ` or `1 − vₖ`, of degree `≤ s`, and multiplies a piece of degree `≤ d`. -/
+
+/-- **Degree of a finite product:** `deg ∏ fᵢ ≤ ∑ deg fᵢ`. -/
+theorem MobiusDegLE.prod {α : Type*} (t : Finset α) (e : α → ℕ) (f : α → (Fin N → ZMod 2) → R)
+    (hf : ∀ i ∈ t, MobiusDegLE (e i) (f i)) : MobiusDegLE (∑ i ∈ t, e i) (∏ i ∈ t, f i) := by
+  classical
+  induction t using Finset.induction with
+  | empty =>
+    have h1 : (∏ i ∈ (∅ : Finset α), f i) = fun _ => (1 : R) := by funext w; simp
+    rw [Finset.sum_empty, h1]
+    exact mobiusDegLE_const 1
+  | insert a t ha ih =>
+    rw [Finset.prod_insert ha, Finset.sum_insert ha]
+    exact mobiusDegLE_mul (hf a (Finset.mem_insert_self a t))
+      (ih fun i hi => hf i (Finset.mem_insert_of_mem hi))
+
+/-- A single bit `v ↦ vₖ` has Möbius degree `≤ 1`. -/
+theorem mobiusDegLE_one_bit (k : Fin N) :
+    MobiusDegLE 1 (fun v : Fin N → ZMod 2 => ((v k).val : R)) := by
+  have h : (fun v : Fin N → ZMod 2 => ((v k).val : R)) = monomChar (R := R) {k} := by
+    funext v
+    simp [monomChar]
+  rw [h]
+  simpa using mobiusDegLE_monomChar (R := R) {k}
+
+/-- The **segment indicator** of the selector values `σ` on the bits `sel`:
+`∏ₜ (v_{sel t} if σₜ = 1, else 1 − v_{sel t})`, equal to `1` exactly when `v ∘ sel = σ`. -/
+def segmentIndicator {s : ℕ} (sel : Fin s → Fin N) (σ : Fin s → ZMod 2) :
+    (Fin N → ZMod 2) → R :=
+  ∏ t : Fin s, fun v => if σ t = 1 then ((v (sel t)).val : R) else 1 - ((v (sel t)).val : R)
+
+omit [CommRing R] in
+private theorem zmod2_cases (a : ZMod 2) : a = 0 ∨ a = 1 := by
+  revert a
+  decide
+
+/-- The segment indicator is the indicator of `v ∘ sel = σ`. -/
+theorem segmentIndicator_apply {s : ℕ} (sel : Fin s → Fin N) (σ : Fin s → ZMod 2)
+    (v : Fin N → ZMod 2) :
+    segmentIndicator (R := R) sel σ v = if (fun t => v (sel t)) = σ then 1 else 0 := by
+  have hfac : ∀ t : Fin s,
+      (if σ t = 1 then ((v (sel t)).val : R) else 1 - ((v (sel t)).val : R))
+        = if v (sel t) = σ t then 1 else 0 := by
+    intro t
+    rcases zmod2_cases (σ t) with h | h <;> rcases zmod2_cases (v (sel t)) with h' | h' <;>
+      simp [h, h']
+  simp only [segmentIndicator, Finset.prod_apply, hfac]
+  by_cases hv : (fun t => v (sel t)) = σ
+  · rw [if_pos hv]
+    exact Finset.prod_eq_one fun t _ => by rw [if_pos (congrFun hv t)]
+  · rw [if_neg hv]
+    obtain ⟨t, ht⟩ : ∃ t, v (sel t) ≠ σ t := Function.ne_iff.mp hv
+    exact Finset.prod_eq_zero (Finset.mem_univ t) (by rw [if_neg ht])
+
+/-- A segment indicator on `s` selector bits has Möbius degree `≤ s`. -/
+theorem mobiusDegLE_segmentIndicator {s : ℕ} (sel : Fin s → Fin N) (σ : Fin s → ZMod 2) :
+    MobiusDegLE s (segmentIndicator (R := R) sel σ) := by
+  have h := MobiusDegLE.prod (Finset.univ : Finset (Fin s)) (fun _ => 1)
+    (fun t => fun v : Fin N → ZMod 2 =>
+      if σ t = 1 then ((v (sel t)).val : R) else 1 - ((v (sel t)).val : R))
+    (fun t _ => by
+      by_cases hσ : σ t = 1
+      · simpa [hσ] using mobiusDegLE_one_bit (R := R) (sel t)
+      · have hsub : (fun v : Fin N → ZMod 2 => 1 - ((v (sel t)).val : R))
+            = (fun _ => (1 : R)) + fun v => (-1) * ((v (sel t)).val : R) := by
+          funext v
+          simp only [Pi.add_apply]
+          ring
+        simp only [hσ, if_false]
+        rw [hsub]
+        exact ((mobiusDegLE_const 1).mono (Nat.zero_le 1)).add
+          ((mobiusDegLE_one_bit (sel t)).const_mul (-1)))
+  simpa [segmentIndicator] using h
+
+/-- **A piecewise polynomial selected by bits has Möbius degree `≤ s + d`.** On each assignment `σ`
+of the `s` selector bits `sel`, the value is the polynomial `p σ` (of `natDegree ≤ d`) evaluated at
+the linear form `∑ᵢ cᵢ vᵢ` of the bits. -/
+theorem mobiusDegLE_piecewise_polynomial {s d : ℕ} (sel : Fin s → Fin N) (c : Fin N → R)
+    (p : (Fin s → ZMod 2) → Polynomial R) (hp : ∀ σ, (p σ).natDegree ≤ d) :
+    MobiusDegLE (s + d)
+      (fun v : Fin N → ZMod 2 => (p fun t => v (sel t)).eval (∑ i, c i * ((v i).val : R))) := by
+  have h : (fun v : Fin N → ZMod 2 => (p fun t => v (sel t)).eval (∑ i, c i * ((v i).val : R)))
+      = ∑ σ : Fin s → ZMod 2, fun v =>
+          segmentIndicator (R := R) sel σ v * (p σ).eval (∑ i, c i * ((v i).val : R)) := by
+    funext v
+    rw [Finset.sum_apply, Finset.sum_eq_single (fun t => v (sel t))]
+    · rw [segmentIndicator_apply, if_pos rfl, one_mul]
+    · intro σ _ hσ
+      rw [segmentIndicator_apply, if_neg (Ne.symm hσ), zero_mul]
+    · intro h
+      exact absurd (Finset.mem_univ _) h
+  rw [h]
+  refine MobiusDegLE.sum _ _ fun σ _ => ?_
+  exact mobiusDegLE_mul (mobiusDegLE_segmentIndicator sel σ)
+    (mobiusDegLE_polynomial_eval (p σ) (hp σ) (mobiusDegLE_one_linear c))
+
 /-! ## §2 — the coefficient arithmetic is the saturating valuation (filtered, not graded) -/
 
-/-- **The general ceiling mechanism:** over `ZMod (2^m)`, a coefficient product vanishes exactly when
-the valuations saturate: `m ≤ v(c) + v(c') → c·c' = 0`. This is `twoAdicVal_mul` as a vanishing
-criterion — the grade the product calculus carries is a *filtration* by `twoAdicVal`, not a grading. -/
+/-- **The general ceiling mechanism:** over `ZMod (2^m)`, a coefficient product vanishes exactly
+when the valuations saturate: `m ≤ v(c) + v(c') → c·c' = 0`. This is `twoAdicVal_mul` as a vanishing
+criterion — the grade the product calculus carries is a *filtration* by `twoAdicVal`, not a grading.
+-/
 theorem mul_eq_zero_of_val_saturated {m : ℕ} {c c' : ZMod (2 ^ m)}
     (h : m ≤ twoAdicVal c + twoAdicVal c') : c * c' = 0 := by
   by_contra hne
@@ -262,12 +450,12 @@ theorem mul_eq_zero_of_val_saturated {m : ℕ} {c c' : ZMod (2 ^ m)}
 
 /-! ## §3 — the `ℤ/8` cascade: one multiplication costs one rung -/
 
-/-- **Sign-level products annihilate** in `ℤ/8`: `2x = 0 ∧ 2y = 0 → xy = 0` (the 2-torsion is `{0,4}`,
-and `4·4 = 0`). The `ℤ/4` ceiling mechanism (`even_mul_even_zero`), one rung up. -/
+/-- **Sign-level products annihilate** in `ℤ/8`: `2x = 0 ∧ 2y = 0 → xy = 0` (the 2-torsion is
+`{0,4}`, and `4·4 = 0`). The `ℤ/4` ceiling mechanism (`even_mul_even_zero`), one rung up. -/
 theorem sign_mul_sign : ∀ x y : ZMod 8, 2 * x = 0 → 2 * y = 0 → x * y = 0 := by decide
 
-/-- **Mid-level products descend one rung** in `ℤ/8`: `4x = 0 ∧ 4y = 0 → 2(xy) = 0` (the 4-torsion is
-`{0,2,4,6}`; products land in the 2-torsion `{0,4}`). -/
+/-- **Mid-level products descend one rung** in `ℤ/8`: `4x = 0 ∧ 4y = 0 → 2(xy) = 0` (the 4-torsion
+is `{0,2,4,6}`; products land in the 2-torsion `{0,4}`). -/
 theorem mid_mul_mid_descends : ∀ x y : ZMod 8, 4 * x = 0 → 4 * y = 0 → 2 * (x * y) = 0 := by decide
 
 /-- **The descent is not a vanishing:** mid-level products can be nonzero (`2·2 = 4 ≠ 0`). This is
@@ -284,8 +472,8 @@ def SignTop (d : ℕ) (f : (Fin N → ZMod 2) → ZMod 8) : Prop :=
 def MidTop (d : ℕ) (f : (Fin N → ZMod 2) → ZMod 8) : Prop :=
   ∀ A : Finset (Fin N), A.card = d → 4 * mobiusCoeff A f = 0
 
-/-- **The `ℤ/8` degree ceiling (sign-level tops):** two factors with sign-level top coefficients lose
-a degree — `deg(f·g) ≤ d + e − 1`. The cubic-ceiling mechanism, one rung up the tower. -/
+/-- **The `ℤ/8` degree ceiling (sign-level tops):** two factors with sign-level top coefficients
+lose a degree — `deg(f·g) ≤ d + e − 1`. The cubic-ceiling mechanism, one rung up the tower. -/
 theorem mobiusDegLE_mul_signTop {d e : ℕ} {f g : (Fin N → ZMod 2) → ZMod 8}
     (hf : MobiusDegLE d f) (hg : MobiusDegLE e g)
     (tf : SignTop d f) (tg : SignTop e g) :
@@ -308,8 +496,8 @@ theorem mobiusDegLE_mul_signTop {d e : ℕ} {f g : (Fin N → ZMod 2) → ZMod 8
 /-- **The `ℤ/8` descent law (mid-level tops):** two factors with mid-level top coefficients do *not*
 lose a degree — but the product's top coefficients **descend to the sign level**:
 `SignTop (d+e) (f·g)`. One multiplication costs one rung of precision; the degree ceiling fires only
-from the last rung (`mobiusDegLE_mul_signTop`). "Each degree needs one more 2-adic rung", as a product
-law. (The general-`m` staircase is §4's `torsionTop_mul`; this is its `m = 3` face.) -/
+from the last rung (`mobiusDegLE_mul_signTop`). "Each degree needs one more 2-adic rung", as a
+product law. (The general-`m` staircase is §4's `torsionTop_mul`; this is its `m = 3` face.) -/
 theorem signTop_mul_of_midTop {d e : ℕ} {f g : (Fin N → ZMod 2) → ZMod 8}
     (hf : MobiusDegLE d f) (hg : MobiusDegLE e g)
     (tf : MidTop d f) (tg : MidTop e g) :
@@ -334,13 +522,13 @@ theorem signTop_mul_of_midTop {d e : ℕ} {f g : (Fin N → ZMod 2) → ZMod 8}
 /-! ## §4 — the general staircase: the full descent law at every rung `ℤ/2^m`
 
 The `ℤ/8` cascade (§3) is the `m = 3` face of one law. Torsion levels compose under the coefficient
-product by `2^a`-torsion × `2^b`-torsion → `2^{a+b−m}`-torsion (`torsion_staircase`) — Nat subtraction
-makes the annihilation case (`a + b ≤ m` ⟹ exponent `0` ⟹ the product *vanishes*) and the descent
-case (`a + b > m` ⟹ the product drops to a lower rung, without vanishing) one statement. Lifted to
-Möbius tops: `torsionTop_mul` (the staircase for products of phases) and `mobiusDegLE_mul_of_torsionTop`
-(the degree ceiling fires exactly when the torsion budget saturates). At `m = 3, a = b = 1` this is
-`sign_mul_sign`/`mobiusDegLE_mul_signTop`; at `m = 3, a = b = 2` it is
-`mid_mul_mid_descends`/`signTop_mul_of_midTop`. -/
+product by `2^a`-torsion × `2^b`-torsion → `2^{a+b−m}`-torsion (`torsion_staircase`) — Nat
+subtraction makes the annihilation case (`a + b ≤ m` ⟹ exponent `0` ⟹ the product *vanishes*) and
+the descent case (`a + b > m` ⟹ the product drops to a lower rung, without vanishing) one statement.
+Lifted to Möbius tops: `torsionTop_mul` (the staircase for products of phases) and
+`mobiusDegLE_mul_of_torsionTop` (the degree ceiling fires exactly when the torsion budget
+saturates). At `m = 3, a = b = 1` this is `sign_mul_sign`/`mobiusDegLE_mul_signTop`; at
+`m = 3, a = b = 2` it is `mid_mul_mid_descends`/`signTop_mul_of_midTop`. -/
 
 /-- A saturated valuation forces zero: `m ≤ twoAdicVal c → c = 0`. -/
 lemma eq_zero_of_val_ge {m : ℕ} {c : ZMod (2 ^ m)} (h : m ≤ twoAdicVal c) : c = 0 := by
@@ -349,8 +537,8 @@ lemma eq_zero_of_val_ge {m : ℕ} {c : ZMod (2 ^ m)} (h : m ≤ twoAdicVal c) : 
 
 /-- **The torsion staircase (every rung):** `2^a`-torsion × `2^b`-torsion → `2^{a+b−m}`-torsion in
 `ZMod (2^m)`. Nat subtraction unifies the two regimes: for `a + b ≤ m` the exponent is `0` and the
-product **vanishes** (annihilation — the ceiling mechanism); for `a + b > m` the product survives but
-**descends** to the `2^{a+b−m}`-torsion rung. The `ℤ/8` cascade of §3 is `m = 3`. -/
+product **vanishes** (annihilation — the ceiling mechanism); for `a + b > m` the product survives
+but **descends** to the `2^{a+b−m}`-torsion rung. The `ℤ/8` cascade of §3 is `m = 3`. -/
 theorem torsion_staircase {m : ℕ} {c c' : ZMod (2 ^ m)} {a b : ℕ}
     (hc : (2 : ZMod (2 ^ m)) ^ a * c = 0) (hc' : (2 : ZMod (2 ^ m)) ^ b * c' = 0) :
     (2 : ZMod (2 ^ m)) ^ (a + b - m) * (c * c') = 0 := by
@@ -412,5 +600,23 @@ theorem mobiusDegLE_mul_of_torsionTop {m : ℕ} {d e a b : ℕ}
   · have hSc : S.card = d + e := by omega
     have htop := torsionTop_mul hf hg tf tg S hSc
     rwa [Nat.sub_eq_zero_of_le hab, pow_zero, one_mul] at htop
+
+/-! ### The faces of the staircase
+
+The `ℤ/8` statements of §3 and the `ℤ/4` cubic ceiling of `FTQCLib.Frame.CubicCeiling` are named in
+the prose above as faces of §4. `ZMod (2 ^ 3)` is `ZMod 8` by computation, so the faces are
+statements about the same functions; these lemmas state them. -/
+
+/-- **Face:** sign-level tops in `ℤ/8` are `2¹`-torsion tops at `m = 3`. -/
+theorem signTop_iff_torsionTop {d : ℕ} (f : (Fin N → ZMod 2) → ZMod 8) :
+    SignTop d f ↔ TorsionTop (m := 3) 1 d f := by
+  unfold SignTop TorsionTop
+  simp
+
+/-- **Face:** mid-level tops in `ℤ/8` are `2²`-torsion tops at `m = 3`. -/
+theorem midTop_iff_torsionTop {d : ℕ} (f : (Fin N → ZMod 2) → ZMod 8) :
+    MidTop d f ↔ TorsionTop (m := 3) 2 d f := by
+  unfold MidTop TorsionTop
+  norm_num
 
 end FTQCLib.Frame.MobiusTower

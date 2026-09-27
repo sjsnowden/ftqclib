@@ -168,6 +168,9 @@ import ECCLib.Scheme.Homogeneous
 import ECCLib.Scheme.HomogeneousCheck
 import ECCLib.Delsarte.Eberlein
 import ECCLib.Delsarte.EberleinCheck
+-- Squares of linear forms in idempotent variables; two's complement as a linear form in the bits
+import ECCLib.IdempotentPolynomial
+import ECCLib.IdempotentPolynomialCheck
 
 set_option linter.style.longLine false
 
