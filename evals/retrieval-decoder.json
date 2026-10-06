@@ -1,0 +1,21 @@
+{
+  "schema": 1,
+  "id": "ftqclib-decoder-bridge",
+  "source_commit": "75589c95949b6d290c53405e0cdc31334120e19a",
+  "modules": ["ECCLib.Decoding", "FTQCLib.CSS.Distance", "FTQCLib.CSS.SurfaceCode"],
+  "anchors": [
+    "ECCLib.Coding.IsCosetLeaderMap",
+    "ECCLib.Coding.exists_cosetLeaderMap",
+    "FTQCLib.CSS.cssX_correct_of_weights_le",
+    "FTQCLib.CSS.cssZ_correct_of_weights_le",
+    "FTQCLib.CSS.CorrectsUpToBoundary"
+  ],
+  "semantic_notes": [
+    "Quantum correction is modulo a stabilizer boundary; do not substitute classical kernel-code distance for quantum logical distance.",
+    "The coset-leader specification constrains realized syndromes and permits ties.",
+    "These are accepted baseline inputs for new proofs, not a reconstruction fixture with a withheld proof."
+  ],
+  "max_hits": 5,
+  "lookup_bytes": 8192,
+  "max_requests": 8
+}

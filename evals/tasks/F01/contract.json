@@ -1,0 +1,16 @@
+{
+  "id": "F01",
+  "purpose": "Development fixture for reconstruction of one retained Lean proof; no claim of unseen mathematics.",
+  "obligation": "Complete FTQCLib.Stabilizer.zShearBy_zShearBy in FTQCLib/Stabilizer/ZShear.lean. Preserve the exact theorem statement and every byte outside its proof term. Keep the existing by form and indent subsequent proof lines; this fixture admits tactic proofs within that boundary.",
+  "evidence": ["Pinned repository source at 75589c95949b6d290c53405e0cdc31334120e19a", "Lean 4.29.1 and pinned Mathlib", "Provided neutral source projection; original proof, Git history, target artifacts and owner examiners are excluded"],
+  "acceptance": ["Protected source boundary unchanged", "Source rebuild and named ZShearCheck consumers pass", "Expected declaration is a theorem of the exact original type", "Transitive axiom sweep permits only propext, Classical.choice and Quot.sound; sorryAx and custom axioms fail"],
+  "completion": "Return the changed source file and observed self-check results. Do not claim acceptance from a message or worker-produced olean.",
+  "writes": ["Only the proof term of zShearBy_zShearBy in FTQCLib/Stabilizer/ZShear.lean", "Private .scratch/build output for public checks"],
+  "standards": ["Statement before proof (LN.2)", "No native_decide, unsafe, partial, extern or implemented_by on the certificate path (LN.3)", "Stable simp only; no raised options or disabled linters (LN.4, LN.7)", "Use provided pinned dependencies; do not change toolchain, imports, definitions or checker files"],
+  "examiner": "evals/tasks/F01/Examiner.lean",
+  "checks": [
+    {"id": "target", "command": ["lean", "-o", ".scratch/build/FTQCLib/Stabilizer/ZShear.olean", "FTQCLib/Stabilizer/ZShear.lean"]},
+    {"id": "consumers", "command": ["lean", "-o", ".scratch/build/FTQCLib/Stabilizer/ZShearCheck.olean", "FTQCLib/Stabilizer/ZShearCheck.lean"]},
+    {"id": "examiner", "command": ["lean", "{examiner}"]}
+  ]
+}

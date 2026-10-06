@@ -1,0 +1,26 @@
+{
+  "id": "F02",
+  "purpose": "Development integration fixture: a minimal reversal of the real signOf consolidation from historical commit 6710bd15ef3fe824949a1f0a3e71fb147302641a, transplanted into its relocated Carrier modules at the pinned revision.",
+  "obligation": "Restore one shared definition site for FTQCLib.Frame.Walkthrough.signOf_zero and signOf_one. Carrier.ResidualBit and Carrier.HadamardAmplitudeCheck must both compile and import together. Preserve the signOf definition and all existing consumer statements and proofs.",
+  "evidence": ["Pinned source at 75589c95949b6d290c53405e0cdc31334120e19a", "Shared definition in Carrier/CharSumPairing.lean", "Relevant source and consumers; no private reference, Git history or target build artifacts"],
+  "acceptance": ["Only sign lemma windows in the three granted modules change", "Required modules are present and original imports preserved", "Each signOf_zero and signOf_one has exactly one declaration site, in the shared FTQCLib.Carrier.CharSumPairing module; protected raw imported-module data must establish this even when Lean merges equal theorems", "Individual source modules and composed protected import pass", "Named Walsh and residual consumer facts remain available", "Exact theorem kinds/types and conventional transitive axiom policy hold"],
+  "completion": "Return the source repair and observed individual/combined checks. Removing a module, dropping imports or leaving duplicate declarations is failure.",
+  "writes": ["Sign lemma block in FTQCLib/Carrier/CharSumPairing.lean", "Restored sign lemma insertion before the e_k pairing in FTQCLib/Carrier/ResidualBit.lean", "Restored sign lemma insertion before the Bell referee in FTQCLib/Carrier/HadamardAmplitudeCheck.lean", "Private .scratch/build output"],
+  "standards": ["The statement is reviewed independently of proof (LN.2)", "Only propext, Classical.choice and Quot.sound; no sorryAx or trust escapes (LN.3)", "One declaration home, with consumer checks (LN.5, LN.8)", "No import, option, definition, linter or toolchain changes"],
+  "examiner": "evals/tasks/F02/Examiner.lean",
+  "checks": [
+    {"id": "shared", "command": ["lean", "-o", ".scratch/build/FTQCLib/Carrier/CharSumPairing.olean", "FTQCLib/Carrier/CharSumPairing.lean"]},
+    {"id": "hadamard-totality", "command": ["lean", "-o", ".scratch/build/FTQCLib/Carrier/HadamardTotality.olean", "FTQCLib/Carrier/HadamardTotality.lean"]},
+    {"id": "swap-shadow", "command": ["lean", "-o", ".scratch/build/FTQCLib/Carrier/SwapShadow.olean", "FTQCLib/Carrier/SwapShadow.lean"]},
+    {"id": "bound-elimination", "command": ["lean", "-o", ".scratch/build/FTQCLib/Carrier/BoundElimination.olean", "FTQCLib/Carrier/BoundElimination.lean"]},
+    {"id": "carrier-state", "command": ["lean", "-o", ".scratch/build/FTQCLib/Carrier/CarrierState.olean", "FTQCLib/Carrier/CarrierState.lean"]},
+    {"id": "hadamard-amplitude", "command": ["lean", "-o", ".scratch/build/FTQCLib/Carrier/HadamardAmplitude.olean", "FTQCLib/Carrier/HadamardAmplitude.lean"]},
+    {"id": "hadamard-cover", "command": ["lean", "-o", ".scratch/build/FTQCLib/Carrier/HadamardCover.olean", "FTQCLib/Carrier/HadamardCover.lean"]},
+    {"id": "hadamard-reduction", "command": ["lean", "-o", ".scratch/build/FTQCLib/Carrier/HadamardReduction.olean", "FTQCLib/Carrier/HadamardReduction.lean"]},
+    {"id": "carrier-state-hadamard", "command": ["lean", "-o", ".scratch/build/FTQCLib/Carrier/CarrierStateHadamard.olean", "FTQCLib/Carrier/CarrierStateHadamard.lean"]},
+    {"id": "hadamard-elimination", "command": ["lean", "-o", ".scratch/build/FTQCLib/Carrier/HadamardElimination.olean", "FTQCLib/Carrier/HadamardElimination.lean"]},
+    {"id": "residual", "command": ["lean", "-o", ".scratch/build/FTQCLib/Carrier/ResidualBit.olean", "FTQCLib/Carrier/ResidualBit.lean"]},
+    {"id": "amplitude", "command": ["lean", "-o", ".scratch/build/FTQCLib/Carrier/HadamardAmplitudeCheck.olean", "FTQCLib/Carrier/HadamardAmplitudeCheck.lean"]},
+    {"id": "examiner", "command": ["lean", "{examiner}"]}
+  ]
+}
