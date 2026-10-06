@@ -104,12 +104,16 @@ Address-space limits are per process, file-size limits per file, and NPROC per r
 trial memory/disk quotas. Trials and compiler checks run sequentially. Only the named local scope is built;
 `FTQCLibHeavy`, the whole-repository combined import, paper fidelity and held-out validation are later stages.
 
-Runtime verification may reuse a byte audit only within the same owner process after rescanning complete file
+Legacy and strict-mode runtime verification may reuse a byte audit only within the same owner process after rescanning complete file
 metadata. Changes trigger a fresh audit and refusal. This assumes the owner controls the runtime directories;
 it is not a defense against a hostile local operating system. No verification cache persists between commands.
 
+Proof-chain studies can instead explicitly bind an owner-maintained runtime pin and reuse matching closed
+control certificates. See [PINNED-RUNTIME.md](PINNED-RUNTIME.md) for the trust assumption, separate audit
+command, invalidation rules and measured startup costs. Existing study manifests keep their original behavior.
+
 Lean resolves each package from one search root. Before rebuilding local modules, the public helper and owner
-checker copy exactly the audited unaffected local ancestors into their respective private build roots; excluded
+checker in strict mode copy exactly the audited unaffected local ancestors into their respective private build roots; excluded
 target artifacts remain absent. These copies do not share mutable inodes with the read-only cache.
 
 F02 checks declaration ownership independently of successful imports. The pinned Lean version can merge equal

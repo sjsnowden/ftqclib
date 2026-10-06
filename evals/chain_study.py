@@ -17,8 +17,10 @@ import chain_check
 import chain_continue
 import chain_kernel
 import chain_runner
+import control_cache
 import fixtures
 import local_retrieval
+import runtime_pin
 import study
 
 PROFILE = '''"""Frozen proof-chain host: checks are executed by the isolated owner adapter."""
@@ -129,6 +131,12 @@ def prepare_locked(args, spec, root, kernel):
     seed = plan_files(worktree, spec, execution, replace=bool(args.continue_from))
     build = json.loads(args.build.read_bytes())
     manifest = make_manifest(args, spec, execution, seed, build, store)
+    if args.runtime_pin:
+        manifest["runtime_pin"] = runtime_pin.admit(args.runtime_pin, manifest, store)
+    if args.controls_from:
+        reference = control_cache.admit(args.controls_from, manifest, store)
+        if reference:
+            manifest["controls_certificate"] = reference
     if args.continue_from:
         # Receipt re-admission needs the frozen snapshot identity, without executing
         # backend retrieval, the compiler, or the model while preparing a version.
@@ -185,8 +193,11 @@ def load(root):
     catalog = Path(manifest["execution"]["model_catalog"])
     if study.digest(catalog.read_bytes()) != manifest["execution"]["model_catalog_sha256"]:
         raise ValueError("model capability catalog changed after preparation")
-    study.event(store, manifest["id"], "stage", name="runtime-audit", detail="Checking immutable runtime and retrieval bytes")
-    backend = local_retrieval.Backend(manifest["snapshot"], manifest["snapshot_id"], store, executor)
+    pinned = manifest.get("runtime_pin") is not None
+    study.event(store, manifest["id"], "stage", name="runtime-bind" if pinned else "runtime-audit",
+                detail="Binding owner-pinned runtime receipt" if pinned else "Auditing runtime and retrieval bytes")
+    lease = runtime_pin.from_store(manifest, store)
+    backend = local_retrieval.Backend(manifest["snapshot"], manifest["snapshot_id"], store, executor, lease=lease)
     checker = chain_check.Checker(root, manifest, store, executor, backend)
     checker.verify()
     return manifest, store, checker, backend
@@ -198,7 +209,7 @@ def toy_node():
             "statement": "theorem chainControl : True", "expected_type": "True"}
 
 
-def boundary_controls(checker):
+def boundary_controls(checker, progress=lambda _: None):
     issue = {"hash": "0" * 64, "operands": []}
     node, found = toy_node(), []
     for name, proof, accepted in (("valid-proof", "by\n  trivial", True),
@@ -206,21 +217,24 @@ def boundary_controls(checker):
                                   ("unstable-simp-refused", "by\n  simp", False),
                                   ("declaration-escape-refused", "by\n  trivial\ntheorem evil : True := by trivial", False),
                                   ("ill-typed-proof-refused", "by\n  exact (0 : Nat)", False)):
+        progress(name)
         result = checker.check(node, proof, issue)
         found.append({"id": name, "passed": result["accepted"] == accepted,
                       "result": checker.store.put(study.canonical(result))})
     wrong = {**node, "expected_type": "False"}
+    progress("exact-type-refused")
     result = checker.check(wrong, "by\n  trivial", issue)
     found.append({"id": "exact-type-refused", "passed": not result["accepted"] and result["status"] == "failed",
                   "result": checker.store.put(study.canonical(result))})
     return found
 
 
-def statement_controls(manifest, checker):
+def statement_controls(manifest, checker, progress=lambda _: None):
     """Compile only owner-labelled stubs to check binder/API compatibility; never accept them as proofs."""
     dependencies, found = {}, []
     issue = {"hash": "0" * 64, "operands": []}
     for node in manifest["nodes"]:
+        progress("statement-" + node["id"])
         result = checker.check(node, "by\n  sorry", issue, admit=False, examine=False, dependencies=dependencies)
         found.append({"id": "statement-" + node["id"], "passed": result["accepted"],
                       "stub_only": True, "result": checker.store.put(study.canonical(result))})
@@ -235,19 +249,29 @@ def statement_controls(manifest, checker):
 def controls(root, manifest, store, checker):
     if any(entry["kind"] == "proposal_start" for entry in store.entries()):
         raise ValueError("controls must precede model admissions")
-    study.event(store, manifest["id"], "stage", name="controls", detail="Grammar, type, axiom and mathematical controls")
-    rows = boundary_controls(checker)
-    rows += statement_controls(manifest, checker)
+    cached = control_cache.reuse(manifest, store)
+    if cached is not None:
+        return finish_controls(manifest, store, cached, reused=True)
+    progress = lambda name: study.event(store, manifest["id"], "stage", name="controls", detail="Checking " + name)
+    rows = boundary_controls(checker, progress)
+    rows += statement_controls(manifest, checker, progress)
+    progress("finite-discriminating-controls")
     node = {"id": "mathematical-controls", "path": "Controls.lean"}
     candidate, build, deps = checker.layout("finite-controls", node, Path(manifest["controls_source"]).read_bytes(), {})
     result = checker.execute(candidate, build, deps, "Controls.lean", "finite-controls")
     rows.append({"id": "finite-discriminating-controls", "passed": result["execution"]["status"] == "completed",
                  "result": store.put(study.canonical(result))})
+    return finish_controls(manifest, store, rows)
+
+
+def finish_controls(manifest, store, rows, *, reused=False):
     expected = 7 + len(manifest["nodes"])
     passed = len(rows) == expected and all(row["passed"] for row in rows)
     ref = store.put(study.canonical(rows))
-    study.event(store, manifest["id"], "controls_end", passed=passed, rows=ref,
-                detail=f"{sum(row['passed'] for row in rows)}/{expected} controls passed")
+    certificate = control_cache.retain(manifest, store, rows) if passed else None
+    study.event(store, manifest["id"], "controls_end", passed=passed, rows=ref, certificate=certificate,
+                reused=reused, detail=f"{sum(row['passed'] for row in rows)}/{expected} controls " +
+                ("reused from exact checking contract" if reused else "passed"))
     study.event(store, manifest["id"], "stage", name="ready" if passed else "blocked",
                 detail="Mechanical controls passed; proof workers not started" if passed else "Mechanical controls failed")
     print(json.dumps({"passed": passed, "rows": rows}), flush=True)
@@ -354,6 +378,8 @@ def main():
     create.add_argument("--model", default="gpt-5.6-luna")
     create.add_argument("--effort", default="medium")
     create.add_argument("--continue-from", type=Path)
+    create.add_argument("--runtime-pin", type=Path, help="Explicit owner-maintained runtime pin; full audit is separate")
+    create.add_argument("--controls-from", type=Path, help="Reuse matching closed control receipts; otherwise run controls")
     for field, default, low, high in (("deadline-seconds", 180, 1, 3600),
                                     ("token-limit", 120000, 1, 10000000),
                                     ("node-token-limit", 24000, 1, 1000000),

@@ -5,6 +5,8 @@ type examiner, transitive axiom policy and dependency artifacts. No worker paths
 commands or writable source tree are accepted. Compilation is serial per owner.
 """
 import json
+import errno
+import os
 from pathlib import Path
 import shutil
 import uuid
@@ -22,6 +24,16 @@ def object_bytes(store, identity):
     if study.digest(data) != identity:
         raise ValueError("immutable object bytes differ: " + identity)
     return data
+
+
+def link_or_copy(source, destination):
+    """Project owner-pinned baseline bytes without copying them; checker mounts remain read-only."""
+    try:
+        return os.link(source, destination)
+    except OSError as error:
+        if error.errno != errno.EXDEV:
+            raise
+        return shutil.copy2(source, destination)
 
 
 def assembled(node, proof, *, admit=True):
@@ -118,7 +130,11 @@ class Checker:
         self.nodes = {node["id"]: node for node in manifest["nodes"]}
 
     def verify(self):
-        runtime.verify(self.compiler, cache=self.runtime_cache)
+        lease = getattr(self.backend, "lease", None)
+        if lease is None:
+            runtime.verify(self.compiler, cache=self.runtime_cache)
+        elif lease.pin["binding"]["compiler"] != self.compiler:
+            raise ValueError("runtime lease does not bind this compiler")
         if not self.backend.unchanged():
             raise ValueError("baseline retrieval artifacts changed")
 
@@ -173,7 +189,8 @@ class Checker:
         for name in roots:
             baseline = self.backend.content / "lib" / name
             if baseline.is_dir():
-                shutil.copytree(baseline, deps / name)
+                copy = link_or_copy if getattr(self.backend, "lease", None) else shutil.copy2
+                shutil.copytree(baseline, deps / name, copy_function=copy)
         for path, data in dependencies.items():
             study.write_new(deps / path, data)
         return candidate, build, deps

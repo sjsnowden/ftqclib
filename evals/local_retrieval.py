@@ -145,7 +145,7 @@ def validate_binding(spec):
 
 
 class Backend:
-    def __init__(self, snapshot, expected_id, store, checker):
+    def __init__(self, snapshot, expected_id, store, checker, *, lease=None):
         self.root, self.store, self.checker = Path(snapshot).resolve(), store, checker
         raw = (self.root / "snapshot.json").read_bytes()
         if not re.fullmatch(r"[0-9a-f]{64}", expected_id) or study.digest(raw) != expected_id:
@@ -157,17 +157,23 @@ class Backend:
         if (type(self.policy["max_hits"]) is not int or not 1 <= self.policy["max_hits"] <= 5
                 or type(self.policy["lookup_bytes"]) is not int or not 1024 <= self.policy["lookup_bytes"] <= 8192):
             raise ValueError("snapshot result bounds")
-        before = runtime.tree_metadata(self.content)
-        if runtime.tree_manifest(self.content) != self.spec["files"]:
-            raise ValueError("snapshot artifact bytes differ")
-        self.metadata = runtime.tree_metadata(self.content)
-        if before != self.metadata:
-            raise ValueError("snapshot changed during admission")
+        self.lease = lease
+        if lease is None:
+            before = runtime.tree_metadata(self.content)
+            if runtime.tree_manifest(self.content) != self.spec["files"]:
+                raise ValueError("snapshot artifact bytes differ")
+            self.metadata = runtime.tree_metadata(self.content)
+            if before != self.metadata:
+                raise ValueError("snapshot changed during admission")
+        elif lease.snapshot != self.snapshot or lease.content != self.content or not lease.unchanged():
+            raise ValueError("runtime lease does not bind this retrieval snapshot")
         if json.loads((self.content / "lib/OntologicSearchScope.trace").read_bytes())["depHash"] != "ontologic-sha256:" + self.spec["closure"]:
             raise ValueError("index trace differs from snapshot binding")
         self.code = store.put(Path(__file__).read_bytes())
 
     def unchanged(self):
+        if self.lease is not None:
+            return self.lease.unchanged()
         return runtime.tree_metadata(self.content) == self.metadata
 
     def record(self, request, result, **details):
