@@ -22,6 +22,7 @@ import fixtures
 import local_retrieval
 import runtime_pin
 import study
+import proof_program
 
 PROFILE = '''"""Frozen proof-chain host: checks are executed by the isolated owner adapter."""
 GATED_KINDS = ("proof", "run")
@@ -69,13 +70,14 @@ def validate_spec(spec):
         names.add(node["name"])
 
 
-def plan_files(worktree, spec, execution, *, replace=False):
+def plan_files(worktree, spec, execution, *, replace=False, program=None):
     agent = {"model": execution["model"], "effort": execution["effort"]}
     steps = [{"id": node["id"], "target": "T01", "kind": "proof", "scheduled": True,
               "title": node["purpose"], "artifact": node["path"], "gate": "Protected Lean type and axiom checks",
               "depends_on": node["deps"], "writes": [node["path"],
               ".ontologic/certificates/" + node["id"] + ".json"], "agent": agent}
              for node in spec["nodes"]]
+    steps += proof_program.compile_steps(program) if program else []
     plan = {"steps": steps, "reviewed_steps": []}
     import plan_check
     import brief
@@ -128,9 +130,15 @@ def prepare_locked(args, spec, root, kernel):
                  "effort": args.effort, "deadline_seconds": args.deadline_seconds, "model_catalog": str(args.model_catalog.resolve()),
                  "model_catalog_sha256": study.digest(args.model_catalog.read_bytes()),
                  "observed_token_limit": args.token_limit}
-    seed = plan_files(worktree, spec, execution, replace=bool(args.continue_from))
+    program = (proof_program.validate(json.loads(args.program.read_bytes()), spec["nodes"])
+               if getattr(args, "program", None) else None)
+    seed = plan_files(worktree, spec, execution, replace=bool(args.continue_from), program=program)
     build = json.loads(args.build.read_bytes())
     manifest = make_manifest(args, spec, execution, seed, build, store)
+    if program:
+        manifest["proof_program"] = program
+        manifest["sources"][str(args.program.resolve())] = store.put(args.program.read_bytes())
+        manifest["kernel_config"].update(proof_program.config(program))
     if args.runtime_pin:
         manifest["runtime_pin"] = runtime_pin.admit(args.runtime_pin, manifest, store)
     if args.controls_from:
@@ -144,6 +152,7 @@ def prepare_locked(args, spec, root, kernel):
         manifest["continuation"] = chain_continue.adopt(args.continue_from, worktree, manifest, store,
                                                        checker.validate_result)
     write(root / "manifest.json", manifest)
+    write(root / "driver-config.json", manifest["kernel_config"])
     identity = store.put(study.canonical(manifest))
     study.write_new(root / "manifest.ref", identity.encode())
     study.event(store, args.id, "study_pin", manifest=identity)
@@ -378,6 +387,7 @@ def main():
     create.add_argument("--model", default="gpt-5.6-luna")
     create.add_argument("--effort", default="medium")
     create.add_argument("--continue-from", type=Path)
+    create.add_argument("--program", type=Path, help="Named model functions and bounded blocked-question routes")
     create.add_argument("--runtime-pin", type=Path, help="Explicit owner-maintained runtime pin; full audit is separate")
     create.add_argument("--controls-from", type=Path, help="Reuse matching closed control receipts; otherwise run controls")
     for field, default, low, high in (("deadline-seconds", 180, 1, 3600),

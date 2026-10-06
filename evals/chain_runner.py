@@ -13,6 +13,8 @@ import chain_check
 import chain_protocol as protocol
 import proof_loop
 import study
+import proof_program
+import proof_effects
 
 
 def known_usage(store, identity):
@@ -35,6 +37,10 @@ def admission(store, manifest):
         return "an invocation is unfinished or has unknown usage; no further model admission"
     if sum(usage.values()) >= manifest["execution"]["observed_token_limit"]:
         return "study token admission threshold reached"
+    cap = manifest.get("proof_program", {}).get("max_model_calls")
+    calls = sum(e["kind"] == "proposal_start" and e.get("study") == manifest["id"] for e in store.entries())
+    if cap is not None and calls >= cap:
+        return "program model-call limit reached (proof and answer calls combined)"
     return None
 
 
@@ -77,6 +83,7 @@ class Runner:
         self.root, self.manifest, self.store = Path(root), manifest, store
         self.checker, self.backend, self.kernel = checker, backend, None
         self.nodes = {node["id"]: node for node in manifest["nodes"]}
+        self.questions = {}
 
     def event(self, kind, **fields):
         return study.event(self.store, self.manifest["id"], kind, **fields)
@@ -98,6 +105,10 @@ class Runner:
         return evidence
 
     def launch(self, job, number, packet):
+        return self.invoke(job, number, packet, protocol.SCHEMA, protocol.INSTRUCTIONS,
+                           "proof-proposal", job["step"]["id"])
+
+    def invoke(self, job, number, packet, schema, instructions, role, slot):
         import proposal_agent
         reason = admission(self.store, self.manifest)
         if reason:
@@ -108,23 +119,26 @@ class Runner:
         if len(prompt.encode()) > self.manifest["policy"]["input_bytes_max"]:
             raise ValueError("assembled proof packet exceeds admitted byte limit")
         identity = {"session": job["issue"]["hash"], "invocation": uuid.uuid4().hex,
-                    "role": "proof-proposal", "binding": job["issue"]["hash"]}
+                    "role": role, "binding": job["issue"]["hash"]}
         directory = self.root / "workers" / identity["invocation"]
         directory.mkdir(parents=True)
         directory.chmod(0o500)
-        self.event("proposal_start", slot=job["step"]["id"], issue=job["issue"]["hash"], round=number,
-                   invocation=identity["invocation"],
-                   prompt=self.store.put(prompt.encode()), prompt_bytes=len(prompt.encode()),
-                   detail=f"{self.manifest['execution']['model']} / {self.manifest['execution']['effort']}")
         config = {key: self.manifest["execution"][key] for key in
                   ("executable", "model", "effort", "deadline_seconds", "model_catalog")}
-        result = proposal_agent.run(self.store, identity, str(directory), protocol.SCHEMA,
-                                    protocol.INSTRUCTIONS, prompt, config)
-        self.event("proposal_end", slot=job["step"]["id"], issue=job["issue"]["hash"], round=number,
+        config.update({key: job["issue"]["agent"][key] for key in ("model", "effort")})
+        self.event("proposal_start", slot=slot, issue=job["issue"]["hash"], round=number,
+                   invocation=identity["invocation"],
+                   prompt=self.store.put(prompt.encode()), prompt_bytes=len(prompt.encode()),
+                   detail=f"{role}: {config['model']} / {config['effort']}")
+        result = proposal_agent.run(self.store, identity, str(directory), schema, instructions, prompt, config)
+        self.event("proposal_end", slot=slot, issue=job["issue"]["hash"], round=number,
                    invocation=identity["invocation"],
                    result_object=self.store.put(study.canonical(result)), usage=result.get("usage"),
                    detail="proposal returned" if result.get("finished") else result.get("reason"))
         return {**result, "admitted": True}
+
+    def answer(self, job):
+        return proof_effects.answer(self, job)
 
     def retrieve(self, session, text, node, number, rounds):
         limit = self.manifest["policy"].get("max_retrieval_rounds", 2)
@@ -162,6 +176,7 @@ class Runner:
                 break
             left = session.requests_left if retrieval_rounds < policy.get("max_retrieval_rounds", 2) else 0
             packet = build_packet(self.manifest, node, job["issue"], ledger, session, latest, left)
+            proof_effects.add_inputs(self, job, packet)
             result = self.launch(job, number, packet)
             if result["admitted"]:
                 records.append(result)
@@ -184,6 +199,11 @@ class Runner:
                 continue
             if action["status"] != "candidate":
                 reason = action.get("reason", "retrieval failed")
+                if action["status"] == "blocked" and self.manifest.get("proof_program"):
+                    request = proof_program.question(self.manifest["proof_program"], node["id"], reason,
+                                                     "Resume the original obligation using the recorded reply.")
+                    if request:
+                        self.questions[job["issue"]["hash"]] = request
                 break
             proof = action["proof"]
             identity, assessment, repeated = self.assess(job, node, proof, number, checked)
@@ -229,7 +249,7 @@ class Runner:
                 "rows_before": None, "review": None, "chain": summary}
 
     def __call__(self, job):
-        node, started = self.nodes[job["step"]["id"]], time.monotonic()
+        node, started = proof_effects.node_for(self, job), time.monotonic()
         self.event("trial_start", slot=node["id"], issue=job["issue"]["hash"], detail=node["purpose"])
         reason = admission(self.store, self.manifest)
         if reason:
@@ -238,8 +258,11 @@ class Runner:
             initial = self.prefetch(node)
             outcome = self.rounds(job, node, initial)
         result = self.result(job, *outcome, time.monotonic() - started)
+        result = proof_effects.question_result(self, job, result)
         self.event("trial_end", slot=node["id"], result=result["chain"])
+        if result["outcome"] == "question":
+            self.event("node_waiting", slot=node["id"], detail="Waiting for " + result["message_request"]["to"])
         self.kernel.retain_result(job["issue"], result)
-        if result["outcome"] != "green":
+        if result["outcome"] not in ("green", "question"):
             self.event("node_blocked", slot=node["id"], reason=result["chain"]["reason"], result=result["chain"])
         return result

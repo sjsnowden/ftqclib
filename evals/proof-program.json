@@ -1,0 +1,25 @@
+{
+  "schema": 1,
+  "functions": {
+    "assess_prerequisite": {
+      "step": "T02.M",
+      "purpose": "Evaluate the reported missing prerequisite. Distinguish absence from insufficient retrieval. Suggest exact supporting declarations when justified, or describe the smallest additional proof obligation and why it is needed. Do not weaken the original theorem.",
+      "model": "gpt-5.6-luna",
+      "effort": "medium",
+      "evidence": []
+    }
+  },
+  "on_blocked": {
+    "T01.1": "assess_prerequisite",
+    "T01.2": "assess_prerequisite",
+    "T01.3": "assess_prerequisite",
+    "T01.4": "assess_prerequisite",
+    "T01.5": "assess_prerequisite",
+    "T01.6": "assess_prerequisite",
+    "T01.7": "assess_prerequisite",
+    "T01.8": "assess_prerequisite",
+    "T01.9": "assess_prerequisite"
+  },
+  "message_limit": 2,
+  "max_model_calls": 32
+}

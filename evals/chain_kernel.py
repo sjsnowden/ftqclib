@@ -5,7 +5,7 @@ results and Git checkpoint observations. An interrupted issue is resumed only fr
 a verified result; unknown execution is refused before native abandonment. Git is
 a projection of immutable accepted bytes, never evidence that a proof was accepted.
 The caller owns the study admission lock and supplies an independently checked
-result validator. This host runs one child at a time and disables operator control.
+result validator. This host runs one child at a time; declared programs enable control.
 """
 import importlib
 import json
@@ -113,13 +113,23 @@ def make_kernel(root, manifest, study_store, runner, validate_result):
               "input_scope": "dependencies", "control_enabled": False, "control_idle_s": 0,
               "attempt_mailboxes": False, "message_routes": {}, "record": None}
     config["chain_manifest"] = manifest_hash
+    if manifest.get("proof_program"):
+        import proof_program
+        proof_program.validate(manifest["proof_program"], manifest["nodes"])
+        config.update(proof_program.config(manifest["proof_program"]))
     host_type = type("ChainKernel", (ChainEffects, module.Kernel), {})
     host = host_type(str(root), manifest["id"], config, attempt_runner=runner)
     host.native = module
     host.store = module.Store(host.store.root, study_store.objects)
     host.study_store, host.manifest_hash = study_store, manifest_hash
     host.chain_manifest, host.continuation = manifest, manifest.get("continuation")
+    host.proof_seed_plan = json.loads(module.canonical(host.plan))
     host.validate_result = validate_result
+    if manifest.get("proof_program"):
+        import proof_effects
+        host.message_runner = runner.answer
+        host.answer_admission_refusal = lambda question: runner.admission_refusal()
+        host.control_request_refusal = lambda observed: proof_effects.control_refusal(host, observed)
     return host
 
 
@@ -222,6 +232,11 @@ class ChainEffects:
         if refusal:
             return refusal
         chain_continue.validate_inherited(self)
+        if self.chain_manifest.get("proof_program"):
+            import proof_effects
+            refusal = proof_effects.recover_answers(self)
+            if refusal:
+                return refusal
         pending = []
         for issue in self.native.state_module.open_issues(entries, self.run_id):
             saved = self.result_record(issue)

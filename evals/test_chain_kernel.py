@@ -7,10 +7,11 @@ import copy
 import json
 from pathlib import Path
 import tempfile
+import os
 
 import chain_kernel
 
-KERNEL = Path(__file__).resolve().parents[3] / "ontolkernel"
+KERNEL = Path(os.environ.get("ONTOLKERNEL", Path(__file__).resolve().parents[3] / "ontolkernel"))
 NATIVE = chain_kernel.native_modules(KERNEL)
 import replay
 PROFILE = '''GATED_KINDS = ("proof", "run")
