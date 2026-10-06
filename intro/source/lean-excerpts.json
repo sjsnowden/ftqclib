@@ -1,0 +1,61 @@
+{
+  "snapshot": "d66ec2b",
+  "excerpts": [
+    {
+      "id": "omega",
+      "module": "FTQCLib/Pauli/Symplectic.lean",
+      "startLine": 52,
+      "sourceSha256": "efb0e70fa0ee2aa996c89bc01bc2ef0102208388f16ffac5ba8d14c9c39e3e56",
+      "code": "def omega (p q : Pauli n) : ZMod 2 :=\n  (∑ i, p.Z i * q.X i) + (∑ i, p.X i * q.Z i)"
+    },
+    {
+      "id": "cycles",
+      "module": "FTQCLib/CSS/BasedComplex.lean",
+      "startLine": 209,
+      "sourceSha256": "729166330b4222f5131409f604512025fb9097b42a842ac927f4c21e990259b1",
+      "code": "def cycles (i : ℕ) : Submodule (ZMod 2) (Fin (C.cells i) → ZMod 2) :=\n  LinearMap.ker (C.dFrom i).mulVecLin\n\n/-- The boundaries of degree `i`: the image of the boundary `∂_{i+1}` into degree `i`. -/\ndef boundaries (i : ℕ) : Submodule (ZMod 2) (Fin (C.cells i) → ZMod 2) :=\n  LinearMap.range (C.d i).mulVecLin"
+    },
+    {
+      "id": "rewrite",
+      "module": "FTQCLib/Carrier/RewriteCompleteness.lean",
+      "startLine": 1191,
+      "sourceSha256": "52ddd4dd4a138cece0630b9f116a8134756dcb66b6e21ae0d29679fbd1728417",
+      "code": "theorem rewrite_complete {S T : KernelSumState n} (hS : IsCarrier S) (hT : IsCarrier T) :\n    Relation.EqvGen CarrierRule S T ↔ StateEq S T ∧ IsDyadicRatio (T.c / S.c) := by\n  constructor\n  · intro hST\n    obtain ⟨hs, r, hr, hc⟩ := stateEq_scale_of_eqvGen hST\n    refine ⟨hs, ?_⟩\n    rw [hc, mul_div_assoc, div_self (c_ne_zero_of_isCarrier hS), mul_one]\n    exact hr\n  · rintro ⟨hs, hd⟩\n    exact eqvGen_of_stateEq hS hT hs hd"
+    },
+    {
+      "id": "gram",
+      "module": "FTQCLib/Carrier/UnreadBits.lean",
+      "startLine": 157,
+      "sourceSha256": "3fee7a01ec62937bbe840808ae7a7c3bc2618cbc405e5ae734a86287a80f54f0",
+      "code": "noncomputable def gram {k : ℕ} (f : (Fin (n + k) → ZMod 2) → ℂ) (x y : Fin n → ZMod 2) : ℂ :=\n  ∑ u : Fin k → ZMod 2, f (Fin.append x u) * starRingEnd ℂ (f (Fin.append y u))"
+    },
+    {
+      "id": "unread",
+      "module": "FTQCLib/Carrier/UnreadBits.lean",
+      "startLine": 173,
+      "sourceSha256": "3fee7a01ec62937bbe840808ae7a7c3bc2618cbc405e5ae734a86287a80f54f0",
+      "code": "theorem unreadEq_of_stateEq {k : ℕ} {S T : KernelSumState (n + k)} (h : StateEq S T) :\n    UnreadEq k S T := by\n  intro x y\n  unfold StateEq at h\n  rw [h]"
+    },
+    {
+      "id": "planar",
+      "module": "FTQCLib/CSS/SurfaceCode.lean",
+      "startLine": 1544,
+      "sourceSha256": "902e745f7130f619c990f7e1038d91524a140bfd9decfe756c3480ca345cccb2",
+      "code": "theorem planarCode_k [NeZero L] :\n    Module.finrank (ZMod 2) (cssZLogical (planarCode L).1 (planarCode L).2) = 1 := by\n  -- `k = n - rk H_X - rk H_Z` with every star and every plaquette independent: the source's\n  -- `L² + (L - 1)² - 2L(L - 1) = 1`.\n  have hcss : IsCSSPair (planarCode L).1 (planarCode L).2 := cssOfComplex_isCSSPair _ _\n  rw [finrank_cssZLogical hcss, rank_planarCode_fst, rank_planarCode_snd]\n  have h := planarComplex_cells_one L\n  omega"
+    },
+    {
+      "id": "carrier-record",
+      "module": "FTQCLib/Carrier/HadamardPhase.lean",
+      "startLine": 44,
+      "sourceSha256": "64a497e289e1f70f3e52c85e9dc77974b298d54df7088274a54827d549fec835",
+      "code": "structure KernelSumState (n : ℕ) where\n  m  : ℕ\n  h  : ℕ\n  Q  : DiagPhase (n + h) m\n  c  : ℂ\n  L  : Submodule (ZMod 2) (Pauli n)\n  x₀ : Fin n → ZMod 2"
+    },
+    {
+      "id": "letter-amp",
+      "module": "FTQCLib/Carrier/GateWord.lean",
+      "startLine": 112,
+      "sourceSha256": "0b6c9cf4dada4a29fcfb94f422bf3b37b77dec58f4487b423774adb9d8bdb796",
+      "code": "noncomputable def letterAmp {m : ℕ} (g : GateLetter n m) (f : (Fin n → ZMod 2) → ℂ) :\n    (Fin n → ZMod 2) → ℂ :=\n  match g with\n  | .hadamard k => walshTransform k f\n  | .diagonal D => fun w => charOf m (D.eval w) * f w\n  | .cnot i j _ => fun w => f (cnotBitMap i j w)"
+    }
+  ]
+}

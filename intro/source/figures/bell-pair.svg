@@ -1,0 +1,30 @@
+<svg xmlns="http://www.w3.org/2000/svg" role="img" width="680" height="310" viewBox="0 0 680 310" font-family="-apple-system, BlinkMacSystemFont, system-ui, sans-serif">
+  <title>A Hadamard on the first of two zero-initialized qubits followed by a controlled-NOT prepares a Bell pair. A support grid highlights the equal-bit outputs 00 and 11; the unequal-bit outputs have zero amplitude.</title>
+  <text x="177" y="31" text-anchor="middle" font-size="20" fill="#1C1B1A">Preparation circuit</text>
+  <text x="513" y="31" text-anchor="middle" font-size="20" fill="#1C1B1A">Output support</text>
+  <text x="177" y="64" text-anchor="middle" font-size="17" fill="#6F6E69">Both qubits start at zero</text>
+  <text x="30" y="124" font-size="19" fill="#1C1B1A">q₀</text>
+  <text x="30" y="214" font-size="19" fill="#1C1B1A">q₁</text>
+  <path d="M65 117H303 M65 207H303" fill="none" stroke="#1C1B1A" stroke-width="1.8"/>
+  <rect x="101" y="93" width="48" height="48" fill="#fff" stroke="#1C1B1A" stroke-width="1.8"/>
+  <text x="125" y="125" text-anchor="middle" font-size="24" fill="#1C1B1A">H</text>
+  <path d="M237 117V227 M217 207H257" fill="none" stroke="#1C1B1A" stroke-width="1.8"/>
+  <circle cx="237" cy="117" r="6" fill="#1C1B1A"/>
+  <circle cx="237" cy="207" r="20" fill="none" stroke="#1C1B1A" stroke-width="1.8"/>
+  <text x="513" y="66" text-anchor="middle" font-size="17" fill="#6F6E69">Second bit</text>
+  <text x="473" y="94" text-anchor="middle" font-size="18" fill="#1C1B1A">0</text>
+  <text x="553" y="94" text-anchor="middle" font-size="18" fill="#1C1B1A">1</text>
+  <text x="414" y="149" text-anchor="middle" font-size="18" fill="#1C1B1A">0</text>
+  <text x="414" y="229" text-anchor="middle" font-size="18" fill="#1C1B1A">1</text>
+  <text x="371" y="184" transform="rotate(-90 371 184)" text-anchor="middle" font-size="17" fill="#6F6E69">First bit</text>
+  <rect x="437" y="109" width="72" height="72" fill="#1A4F8C"/>
+  <rect x="517" y="109" width="72" height="72" fill="#E6E4D9"/>
+  <rect x="437" y="189" width="72" height="72" fill="#E6E4D9"/>
+  <rect x="517" y="189" width="72" height="72" fill="#1A4F8C"/>
+  <text x="473" y="154" text-anchor="middle" font-size="24" fill="#fff">00</text>
+  <text x="553" y="154" text-anchor="middle" font-size="24" fill="#6F6E69">01</text>
+  <text x="473" y="234" text-anchor="middle" font-size="24" fill="#6F6E69">10</text>
+  <text x="553" y="234" text-anchor="middle" font-size="24" fill="#fff">11</text>
+  <text x="177" y="287" text-anchor="middle" font-size="17" fill="#6F6E69">Time runs from left to right</text>
+  <text x="513" y="287" text-anchor="middle" font-size="17" fill="#1A4F8C">00 and 11: nonzero amplitudes</text>
+</svg>

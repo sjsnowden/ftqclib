@@ -1,0 +1,47 @@
+{
+  "title": "ftqclib: A Mathematical Foundation for Fault-Tolerant Quantum Computing",
+  "sourceSnapshot": "d66ec2b (published embedded source)",
+  "plan": {
+    "targets": "08f4171e1623",
+    "steps": "78711b2a934e",
+    "inspected": "2026-10-05"
+  },
+  "build": {
+    "marked": "17.0.5",
+    "temml": "0.13.5"
+  },
+  "sha256": {
+    "markdown": "237a6041f8aec610cb9862bc9d58a8dc77af42df518e54b645e37ccf0c288da9",
+    "template": "535aae997878e505fcc500c58b7216803d70628dd6c5abe01cf77b00fee59b09",
+    "stylesheet": "46fab610085c27fcbbd6b97f823f0e57cb3f15882a54d3ac65b22da37be0120a",
+    "builder": "5c2fd8ead78a0135b41cf9757d11aee492b57be3ac2c187ba53defbd8d8d135e",
+    "leanRegistry": "489c4fc0ba6a39db9a8e43a8c89a06394cc39cb64830127c9fdb8db9bc1f0d26",
+    "html": "ea93e8fef51a02699c12cfa2dd6c1e4fbac103fc11fe7800fcecc0767389f5d1",
+    "figures": {
+      "bell-pair.svg": "250090e3e85ede41b72b3bd1e4904abff4d70b193bd0aec39c02855fe39a481d",
+      "pauli-signs.svg": "eb986c9fabc96d5bc469332d20e2bc0e0590766af0ca4f519c37955cedb646d7",
+      "interference.svg": "f967da227846705c7e67a72e8523c13cd7c9cfa0949f28ee60b697ea2de20b8e",
+      "chains.svg": "c94958bb1b75deb1d2a01a8b4ee7467382d43c9192edbe838c9b03d1fe7b0260",
+      "carrier-evaluation.svg": "080be0d0301542555788ed62dcaa75d930bde1ce44b4ce5d8e1568840741187e",
+      "carrier-gates.svg": "80948676db72893c58f3fac1b9e8ecd4dc0d4730fd475293e74ed3e06bfc587d",
+      "semantics.svg": "c0bb50afc3ae980d7ca6ab5d45ad911fa6acaaf42f9da65a9d4bd0c0037aa093",
+      "unread-bell.svg": "638529d44c5fcf058feec29b6f2b9477adcb53d27e6ad6fd93a9abf0ed590e8f",
+      "surface-patch.svg": "be0a7350f1d0d348c9c6cf7ca88989b2e31f81ee193776e03ad4f8ecaae0f41a",
+      "surface-roadmap.svg": "5d4668df15e54e508b189fb235e4b2317fa655dc10aa6088132a99ae6710ee8e"
+    }
+  },
+  "content": {
+    "figures": 10,
+    "leanBlocks": 8,
+    "mathElements": 218,
+    "mainWords": 5857
+  },
+  "checks": {
+    "noActiveContent": true,
+    "internalLinksResolve": true,
+    "uniqueIds": true,
+    "stylesheetUnchanged": true,
+    "leanExcerptsMatchRegistry": true
+  },
+  "note": "Document build and source review only; no independent Lean rebuild."
+}

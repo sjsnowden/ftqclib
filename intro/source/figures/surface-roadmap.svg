@@ -1,0 +1,33 @@
+<svg xmlns="http://www.w3.org/2000/svg" role="img" width="680" height="520" viewBox="0 0 680 520" font-family="-apple-system, BlinkMacSystemFont, system-ui, sans-serif">
+<title>Selected plan targets. Proved foundations include surface-code geometry, encoding and Pauli errors. Planned syndrome extraction and correction lead toward the surface-code memory theorem. Further planned work includes noisy rounds, detector models and lattice surgery. This is a reading guide, not the complete dependency graph.</title>
+<text x="340" y="28" text-anchor="middle" font-size="22" fill="#1C1B1A">From a code to a verified memory</text>
+<rect x="40" y="60" width="600" height="76" fill="none" stroke="#1C1B1A"/>
+<circle cx="61" cy="81" r="5" fill="#1C1B1A"/>
+<text x="82" y="86" text-anchor="start" font-size="14" fill="#6F6E69">PROVED</text>
+<text x="620" y="86" text-anchor="end" font-size="14" fill="#6F6E69">T34 · T29 · T64</text>
+<text x="340" y="116" text-anchor="middle" font-size="18" fill="#1C1B1A">Geometry and distance · encoding · Pauli errors</text>
+<rect x="40" y="168" width="600" height="76" fill="none" stroke="#CECDC3"/>
+<circle cx="61" cy="189" r="5" fill="#fff"/>
+<rect x="56" y="184" width="10" height="10" fill="none" stroke="#6F6E69"/>
+<text x="82" y="194" text-anchor="start" font-size="14" fill="#6F6E69">PLANNED</text>
+<text x="620" y="194" text-anchor="end" font-size="14" fill="#6F6E69">T30 · T31</text>
+<text x="340" y="224" text-anchor="middle" font-size="18" fill="#1C1B1A">Syndrome extraction and decoder-controlled correction</text>
+<rect x="40" y="276" width="600" height="76" fill="none" stroke="#CECDC3"/>
+<circle cx="61" cy="297" r="5" fill="#fff"/>
+<rect x="56" y="292" width="10" height="10" fill="none" stroke="#6F6E69"/>
+<text x="82" y="302" text-anchor="start" font-size="14" fill="#6F6E69">PLANNED</text>
+<text x="620" y="302" text-anchor="end" font-size="14" fill="#6F6E69">T65</text>
+<text x="340" y="332" text-anchor="middle" font-size="18" fill="#1C1B1A">One-round surface-code memory theorem</text>
+<rect x="40" y="411" width="600" height="76" fill="none" stroke="#CECDC3"/>
+<circle cx="61" cy="432" r="5" fill="#fff"/>
+<rect x="56" y="427" width="10" height="10" fill="none" stroke="#6F6E69"/>
+<text x="82" y="437" text-anchor="start" font-size="14" fill="#6F6E69">FURTHER WORK</text>
+<text x="620" y="437" text-anchor="end" font-size="14" fill="#6F6E69">T53 · T61</text>
+<text x="340" y="467" text-anchor="middle" font-size="18" fill="#1C1B1A">Noisy rounds and detectors · lattice surgery</text>
+<line x1="340" y1="136" x2="340" y2="168" stroke="#6F6E69" stroke-width="1.5"/>
+<path d="M335 161L340 168L345 161" stroke="#6F6E69" stroke-width="1.5" fill="none"/>
+<line x1="340" y1="244" x2="340" y2="276" stroke="#6F6E69" stroke-width="1.5"/>
+<path d="M335 269L340 276L345 269" stroke="#6F6E69" stroke-width="1.5" fill="none"/>
+<text x="340" y="389" text-anchor="middle" font-size="16" fill="#6F6E69">The programme then extends to repeated operations</text>
+<text x="340" y="514" text-anchor="middle" font-size="14" fill="#6F6E69">Status from the plan inspected on 5 October 2026</text>
+</svg>

@@ -1,0 +1,31 @@
+<svg xmlns="http://www.w3.org/2000/svg" role="img" width="680" height="295" viewBox="0 0 680 295" font-family="-apple-system, BlinkMacSystemFont, system-ui, sans-serif">
+<title>A filled square has four boundary edges. Taking their boundary counts each corner twice, leaving zero over binary arithmetic. This is the geometric reason a boundary has no syndrome.</title>
+<text x="105" y="30" text-anchor="middle" font-size="20" fill="#1C1B1A">A face</text>
+<text x="335" y="30" text-anchor="middle" font-size="20" fill="#1C1B1A">Its boundary</text>
+<text x="575" y="30" text-anchor="middle" font-size="20" fill="#1C1B1A">Boundary again</text>
+<rect x="48" y="85" width="112" height="112" fill="#E6E4D9" stroke="#CECDC3"/>
+<rect x="278" y="85" width="112" height="112" fill="none" stroke="#1A4F8C"/>
+<circle cx="48" cy="85" r="4" fill="#6F6E69"/>
+<circle cx="48" cy="197" r="4" fill="#6F6E69"/>
+<circle cx="160" cy="85" r="4" fill="#6F6E69"/>
+<circle cx="160" cy="197" r="4" fill="#6F6E69"/>
+<circle cx="278" cy="85" r="4" fill="#6F6E69"/>
+<circle cx="278" cy="197" r="4" fill="#6F6E69"/>
+<circle cx="390" cy="85" r="4" fill="#6F6E69"/>
+<circle cx="390" cy="197" r="4" fill="#6F6E69"/>
+<line x1="185" y1="142" x2="252" y2="142" stroke="#6F6E69" stroke-width="1.5"/>
+<path d="M245 137L252 142L245 147" stroke="#6F6E69" stroke-width="1.5" fill="none"/>
+<line x1="414" y1="142" x2="479" y2="142" stroke="#6F6E69" stroke-width="1.5"/>
+<path d="M472 137L479 142L472 147" stroke="#6F6E69" stroke-width="1.5" fill="none"/>
+<circle cx="520" cy="85" r="7" fill="#1A4F8C"/>
+<text x="520" y="116" text-anchor="middle" font-size="15" fill="#6F6E69">twice</text>
+<circle cx="520" cy="197" r="7" fill="#1A4F8C"/>
+<text x="520" y="228" text-anchor="middle" font-size="15" fill="#6F6E69">twice</text>
+<circle cx="630" cy="85" r="7" fill="#1A4F8C"/>
+<text x="630" y="116" text-anchor="middle" font-size="15" fill="#6F6E69">twice</text>
+<circle cx="630" cy="197" r="7" fill="#1A4F8C"/>
+<text x="630" y="228" text-anchor="middle" font-size="15" fill="#6F6E69">twice</text>
+<text x="105" y="262" text-anchor="middle" font-size="16" fill="#6F6E69">2-dimensional cell</text>
+<text x="335" y="262" text-anchor="middle" font-size="16" fill="#6F6E69">1-dimensional chain</text>
+<text x="575" y="262" text-anchor="middle" font-size="17" fill="#1A4F8C">Zero modulo two</text>
+</svg>

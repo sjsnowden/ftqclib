@@ -1,0 +1,61 @@
+<svg xmlns="http://www.w3.org/2000/svg" role="img" width="680" height="390" viewBox="0 0 680 390" font-family="-apple-system, BlinkMacSystemFont, system-ui, sans-serif">
+<title>Two copies of the unrotated distance-three planar patch. Each has thirteen edge qubits: nine vertical and four interior horizontal. A four-edge loop bounds a face and is a stabilizer; a three-edge vertical string joins the rough boundaries and is a logical Z. Dashed boundary guides are not data-qubit edges.</title>
+<text x="170" y="28" text-anchor="middle" font-size="20" fill="#1C1B1A">A stabilizer boundary</text>
+<line x1="70" y1="85" x2="70" y2="285" stroke="#CECDC3" stroke-width="1.5"/>
+<circle cx="70" cy="118.33333333333334" r="4" fill="#6F6E69"/>
+<circle cx="70" cy="185.0" r="4" fill="#6F6E69"/>
+<circle cx="70" cy="251.66666666666666" r="4" fill="#6F6E69"/>
+<line x1="170" y1="85" x2="170" y2="285" stroke="#CECDC3" stroke-width="1.5"/>
+<circle cx="170" cy="118.33333333333334" r="4" fill="#6F6E69"/>
+<circle cx="170" cy="185.0" r="4" fill="#6F6E69"/>
+<circle cx="170" cy="251.66666666666666" r="4" fill="#6F6E69"/>
+<line x1="270" y1="85" x2="270" y2="285" stroke="#CECDC3" stroke-width="1.5"/>
+<circle cx="270" cy="118.33333333333334" r="4" fill="#6F6E69"/>
+<circle cx="270" cy="185.0" r="4" fill="#6F6E69"/>
+<circle cx="270" cy="251.66666666666666" r="4" fill="#6F6E69"/>
+<line x1="70" y1="151.66666666666669" x2="270" y2="151.66666666666669" stroke="#CECDC3" stroke-width="1.5"/>
+<circle cx="120" cy="151.66666666666669" r="4" fill="#6F6E69"/>
+<circle cx="220" cy="151.66666666666669" r="4" fill="#6F6E69"/>
+<line x1="70" y1="218.33333333333334" x2="270" y2="218.33333333333334" stroke="#CECDC3" stroke-width="1.5"/>
+<circle cx="120" cy="218.33333333333334" r="4" fill="#6F6E69"/>
+<circle cx="220" cy="218.33333333333334" r="4" fill="#6F6E69"/>
+<line x1="55" y1="85" x2="285" y2="85" stroke="#1C1B1A" stroke-width="1.5" stroke-dasharray="5 4"/>
+<line x1="55" y1="285" x2="285" y2="285" stroke="#1C1B1A" stroke-width="1.5" stroke-dasharray="5 4"/>
+<text x="170" y="65" text-anchor="middle" font-size="16" fill="#6F6E69">rough boundary</text>
+<text x="170" y="312" text-anchor="middle" font-size="16" fill="#6F6E69">rough boundary</text>
+<text x="510" y="28" text-anchor="middle" font-size="20" fill="#1C1B1A">A logical string</text>
+<line x1="410" y1="85" x2="410" y2="285" stroke="#CECDC3" stroke-width="1.5"/>
+<circle cx="410" cy="118.33333333333334" r="4" fill="#6F6E69"/>
+<circle cx="410" cy="185.0" r="4" fill="#6F6E69"/>
+<circle cx="410" cy="251.66666666666666" r="4" fill="#6F6E69"/>
+<line x1="510" y1="85" x2="510" y2="285" stroke="#CECDC3" stroke-width="1.5"/>
+<circle cx="510" cy="118.33333333333334" r="4" fill="#6F6E69"/>
+<circle cx="510" cy="185.0" r="4" fill="#6F6E69"/>
+<circle cx="510" cy="251.66666666666666" r="4" fill="#6F6E69"/>
+<line x1="610" y1="85" x2="610" y2="285" stroke="#CECDC3" stroke-width="1.5"/>
+<circle cx="610" cy="118.33333333333334" r="4" fill="#6F6E69"/>
+<circle cx="610" cy="185.0" r="4" fill="#6F6E69"/>
+<circle cx="610" cy="251.66666666666666" r="4" fill="#6F6E69"/>
+<line x1="410" y1="151.66666666666669" x2="610" y2="151.66666666666669" stroke="#CECDC3" stroke-width="1.5"/>
+<circle cx="460" cy="151.66666666666669" r="4" fill="#6F6E69"/>
+<circle cx="560" cy="151.66666666666669" r="4" fill="#6F6E69"/>
+<line x1="410" y1="218.33333333333334" x2="610" y2="218.33333333333334" stroke="#CECDC3" stroke-width="1.5"/>
+<circle cx="460" cy="218.33333333333334" r="4" fill="#6F6E69"/>
+<circle cx="560" cy="218.33333333333334" r="4" fill="#6F6E69"/>
+<line x1="395" y1="85" x2="625" y2="85" stroke="#1C1B1A" stroke-width="1.5" stroke-dasharray="5 4"/>
+<line x1="395" y1="285" x2="625" y2="285" stroke="#1C1B1A" stroke-width="1.5" stroke-dasharray="5 4"/>
+<text x="510" y="65" text-anchor="middle" font-size="16" fill="#6F6E69">rough boundary</text>
+<text x="510" y="312" text-anchor="middle" font-size="16" fill="#6F6E69">rough boundary</text>
+<path d="M70 151.667H170V218.333H70Z" stroke="#1A4F8C" stroke-width="4" fill="none"/>
+<path d="M510 85V285" stroke="#1A4F8C" stroke-width="4" fill="none"/>
+<circle cx="120" cy="151.667" r="5" fill="#1A4F8C"/>
+<circle cx="120" cy="218.333" r="5" fill="#1A4F8C"/>
+<circle cx="70" cy="185" r="5" fill="#1A4F8C"/>
+<circle cx="170" cy="185" r="5" fill="#1A4F8C"/>
+<circle cx="510" cy="118.333" r="5" fill="#1A4F8C"/>
+<circle cx="510" cy="185" r="5" fill="#1A4F8C"/>
+<circle cx="510" cy="251.667" r="5" fill="#1A4F8C"/>
+<text x="170" y="354" text-anchor="middle" font-size="17" fill="#1A4F8C">Bounds a collection of faces</text>
+<text x="510" y="354" text-anchor="middle" font-size="17" fill="#1A4F8C">Joins distinct rough boundaries</text>
+<text x="340" y="384" text-anchor="middle" font-size="15" fill="#6F6E69">Dots mark data qubits; dashed lines mark boundary guides</text>
+</svg>

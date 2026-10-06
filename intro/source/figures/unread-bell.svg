@@ -1,0 +1,25 @@
+<svg xmlns="http://www.w3.org/2000/svg" role="img" width="680" height="280" viewBox="0 0 680 280" font-family="-apple-system, BlinkMacSystemFont, system-ui, sans-serif">
+<title>The retained Bell qubit is correlated with an unread qubit. The unread states zero and one are orthogonal, so cross terms vanish and the retained density matrix has only two equal diagonal entries.</title>
+<text x="167" y="29" text-anchor="middle" font-size="20" fill="#1C1B1A">Bell correlations</text>
+<text x="505" y="29" text-anchor="middle" font-size="20" fill="#1C1B1A">Retained density matrix</text>
+<text x="78" y="65" text-anchor="middle" font-size="16" fill="#6F6E69">kept</text>
+<text x="253" y="65" text-anchor="middle" font-size="16" fill="#6F6E69">unread</text>
+<text x="78" y="113" text-anchor="middle" font-size="25" fill="#1C1B1A">0</text>
+<line x1="107" y1="106" x2="224" y2="106" stroke="#1A4F8C" stroke-width="2"/>
+<text x="253" y="113" text-anchor="middle" font-size="25" fill="#1C1B1A">0</text>
+<text x="78" y="193" text-anchor="middle" font-size="25" fill="#1C1B1A">1</text>
+<line x1="107" y1="186" x2="224" y2="186" stroke="#1A4F8C" stroke-width="2"/>
+<text x="253" y="193" text-anchor="middle" font-size="25" fill="#1C1B1A">1</text>
+<text x="168" y="249" text-anchor="middle" font-size="16" fill="#6F6E69">Different unread states</text>
+<line x1="304" y1="151" x2="360" y2="151" stroke="#6F6E69" stroke-width="1.5"/>
+<path d="M353 146L360 151L353 156" stroke="#6F6E69" stroke-width="1.5" fill="none"/>
+<rect x="421" y="70" width="72" height="72" fill="#1A4F8C" stroke="none"/>
+<text x="457" y="115" text-anchor="middle" font-size="25" fill="#fff">½</text>
+<rect x="501" y="70" width="72" height="72" fill="#E6E4D9" stroke="none"/>
+<text x="537" y="115" text-anchor="middle" font-size="25" fill="#6F6E69">0</text>
+<rect x="421" y="150" width="72" height="72" fill="#E6E4D9" stroke="none"/>
+<text x="457" y="195" text-anchor="middle" font-size="25" fill="#6F6E69">0</text>
+<rect x="501" y="150" width="72" height="72" fill="#1A4F8C" stroke="none"/>
+<text x="537" y="195" text-anchor="middle" font-size="25" fill="#fff">½</text>
+<text x="500" y="249" text-anchor="middle" font-size="18" fill="#1A4F8C">Cross terms vanish</text>
+</svg>

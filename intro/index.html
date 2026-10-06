@@ -1,0 +1,836 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>ftqclib: A Mathematical Foundation for Fault-Tolerant Quantum Computing</title>
+<!--
+  EVERYTHING MUST BE SEMANTIC.
+
+  STYLE-PUBLIC is STYLE for documents that leave the building. The structure, the semantic
+  rule and the single-file rule are STYLE's, unchanged; what differs is the faces, the
+  labels, the colours, the figures, their legends and their captions, and more room around
+  everything. An engineering report uses STYLE; a paper, a note or a page for readers
+  outside uses STYLE-PUBLIC.
+
+  An element is chosen for what the content IS. Semantics does not exclude presentation —
+  many elements carry both, and that is the point: em and strong mean emphasis and
+  importance and also look like it; b and i are defined as stylistically offset and
+  alternate-voice text, not as tags to avoid. What is excluded is markup carrying only an
+  appearance where an element with meaning already exists, and appearance hard-coded into
+  markup where a rule in this stylesheet would do it.
+
+    pre wrapping code      code and commands; a bare pre is preformatted non-code
+    h2, h3                 a section, and a division inside one; h1 is the title alone
+    thead, and th scope    a table's header row
+    table                  data with two axes: rows against comparable columns
+    dl, dt, dd             a term with its description — one axis, not two
+    time, with datetime    any date
+    main, header, footer   document landmarks
+    blockquote             a statement set apart from the argument
+    figure, figcaption     an actual image and its caption
+    img                    a raster image; carries alt text
+    svg, with role="img"   a vector image, inline; its first child, title, is its alt text
+    class="ladder"         a list read as a sequence of rungs
+    class="meta"           metadata about the document, not its content
+    class="legend"         a figure's key: which mark stands for which series
+    b in figcaption        the figure's label, as in Figure 3
+    math                   mathematics: MathML compiled from LaTeX when the document is built;
+                           never an image of a formula, and never script in the page
+    class="tml-...-pad"    Temml's italic correction on a superscript, the one class it may emit
+
+  A class names a role, not a look: meta, not small. No div or span standing in for an
+  element that exists. The test: with the stylesheet removed, the document's structure is
+  still readable from its markup alone.
+
+  Every image is inside the file, so the document stays one file with no network. A raster
+  image (a photograph, a screenshot, a scan) is an img whose source is a data URI. A vector
+  image (a drawing, a chart, a plan) is an svg written inline, not encoded, so it can be
+  read, diffed and searched like the rest of the file. It carries a viewBox, and width and
+  height for its intended size; the stylesheet shrinks it to the column as it does an img.
+  Its ids are document ids, so prefix them to keep them from colliding. Colour it by fill
+  and stroke on its own elements, not by a style block inside it, which would leak into the
+  document. Never embed a raster image inside an svg to pass it off as a vector.
+
+  The alt text, or the svg's title, says what the image shows, for a reader without the
+  image. The figcaption says what the image is and where it came from. A rendering names its
+  source and renderer, because a rendering is derived from the thing and is not the thing
+  itself; a raster rendering also names its resolution, which a vector does not have.
+  Diagrams drawn in text stay in pre blocks; figure is for raster and vector images.
+
+  A figure is centred in the column. A chart with axes is centred on its plot area, the
+  field inside the axes, not on the box that includes the axis labels: its viewBox leaves
+  the same gutter on both sides of the plot, so centring the svg centres the field. The
+  generator draws every such chart through one function that sets the viewBox this way.
+
+  Faces are the system's, so there are still no fonts and no network: New York for text
+  where the system has it (Georgia otherwise), San Francisco for labels, captions, legends
+  and metadata, SF Mono for code, and the system's maths font for mathematics (STIX Two Math
+  on Apple systems, Cambria Math on Windows).
+
+  Colours are Flexoki's, exact, from the README of kepano/flexoki at commit 8d723bac:
+    text              base-950 1C1B1A; the title in black 100F0F
+    labels, captions  base-600 6F6E69; faint ticks base-300 B7B5AC
+    rules             base-200 CECDC3; hairlines base-100 E6E4D9
+  A section heading, h2, is underlined beneath its words in ink. Headings are not greyed by
+  level; the greys belong to labels and captions, and a lighter heading would be harder to
+  find.
+  A figure uses colour in one of two ways, never both:
+    to single out one thing   that thing in blue-700 1A4F8C, everything else in base greys
+    to compare several        fills in blue-200 92BFDB, red-200 F89A8A, yellow-150 F1D67E,
+                              cyan-100 BFE8D9, in that order, four at most; fills only,
+                              never outlined and never thin lines, since they are too pale
+                              for a line to read; the legend names every series
+  Colour is never the only cue: a highlighted mark is also labelled, and compared series are
+  named in the legend.
+
+  Element names above are written without angle brackets deliberately. A comment holding
+  literal markup is markup as far as a naive tool is concerned: a regex pass over this
+  file once matched a table tag inside this comment and deleted everything between it and
+  the first real closing tag. Transform these documents by hand, or with a parser.
+-->
+<style>
+  body { color: #1C1B1A; background: #fff; font-family: ui-serif, "New York", Georgia, serif; max-width: 46em; margin: 5em auto 6em; padding: 0 1.5em; font-size: 1.0625em; line-height: 1.6; }
+  header .meta:first-child, figcaption, .meta, .legend, th, dt, code, pre { font-family: -apple-system, BlinkMacSystemFont, "SF Pro Text", system-ui, sans-serif; }
+  code, pre { font-family: ui-monospace, "SF Mono", Menlo, Consolas, monospace; font-size: .86em; }
+  h1 { font-size: 2.6em; font-weight: 300; letter-spacing: -.015em; line-height: 1.1; color: #100F0F; margin: 2.4em 0 .5em; max-width: 16em; }
+  h2 { font-size: 1.3em; font-weight: 400; margin-top: 3.2em; text-decoration: underline 1px #1C1B1A; text-underline-offset: .3em; }
+  h3 { font-size: 1em; font-weight: normal; font-style: italic; margin-top: 2em; }
+  .meta { font-size: .82em; color: #6F6E69; }
+  header .meta:first-child { font-size: .72em; letter-spacing: .32em; text-transform: uppercase; color: #878580; }
+  table { border-collapse: collapse; margin: 1.2em 0; }
+  th, td { border-bottom: 0.5px solid #CECDC3; padding: .45em 1.2em .45em 0; text-align: left; vertical-align: top; }
+  thead th { border-bottom: 0.5px solid #1C1B1A; }
+  th, dt { font-weight: 500; font-size: .72em; letter-spacing: .24em; text-transform: uppercase; color: #6F6E69; }
+  dl { margin: 1.2em 0; }
+  dt { margin-top: 1.1em; }
+  dd { margin: .2em 0 0 0; }
+  pre { border-left: 1px solid #B7B5AC; padding: .2em 0 .2em 1.2em; overflow-x: auto; }
+  pre code { font-size: inherit; }
+  blockquote { margin: 2em 0; padding-left: 1.2em; border-left: 1px solid #1C1B1A; font-style: italic; }
+  figure { margin: 3.5em 0; }
+  figure img, figure svg[role="img"] { display: block; max-width: 100%; height: auto; margin: 0 auto; }
+  figcaption { font-size: .82em; line-height: 1.5; color: #6F6E69; margin: 1.2em auto 0; max-width: 36em; text-align: center; }
+  figcaption b { display: block; margin-bottom: .4em; font-weight: 500; font-size: .88em; letter-spacing: .24em; text-transform: uppercase; color: #1C1B1A; }
+  .legend { list-style: none; padding: 0; margin: 0 0 1.6em; display: flex; flex-wrap: wrap; justify-content: center; gap: .6em 2.2em; font-size: .72em; letter-spacing: .24em; text-transform: uppercase; color: #6F6E69; }
+  .legend svg { margin-right: .8em; vertical-align: -1px; }
+  footer { margin-top: 5em; border-top: 0.5px solid #CECDC3; padding-top: 1em; }
+  .ladder li { margin: .15em 0; }
+  math { font-family: "STIX Two Math", "Cambria Math", "Latin Modern Math", "DejaVu Math TeX Gyre", "Noto Sans Math", math; font-size: 1.05em; }
+  math[display="block"] { display: block math; margin: 1.4em 0; }
+  figcaption math { font-size: 1.1em; }
+  @supports (not (-moz-appearance: none)) { .tml-sml-pad { padding-left: .05em; } .tml-med-pad { padding-left: .1em; } .tml-lrg-pad { padding-left: .15em; } }
+</style>
+</head>
+<body>
+<header>
+<p class="meta">ftqclib · overview</p>
+<h1>ftqclib: A Mathematical Foundation for Fault-Tolerant Quantum Computing</h1>
+<p class="meta">An introduction to the project's mathematics, formal methods, and purpose.</p>
+</header>
+<main>
+<h2 id="introduction">Introduction</h2>
+<p>Quantum computing has acquired its language through the problems it has solved. A circuit describes how a computation is performed. A stabilizer specifies constraints on a state. A syndrome records evidence of an error. A magic state supplies a resource for a gate that is difficult to perform directly. These names preserve useful distinctions, but the mathematical connections between them are often left for the reader to reconstruct. Moving from circuits to error correction, or from pure states to noise, can feel like entering a succession of different subjects.</p>
+<p>The connections are substantial. Commutation of Pauli operators is described by a bilinear pairing on binary vectors. Phases attached to bit strings can be studied as polynomial functions. Hadamard gates perform a finite Fourier transform. In a surface code, the distinction between a harmless closed error string and a logical error is expressed by homology. Recognizing these structures gives a reader ways to use mathematics already understood, and gives a researcher tools developed for more general problems.</p>
+<p><strong>ftqclib is an effort to make these connections explicit, precise, and reusable.</strong> It is a Lean 4 library, built on Mathlib, that develops mathematical descriptions of quantum computation and proves relationships between them. Lean checks proofs against the definitions and assumptions of each statement. A verified connection allows a result established in one description to be used in another, with the conditions of that translation visible.</p>
+<p>The development brings together stabilizer geometry, the Clifford hierarchy, a calculus of finite sums of phases, measurement protocols, channels, and quantum error correction. A companion library, ECCLib, develops Fourier analysis, finite-field mathematics, classical codes, and verified classical decoding algorithms. The common foundation is useful because the subjects meet: the signs governing Pauli commutation also enter the Fourier description of noise, and that description leads to identities constraining quantum codes.</p>
+<p>The intended beneficiaries include both readers and builders. A reader should be able to understand why several descriptions of a quantum process agree. A builder should be able to define a new transformation, encoding, or algorithm and state exactly what its correctness requires. Existing proofs can then support that construction instead of being reconstructed each time in a different notation.</p>
+<p>This becomes especially valuable when direct classical simulation is too expensive to serve as the principal check on a quantum computation. A general proof can establish that a construction preserves its specified meaning without computing every output of every instance. Experimental evidence remains necessary to determine how faithfully hardware realizes the model.</p>
+<p>The wider purpose is to make dependable quantum computing easier to understand and contribute to. Clear exposition and reusable formal mathematics can lower the cost of entering the field and combining results. Broader participation may, in turn, help produce better codes, algorithms, and implementations. Useful quantum computation and its public benefit are the goals of this effort; a shared, inspectable mathematical foundation is one way to work toward them.</p>
+<h2 id="one-state-several-descriptions">One state, several descriptions</h2>
+<p>Consider two qubits initially in the state <math><mrow><mi>|</mi><mn>00</mn><mo form="postfix" stretchy="false">⟩</mo></mrow></math>. Apply a Hadamard gate to the first and then a controlled-NOT with the first as control. The result is the Bell state</p>
+<math display="block"><mrow><mi>|</mi><msup><mrow><mi mathvariant="normal">Φ</mi><mspace></mspace></mrow><mo>+</mo></msup><mo form="postfix" stretchy="false">⟩</mo><mo>=</mo><mfrac><mrow><mi>|</mi><mn>00</mn><mo form="postfix" stretchy="false">⟩</mo><mo>+</mo><mi>|</mi><mn>11</mn><mo form="postfix" stretchy="false" lspace="0em" rspace="0em">⟩</mo></mrow><msqrt><mn>2</mn></msqrt></mfrac><mo>=</mo><mfrac><mn>1</mn><msqrt><mn>2</mn></msqrt></mfrac><mrow><munder><mo movablelimits="false">∑</mo><mrow><mi>t</mi><mo>∈</mo><mrow><mo fence="true" form="prefix" stretchy="false">{</mo><mn>0,1</mn><mo fence="true" form="postfix" stretchy="false">}</mo></mrow></mrow></munder></mrow><mi>|</mi><mi>t</mi><mo separator="true">,</mo><mi>t</mi><mo form="postfix" stretchy="false">⟩</mo><mi>.</mi></mrow></math>
+<p>The first expression displays its nonzero amplitudes. The second describes the same state using a single binary variable: choose a value of <math><mi>t</mi></math>, place it in both positions, and sum the two alternatives with the stated scale. The circuit, the amplitude vector, and the finite sum already offer three descriptions of one construction.</p>
+<figure>
+<svg xmlns="http://www.w3.org/2000/svg" role="img" width="680" height="310" viewBox="0 0 680 310" font-family="-apple-system, BlinkMacSystemFont, system-ui, sans-serif">
+  <title>A Hadamard on the first of two zero-initialized qubits followed by a controlled-NOT prepares a Bell pair. A support grid highlights the equal-bit outputs 00 and 11; the unequal-bit outputs have zero amplitude.</title>
+  <text x="177" y="31" text-anchor="middle" font-size="20" fill="#1C1B1A">Preparation circuit</text>
+  <text x="513" y="31" text-anchor="middle" font-size="20" fill="#1C1B1A">Output support</text>
+  <text x="177" y="64" text-anchor="middle" font-size="17" fill="#6F6E69">Both qubits start at zero</text>
+  <text x="30" y="124" font-size="19" fill="#1C1B1A">q₀</text>
+  <text x="30" y="214" font-size="19" fill="#1C1B1A">q₁</text>
+  <path d="M65 117H303 M65 207H303" fill="none" stroke="#1C1B1A" stroke-width="1.8"/>
+  <rect x="101" y="93" width="48" height="48" fill="#fff" stroke="#1C1B1A" stroke-width="1.8"/>
+  <text x="125" y="125" text-anchor="middle" font-size="24" fill="#1C1B1A">H</text>
+  <path d="M237 117V227 M217 207H257" fill="none" stroke="#1C1B1A" stroke-width="1.8"/>
+  <circle cx="237" cy="117" r="6" fill="#1C1B1A"/>
+  <circle cx="237" cy="207" r="20" fill="none" stroke="#1C1B1A" stroke-width="1.8"/>
+  <text x="513" y="66" text-anchor="middle" font-size="17" fill="#6F6E69">Second bit</text>
+  <text x="473" y="94" text-anchor="middle" font-size="18" fill="#1C1B1A">0</text>
+  <text x="553" y="94" text-anchor="middle" font-size="18" fill="#1C1B1A">1</text>
+  <text x="414" y="149" text-anchor="middle" font-size="18" fill="#1C1B1A">0</text>
+  <text x="414" y="229" text-anchor="middle" font-size="18" fill="#1C1B1A">1</text>
+  <text x="371" y="184" transform="rotate(-90 371 184)" text-anchor="middle" font-size="17" fill="#6F6E69">First bit</text>
+  <rect x="437" y="109" width="72" height="72" fill="#1A4F8C"/>
+  <rect x="517" y="109" width="72" height="72" fill="#E6E4D9"/>
+  <rect x="437" y="189" width="72" height="72" fill="#E6E4D9"/>
+  <rect x="517" y="189" width="72" height="72" fill="#1A4F8C"/>
+  <text x="473" y="154" text-anchor="middle" font-size="24" fill="#fff">00</text>
+  <text x="553" y="154" text-anchor="middle" font-size="24" fill="#6F6E69">01</text>
+  <text x="473" y="234" text-anchor="middle" font-size="24" fill="#6F6E69">10</text>
+  <text x="553" y="234" text-anchor="middle" font-size="24" fill="#fff">11</text>
+  <text x="177" y="287" text-anchor="middle" font-size="17" fill="#6F6E69">Time runs from left to right</text>
+  <text x="513" y="287" text-anchor="middle" font-size="17" fill="#1A4F8C">00 and 11: nonzero amplitudes</text>
+</svg>
+<figcaption><b>Figure 1.</b>The preparation circuit and the support of its output. Only the bit strings 00 and 11 have nonzero amplitude; both amplitudes are positive and equal to <math><mrow><mn>1</mn><mi>/</mi><msqrt><mn>2</mn></msqrt></mrow></math>. The highlighted cells show support, not a classical mixture. Original SVG diagram for this essay, following the calculation above.</figcaption>
+</figure>
+<p>There is also a description by constraints. The Bell state is fixed by applying <math><mi>X</mi></math> to both qubits, and by applying <math><mi>Z</mi></math> to both. Write these operations as <math><mrow><mi>X</mi><mi>X</mi></mrow></math> and <math><mrow><mi>Z</mi><mi>Z</mi></mrow></math>.</p>
+<section class="proposition" aria-label="Proposition — Bell-state characterization">
+<p><strong>Proposition — Bell-state characterization.</strong></p>
+<p>The simultaneous <math><mrow><mo form="prefix" stretchy="false">+</mo><mn>1</mn></mrow></math> eigenspace of <math><mrow><mi>X</mi><mi>X</mi></mrow></math> and <math><mrow><mi>Z</mi><mi>Z</mi></mrow></math> is the one-dimensional space spanned by <math><mrow><mi>|</mi><msup><mrow><mi mathvariant="normal">Φ</mi><mspace></mspace></mrow><mo>+</mo></msup><mo form="postfix" stretchy="false">⟩</mo></mrow></math>.</p>
+</section>
+<section class="proof" aria-label="Proof">
+<p><strong>Proof.</strong></p>
+<p>Write a general state as <math><mrow><mi>a</mi><mi>|</mi><mn>00</mn><mo form="postfix" stretchy="false">⟩</mo><mo>+</mo><mi>b</mi><mi>|</mi><mn>01</mn><mo form="postfix" stretchy="false">⟩</mo><mo>+</mo><mi>c</mi><mi>|</mi><mn>10</mn><mo form="postfix" stretchy="false">⟩</mo><mo>+</mo><mi>d</mi><mi>|</mi><mn>11</mn><mo form="postfix" stretchy="false">⟩</mo></mrow></math>. The operation <math><mrow><mi>Z</mi><mi>Z</mi></mrow></math> leaves the equal-bit terms unchanged and negates the unequal-bit terms. Being fixed by it therefore forces <math><mrow><mi>b</mi><mo>=</mo><mi>c</mi><mo>=</mo><mn>0</mn></mrow></math>. The operation <math><mrow><mi>X</mi><mi>X</mi></mrow></math> exchanges <math><mrow><mi>|</mi><mn>00</mn><mo form="postfix" stretchy="false">⟩</mo></mrow></math> and <math><mrow><mi>|</mi><mn>11</mn><mo form="postfix" stretchy="false">⟩</mo></mrow></math>, so being fixed by it then forces <math><mrow><mi>a</mi><mo>=</mo><mi>d</mi></mrow></math>. The resulting vectors are exactly the scalar multiples of <math><mrow><mi>|</mi><mn>00</mn><mo form="postfix" stretchy="false">⟩</mo><mo>+</mo><mi>|</mi><mn>11</mn><mo form="postfix" stretchy="false">⟩</mo></mrow></math>.</p>
+</section>
+<p>This proof gives the stabilizer description a precise meaning. Normalization leaves only an overall phase unspecified. Changing a stabilizer sign changes the state: the <math><mrow><mo form="prefix" stretchy="false">+</mo><mn>1</mn></mrow></math> eigenspace of <math><mrow><mi>Z</mi><mi>Z</mi></mrow></math> intersected with the <math><mrow><mo form="prefix" stretchy="false">−</mo><mn>1</mn></mrow></math> eigenspace of <math><mrow><mi>X</mi><mi>X</mi></mrow></math> is spanned by <math><mrow><mrow><mo fence="true" form="prefix" stretchy="false">(</mo><mi>|</mi><mn>00</mn><mo form="postfix" stretchy="false">⟩</mo><mo>−</mo><mi>|</mi><mn>11</mn><mo form="postfix" stretchy="false">⟩</mo><mo fence="true" form="postfix" stretchy="false">)</mo></mrow><mi>/</mi><msqrt><mn>2</mn></msqrt></mrow></math>. The signs carry information.</p>
+<p>The commutation calculation itself can be expressed in binary arithmetic. Label an <math><mi>n</mi></math>-qubit Pauli, up to scalar phase, by two bit strings <math><mrow><mi>a</mi><mo separator="true">,</mo><mi>b</mi></mrow></math>: the entries of <math><mi>a</mi></math> indicate where an <math><mi>X</mi></math> occurs, and those of <math><mi>b</mi></math> where a <math><mi>Z</mi></math> occurs. For two labels define</p>
+<math display="block"><mrow><mi>ω</mi><mo fence="true" symmetric="true" minsize="1.2em" maxsize="1.2em">(</mo><mo form="prefix" stretchy="false">(</mo><mi>a</mi><mo separator="true">,</mo><mi>b</mi><mo form="postfix" stretchy="false">)</mo><mo separator="true">,</mo><mo form="prefix" stretchy="false">(</mo><mi>c</mi><mo separator="true">,</mo><mi>d</mi><mo form="postfix" stretchy="false">)</mo><mo fence="true" symmetric="true" minsize="1.2em" maxsize="1.2em">)</mo><mo>=</mo><mi>a</mi><mo>⋅</mo><mi>d</mi><mo>+</mo><mi>b</mi><mo>⋅</mo><mi>c</mi><mo></mo><mspace width="1em"></mspace><mo form="prefix" stretchy="false">(</mo><mpadded lspace="0"><mi>mod</mi></mpadded><mspace width="0.3333em"></mspace><mn>2</mn><mo form="postfix" stretchy="false">)</mo><mi>.</mi></mrow></math>
+<p>The corresponding Paulis commute when this value is zero and anticommute when it is one. The pairing counts, modulo two, the sign changes produced by passing an <math><mi>X</mi></math> through a <math><mi>Z</mi></math>. It is called a symplectic form. For the two Bell stabilizers, <math><mrow><mi>a</mi><mo>=</mo><mrow><mo fence="true" form="prefix" stretchy="false">(</mo><mn>1,1</mn><mo fence="true" form="postfix" stretchy="false">)</mo></mrow></mrow></math> for <math><mrow><mi>X</mi><mi>X</mi></mrow></math> and <math><mrow><mi>d</mi><mo>=</mo><mrow><mo fence="true" form="prefix" stretchy="false">(</mo><mn>1,1</mn><mo fence="true" form="postfix" stretchy="false">)</mo></mrow></mrow></math> for <math><mrow><mi>Z</mi><mi>Z</mi></mrow></math>, so the two sign changes cancel.</p>
+<figure>
+<svg xmlns="http://www.w3.org/2000/svg" role="img" width="680" height="265" viewBox="0 0 680 265" font-family="-apple-system, BlinkMacSystemFont, system-ui, sans-serif">
+<title>Commutation is a parity calculation. XX and ZZ exchange X and Z on two qubits and commute; XI and ZI exchange them on one qubit and anticommute.</title>
+<text x="175" y="30" text-anchor="middle" font-size="20" fill="#1C1B1A">Two local exchanges</text>
+<text x="505" y="30" text-anchor="middle" font-size="20" fill="#1C1B1A">One local exchange</text>
+<rect x="71" y="58" width="68" height="111" fill="none" stroke="#CECDC3"/>
+<text x="105" y="89" text-anchor="middle" font-size="25" fill="#1C1B1A">X</text>
+<text x="105" y="147" text-anchor="middle" font-size="25" fill="#1C1B1A">Z</text>
+<path d="M85 102L125 121 M125 102L85 121" stroke="#1A4F8C" stroke-width="2" fill="none"/>
+<text x="105" y="193" text-anchor="middle" font-size="15" fill="#1A4F8C">one minus</text>
+<rect x="201" y="58" width="68" height="111" fill="none" stroke="#CECDC3"/>
+<text x="235" y="89" text-anchor="middle" font-size="25" fill="#1C1B1A">X</text>
+<text x="235" y="147" text-anchor="middle" font-size="25" fill="#1C1B1A">Z</text>
+<path d="M215 102L255 121 M255 102L215 121" stroke="#1A4F8C" stroke-width="2" fill="none"/>
+<text x="235" y="193" text-anchor="middle" font-size="15" fill="#1A4F8C">one minus</text>
+<rect x="401" y="58" width="68" height="111" fill="none" stroke="#CECDC3"/>
+<text x="435" y="89" text-anchor="middle" font-size="25" fill="#1C1B1A">X</text>
+<text x="435" y="147" text-anchor="middle" font-size="25" fill="#1C1B1A">Z</text>
+<path d="M415 102L455 121 M455 102L415 121" stroke="#1A4F8C" stroke-width="2" fill="none"/>
+<text x="435" y="193" text-anchor="middle" font-size="15" fill="#1A4F8C">one minus</text>
+<rect x="531" y="58" width="68" height="111" fill="none" stroke="#CECDC3"/>
+<text x="565" y="89" text-anchor="middle" font-size="25" fill="#1C1B1A">I</text>
+<text x="565" y="147" text-anchor="middle" font-size="25" fill="#1C1B1A">I</text>
+<text x="565" y="193" text-anchor="middle" font-size="15" fill="#6F6E69">no sign</text>
+<text x="175" y="237" text-anchor="middle" font-size="19" fill="#1A4F8C">Even parity: commute</text>
+<text x="505" y="237" text-anchor="middle" font-size="19" fill="#1A4F8C">Odd parity: anticommute</text>
+</svg>
+<figcaption><b>Figure 2.</b>Commutation becomes parity. Each local exchange of <math><mi>X</mi></math> and <math><mi>Z</mi></math> contributes one minus sign. The two exchanges in <math><mrow><mi>X</mi><mi>X</mi></mrow></math> versus <math><mrow><mi>Z</mi><mi>Z</mi></mrow></math> cancel; the single exchange in <math><mrow><mi>X</mi><mi>I</mi></mrow></math> versus <math><mrow><mi>Z</mi><mi>I</mi></mrow></math> does not. Original SVG diagram of the symplectic calculation above.</figcaption>
+</figure>
+<p>The gain is conceptual as well as computational. The binary span of a family of commuting Pauli labels is a subspace on which this pairing vanishes. Clifford gates act by transformations preserving the pairing. Signs and scalar phases require additional structure, which ftqclib treats explicitly. The library develops the connections between these geometric objects and their actions on quantum states. <a href="#ref-stabilizers">1</a></p>
+<p>The corresponding Lean definition is short enough to read directly:</p>
+<pre><code class="language-lean">def omega (p q : Pauli n) : ZMod 2 :=
+  (∑ i, p.Z i * q.X i) + (∑ i, p.X i * q.Z i)
+</code></pre>
+<p>Here <code>ZMod 2</code> means arithmetic modulo two, <code>p.X</code> and <code>p.Z</code> are the two binary components, and <code>∑ i</code> sums over qubit positions. The notation differs from the displayed equation, but the operation is exactly the same. Throughout this essay, Lean blocks are excerpts from the named source modules, with their surrounding imports and namespace context omitted. They show the actual definitions and proofs; they are not standalone programs.</p>
+<h2 id="a-common-mathematical-foundation">A common mathematical foundation</h2>
+<p>The Bell example suggests a general method: choose a representation that exposes the structure of a problem, and prove how that representation relates to the others.</p>
+<p>For diagonal gates, the useful object is a phase function on bit strings. A gate multiplies each basis amplitude by a phase; powers of two in the phase denominator provide a natural precision parameter. Flipping an input bit compares two values of the function, producing a finite difference. Repeated differences connect polynomial arithmetic to the recursive definition of the Clifford hierarchy. The library formalizes the qubit classification of diagonal hierarchy gates, including the effective levels of familiar gates such as <math><mi>S</mi></math>, <math><mi>T</mi></math>, and CCZ. Global-phase conventions are part of the statements. <a href="#ref-hierarchy">2</a></p>
+<p>Hadamards introduce sums, so a representation intended to follow general circuits must accommodate interference. The carrier calculus describes amplitudes through finite sums of polynomial phases, together with support and scale data. Some bits label the visible output; auxiliary bits are summed over. This provides a setting in which gate actions, changes of representation, and equality can be studied together.</p>
+<figure>
+<svg xmlns="http://www.w3.org/2000/svg" role="img" width="680" height="315" viewBox="0 0 680 315" font-family="-apple-system, BlinkMacSystemFont, system-ui, sans-serif">
+<title>Two Hadamards return an initial zero qubit to zero. Both intermediate paths contribute positively to output zero; their contributions to output one have opposite signs and cancel.</title>
+<text x="65" y="30" text-anchor="middle" font-size="19" fill="#1C1B1A">Input</text>
+<text x="315" y="30" text-anchor="middle" font-size="19" fill="#1C1B1A">Summed bit</text>
+<text x="565" y="30" text-anchor="middle" font-size="19" fill="#1C1B1A">Output</text>
+<text x="185" y="58" text-anchor="middle" font-size="16" fill="#6F6E69">first H</text>
+<text x="440" y="58" text-anchor="middle" font-size="16" fill="#6F6E69">second H</text>
+<circle cx="65" cy="159" r="19" fill="#fff"/>
+<text x="65" y="166" text-anchor="middle" font-size="23" fill="#1C1B1A">0</text>
+<circle cx="315" cy="95" r="19" fill="#fff"/>
+<text x="315" y="102" text-anchor="middle" font-size="23" fill="#1C1B1A">0</text>
+<circle cx="315" cy="225" r="19" fill="#fff"/>
+<text x="315" y="232" text-anchor="middle" font-size="23" fill="#1C1B1A">1</text>
+<circle cx="565" cy="95" r="19" fill="#fff"/>
+<text x="565" y="102" text-anchor="middle" font-size="23" fill="#1C1B1A">0</text>
+<circle cx="565" cy="225" r="19" fill="#fff"/>
+<text x="565" y="232" text-anchor="middle" font-size="23" fill="#1C1B1A">1</text>
+<line x1="90" y1="155" x2="290" y2="95" stroke="#6F6E69" stroke-width="1.5"/>
+<line x1="90" y1="155" x2="290" y2="225" stroke="#6F6E69" stroke-width="1.5"/>
+<line x1="339" y1="95" x2="541" y2="95" stroke="#1A4F8C" stroke-width="2"/>
+<line x1="339" y1="225" x2="541" y2="95" stroke="#1A4F8C" stroke-width="2"/>
+<line x1="339" y1="95" x2="541" y2="225" stroke="#6F6E69" stroke-width="2"/>
+<line x1="339" y1="225" x2="541" y2="225" stroke="#6F6E69" stroke-width="2"/>
+<text x="450" y="87" text-anchor="middle" font-size="22" fill="#1A4F8C">+</text>
+<text x="450" y="149" text-anchor="middle" font-size="22" fill="#1A4F8C">+</text>
+<text x="395" y="157" text-anchor="middle" font-size="22" fill="#6F6E69">+</text>
+<text x="450" y="250" text-anchor="middle" font-size="22" fill="#6F6E69">−</text>
+<text x="315" y="291" text-anchor="middle" font-size="19" fill="#1A4F8C">Add amplitudes before taking probabilities</text>
+<text x="610" y="100" text-anchor="middle" font-size="16" fill="#1A4F8C">add</text>
+<text x="610" y="230" text-anchor="middle" font-size="16" fill="#6F6E69">cancel</text>
+</svg>
+<figcaption><b>Figure 3.</b>A summed bit records alternatives that can interfere. Starting at zero, two Hadamards give two positive path contributions to output zero and opposite contributions to output one. Each path has magnitude one half. The intermediate bit is summed over; reading it would change the process. Original SVG path diagram of this elementary circuit identity.</figcaption>
+</figure>
+<p>Fourier analysis supplies another connection. A layer of Hadamards is a normalized transform built from signs determined by binary dot products. The same sign patterns occur in code duality and channel representations. ECCLib develops finite Fourier analysis, classical coding identities, and verified decoding algorithms independently of FTQCLib: it imports Mathlib, while FTQCLib uses both. <a href="#ref-ecclib">3</a></p>
+<p>Topology enters through error correction. In a lattice code, taking the boundary of an error string gives its syndrome. Closed strings have zero boundary, but some are boundaries of collections of faces and others represent logical operations. A chain complex records these relationships; homology records the remaining distinction. ftqclib develops this description alongside stabilizer and CSS algebra.</p>
+<figure>
+<svg xmlns="http://www.w3.org/2000/svg" role="img" width="680" height="295" viewBox="0 0 680 295" font-family="-apple-system, BlinkMacSystemFont, system-ui, sans-serif">
+<title>A filled square has four boundary edges. Taking their boundary counts each corner twice, leaving zero over binary arithmetic. This is the geometric reason a boundary has no syndrome.</title>
+<text x="105" y="30" text-anchor="middle" font-size="20" fill="#1C1B1A">A face</text>
+<text x="335" y="30" text-anchor="middle" font-size="20" fill="#1C1B1A">Its boundary</text>
+<text x="575" y="30" text-anchor="middle" font-size="20" fill="#1C1B1A">Boundary again</text>
+<rect x="48" y="85" width="112" height="112" fill="#E6E4D9" stroke="#CECDC3"/>
+<rect x="278" y="85" width="112" height="112" fill="none" stroke="#1A4F8C"/>
+<circle cx="48" cy="85" r="4" fill="#6F6E69"/>
+<circle cx="48" cy="197" r="4" fill="#6F6E69"/>
+<circle cx="160" cy="85" r="4" fill="#6F6E69"/>
+<circle cx="160" cy="197" r="4" fill="#6F6E69"/>
+<circle cx="278" cy="85" r="4" fill="#6F6E69"/>
+<circle cx="278" cy="197" r="4" fill="#6F6E69"/>
+<circle cx="390" cy="85" r="4" fill="#6F6E69"/>
+<circle cx="390" cy="197" r="4" fill="#6F6E69"/>
+<line x1="185" y1="142" x2="252" y2="142" stroke="#6F6E69" stroke-width="1.5"/>
+<path d="M245 137L252 142L245 147" stroke="#6F6E69" stroke-width="1.5" fill="none"/>
+<line x1="414" y1="142" x2="479" y2="142" stroke="#6F6E69" stroke-width="1.5"/>
+<path d="M472 137L479 142L472 147" stroke="#6F6E69" stroke-width="1.5" fill="none"/>
+<circle cx="520" cy="85" r="7" fill="#1A4F8C"/>
+<text x="520" y="116" text-anchor="middle" font-size="15" fill="#6F6E69">twice</text>
+<circle cx="520" cy="197" r="7" fill="#1A4F8C"/>
+<text x="520" y="228" text-anchor="middle" font-size="15" fill="#6F6E69">twice</text>
+<circle cx="630" cy="85" r="7" fill="#1A4F8C"/>
+<text x="630" y="116" text-anchor="middle" font-size="15" fill="#6F6E69">twice</text>
+<circle cx="630" cy="197" r="7" fill="#1A4F8C"/>
+<text x="630" y="228" text-anchor="middle" font-size="15" fill="#6F6E69">twice</text>
+<text x="105" y="262" text-anchor="middle" font-size="16" fill="#6F6E69">2-dimensional cell</text>
+<text x="335" y="262" text-anchor="middle" font-size="16" fill="#6F6E69">1-dimensional chain</text>
+<text x="575" y="262" text-anchor="middle" font-size="17" fill="#1A4F8C">Zero modulo two</text>
+</svg>
+<figcaption><b>Figure 4.</b>Why the boundary of a boundary vanishes. Each corner of the square occurs in two boundary edges and hence cancels in binary arithmetic. In the code interpretation, this identity underlies the compatibility of the checks. Original SVG diagram illustrating the chain-complex description.</figcaption>
+</figure>
+<p>The source makes the familiar distinction using the kernel and image of linear maps:</p>
+<pre><code class="language-lean">def cycles (i : ℕ) : Submodule (ZMod 2) (Fin (C.cells i) → ZMod 2) :=
+  LinearMap.ker (C.dFrom i).mulVecLin
+
+/-- The boundaries of degree `i`: the image of the boundary `∂_{i+1}` into degree `i`. -/
+def boundaries (i : ℕ) : Submodule (ZMod 2) (Fin (C.cells i) → ZMod 2) :=
+  LinearMap.range (C.d i).mulVecLin
+</code></pre>
+<p><code>LinearMap.ker</code> selects chains with zero boundary; <code>LinearMap.range</code> selects those that arise as boundaries of higher-dimensional chains. The subscript-like argument <code>i</code> is the dimension. At degree one, homology takes cycles modulo boundaries: it identifies strings differing by a stabilizer while retaining the logical distinction. These definitions come from <code>CSS.BasedComplex</code>.</p>
+<h2 id="meaning-transformation-and-proof">Meaning, transformation, and proof</h2>
+<p>Before an algebraic expression can be transformed safely, its meaning must be specified. For a carrier expression, this meaning is an amplitude function. For a gate word it is an action on amplitude functions. Measurement adds outcomes; forgetting part of a system leads to a channel. These assignments are the semantics of the representations.</p>
+<h3 id="a-carrier-record-and-the-state-it-denotes">A carrier record and the state it denotes</h3>
+<p>Write <math><mi>𝒞</mi></math> for a carrier record on an <math><mi>n</mi></math>-qubit register, and <math><msub><mi>ψ</mi><mi>𝒞</mi></msub></math> for its amplitude function. The calligraphic letter names a mathematical presentation; the subscripted wavefunction names what that presentation means. Lowercase <math><mi>c</mi></math> remains the record&#39;s scalar coefficient. This notation is expository: the Lean type is <code>KernelSumState n</code>.</p>
+<p>A record has six fields:</p>
+<math display="block"><mrow><mi>𝒞</mi><mo>=</mo><mrow><mo fence="true" form="prefix" stretchy="false">(</mo><mi>m</mi><mo separator="true">,</mo><mi>h</mi><mo separator="true">,</mo><mi>Q</mi><mo separator="true">,</mo><mi>c</mi><mo separator="true">,</mo><mi>L</mi><mo separator="true">,</mo><msub><mi>x</mi><mn>0</mn></msub><mo fence="true" form="postfix" stretchy="false">)</mo></mrow><mi>.</mi></mrow></math>
+<table>
+<thead>
+<tr>
+<th scope="col">Field</th>
+<th scope="col">Mathematical role</th>
+<th scope="col">What the reader should picture</th>
+</tr>
+</thead>
+<tbody><tr>
+<td><math><mi>m</mi></math></td>
+<td>Phase precision: exponents are read modulo <math><msup><mn>2</mn><mi>m</mi></msup></math>.</td>
+<td>Which roots of unity can occur.</td>
+</tr>
+<tr>
+<td><math><mi>h</mi></math></td>
+<td>Number of summed, or bound, bits.</td>
+<td>Alternatives whose amplitudes must be added.</td>
+</tr>
+<tr>
+<td><math><mi>Q</mi></math></td>
+<td>A phase polynomial in <math><mrow><mi>n</mi><mo>+</mo><mi>h</mi></mrow></math> binary inputs.</td>
+<td>The phase attached to each visible-word/summed-word pair.</td>
+</tr>
+<tr>
+<td><math><mi>c</mi></math></td>
+<td>A complex scalar coefficient.</td>
+<td>The overall scale and phase, before the factor from <math><mi>h</mi></math>.</td>
+</tr>
+<tr>
+<td><math><mi>L</mi></math></td>
+<td>A subspace of binary Pauli labels.</td>
+<td>Geometric data determining which visible words are permitted.</td>
+</tr>
+<tr>
+<td><math><msub><mi>x</mi><mn>0</mn></msub></math></td>
+<td>An <math><mi>n</mi></math>-bit offset.</td>
+<td>A translation of that permitted region.</td>
+</tr>
+</tbody></table>
+<p>Let <math><mrow><msub><mi>π</mi><mi>X</mi></msub><mrow><mo fence="true" form="prefix" stretchy="false">(</mo><mi>L</mi><mo fence="true" form="postfix" stretchy="false">)</mo></mrow></mrow></math> be the set of <math><mi>X</mi></math>-components of labels in <math><mi>L</mi></math>. Define the affine region <math><mrow><msub><mi>A</mi><mi>𝒞</mi></msub><mo>=</mo><msub><mi>x</mi><mn>0</mn></msub><mo>+</mo><msub><mi>π</mi><mi>X</mi></msub><mrow><mo fence="true" form="prefix" stretchy="false">(</mo><mi>L</mi><mo fence="true" form="postfix" stretchy="false">)</mo></mrow></mrow></math>, and put <math><mrow><msub><mi>ζ</mi><mi>m</mi></msub><mo>=</mo><mrow><mi>exp</mi><mo>⁡</mo></mrow><mrow><mo fence="true" form="prefix" stretchy="false">(</mo><mn>2</mn><mi>π</mi><mi>i</mi><mi>/</mi><msup><mn>2</mn><mi>m</mi></msup><mo fence="true" form="postfix" stretchy="false">)</mo></mrow></mrow></math>. The record denotes</p>
+<math display="block"><mrow><msub><mi>ψ</mi><mi>𝒞</mi></msub><mrow><mo fence="true" form="prefix" stretchy="false">(</mo><mi>w</mi><mo fence="true" form="postfix" stretchy="false">)</mo></mrow><mo>=</mo><msub><mn>𝟏</mn><msub><mi>A</mi><mi>𝒞</mi></msub></msub><mrow><mo fence="true" form="prefix" stretchy="false">(</mo><mi>w</mi><mo fence="true" form="postfix" stretchy="false">)</mo></mrow><mspace width="0.1667em"></mspace><mfrac><mi>c</mi><msup><mrow><mo fence="true" form="prefix" stretchy="false">(</mo><msqrt><mn>2</mn></msqrt><mo fence="true" form="postfix" stretchy="false">)</mo></mrow><mi>h</mi></msup></mfrac><mrow><munder><mo movablelimits="false">∑</mo><mrow><mi>y</mi><mo>∈</mo><msup><mrow><mo fence="true" form="prefix" stretchy="false">{</mo><mn>0,1</mn><mo fence="true" form="postfix" stretchy="false">}</mo></mrow><mi>h</mi></msup></mrow></munder></mrow><msubsup><mi>ζ</mi><mi>m</mi><mrow><mi>Q</mi><mrow><mo fence="true" form="prefix" stretchy="false">(</mo><mi>w</mi><mo separator="true">,</mo><mi>y</mi><mo fence="true" form="postfix" stretchy="false">)</mo></mrow></mrow></msubsup><mi>.</mi></mrow></math>
+<p>The indicator is one inside <math><msub><mi>A</mi><mi>𝒞</mi></msub></math> and zero outside it. The exponent is evaluated modulo <math><msup><mn>2</mn><mi>m</mi></msup></math>; choosing another integer representative gives the same root of unity. The visible word <math><mi>w</mi></math> labels an output basis state. The bound word <math><mi>y</mi></math> is summed over and is not an additional output register. When <math><mrow><mi>h</mi><mo>=</mo><mn>0</mn></mrow></math>, there is one empty word, so the sum has one term.</p>
+<p>The corresponding state vector is</p>
+<math display="block"><mrow><mo form="prefix" stretchy="false">|</mo><msub><mi>ψ</mi><mi>𝒞</mi></msub><mo form="postfix" stretchy="false">⟩</mo><mo>=</mo><mrow><munder><mo movablelimits="false">∑</mo><mrow><mi>w</mi><mo>∈</mo><mo form="prefix" stretchy="false">{</mo><mn>0,1</mn><msup><mo form="postfix" stretchy="false">}</mo><mi>n</mi></msup></mrow></munder></mrow><msub><mi>ψ</mi><mi>𝒞</mi></msub><mo form="prefix" stretchy="false">(</mo><mi>w</mi><mo form="postfix" stretchy="false">)</mo><mo form="prefix" stretchy="false">|</mo><mi>w</mi><mo form="postfix" stretchy="false">⟩</mo><mi>.</mi></mrow></math>
+<p>For an admissible carrier, <math><mrow><mi>m</mi><mo>≥</mo><mn>1</mn></mrow></math>, <math><mi>L</mi></math> is Lagrangian—a maximal commuting subspace of the binary Pauli labels—and this amplitude function is not identically zero. Unit normalization is a further property. Also, <math><msub><mi>A</mi><mi>𝒞</mi></msub></math> is a <strong>support envelope</strong>: interference can make an amplitude zero even inside it. The datum <math><mi>L</mi></math> must not in general be read as the stabilizer group of the denoted state; the phase polynomial and the sum also affect that state.</p>
+<figure>
+<svg xmlns="http://www.w3.org/2000/svg" role="img" width="680" height="440" viewBox="0 0 680 440" font-family="-apple-system, BlinkMacSystemFont, system-ui, sans-serif">
+<title>Evaluate a carrier at a fixed visible word. Outside the support envelope the amplitude is zero. Inside, enumerate the bound alternatives, read their phases, sum them and multiply by the scalar and the normalization factor. The illustrated two alternatives are the case of one bound bit.</title>
+<text x="340" y="27" text-anchor="middle" font-size="22" fill="#1C1B1A">Read one amplitude from the record</text>
+<rect x="40" y="56" width="265" height="53" fill="none" stroke="#CECDC3"/>
+<text x="172" y="89" text-anchor="middle" font-size="19" fill="#1C1B1A">Fix a visible word</text>
+<line x1="305" y1="82" x2="369" y2="82" stroke="#6F6E69" stroke-width="1.5"/>
+<path d="M362 77L369 82L362 87" stroke="#6F6E69" stroke-width="1.5" fill="none"/>
+<rect x="370" y="56" width="270" height="53" fill="none" stroke="#CECDC3"/>
+<text x="505" y="78" text-anchor="middle" font-size="18" fill="#1C1B1A">Test the support envelope</text>
+<text x="505" y="99" text-anchor="middle" font-size="15" fill="#6F6E69">using geometry and offset</text>
+<line x1="505" y1="109" x2="505" y2="148" stroke="#6F6E69" stroke-width="1.5"/>
+<path d="M500 141L505 148L510 141" stroke="#6F6E69" stroke-width="1.5" fill="none"/>
+<text x="555" y="135" text-anchor="middle" font-size="15" fill="#6F6E69">outside</text>
+<text x="505" y="171" text-anchor="middle" font-size="19" fill="#6F6E69">Amplitude zero</text>
+<path d="M370 92H340V196H300" stroke="#6F6E69" stroke-width="1.5" fill="none"/>
+<text x="315" y="159" text-anchor="middle" font-size="15" fill="#6F6E69">inside</text>
+<rect x="40" y="183" width="260" height="78" fill="none" stroke="#CECDC3"/>
+<text x="170" y="205" text-anchor="middle" font-size="17" fill="#1C1B1A">Read each bound alternative</text>
+<circle cx="108" cy="234" r="12" fill="#E6E4D9"/>
+<text x="108" y="240" text-anchor="middle" font-size="17" fill="#1C1B1A">0</text>
+<circle cx="226" cy="234" r="12" fill="#E6E4D9"/>
+<text x="226" y="240" text-anchor="middle" font-size="17" fill="#1C1B1A">1</text>
+<line x1="300" y1="223" x2="369" y2="223" stroke="#6F6E69" stroke-width="1.5"/>
+<path d="M362 218L369 223L362 228" stroke="#6F6E69" stroke-width="1.5" fill="none"/>
+<rect x="370" y="190" width="270" height="65" fill="none" stroke="#CECDC3"/>
+<text x="505" y="217" text-anchor="middle" font-size="19" fill="#1C1B1A">Evaluate its phase</text>
+<text x="505" y="240" text-anchor="middle" font-size="15" fill="#6F6E69">from polynomial and precision</text>
+<path d="M505 255V285H170V308" stroke="#6F6E69" stroke-width="1.5" fill="none"/>
+<rect x="40" y="309" width="260" height="57" fill="none" stroke="#CECDC3"/>
+<text x="170" y="342" text-anchor="middle" font-size="19" fill="#1A4F8C">Add the phases</text>
+<line x1="300" y1="337" x2="369" y2="337" stroke="#6F6E69" stroke-width="1.5"/>
+<path d="M362 332L369 337L362 342" stroke="#6F6E69" stroke-width="1.5" fill="none"/>
+<rect x="370" y="309" width="270" height="57" fill="none" stroke="#CECDC3"/>
+<text x="505" y="332" text-anchor="middle" font-size="18" fill="#1C1B1A">Apply scale and</text>
+<text x="505" y="353" text-anchor="middle" font-size="18" fill="#1C1B1A">bound-bit normalization</text>
+<line x1="505" y1="366" x2="505" y2="399" stroke="#6F6E69" stroke-width="1.5"/>
+<path d="M500 392L505 399L510 392" stroke="#6F6E69" stroke-width="1.5" fill="none"/>
+<text x="505" y="425" text-anchor="middle" font-size="19" fill="#1A4F8C">One complex amplitude</text>
+<text x="170" y="409" text-anchor="middle" font-size="15" fill="#6F6E69">Repeat for each visible word</text>
+</svg>
+<figcaption><b>Figure 5.</b>How a carrier record is read. Fix one visible word, test its geometric support condition, then add the phases of its bound alternatives and apply the recorded scale and normalization. Repeating this calculation gives the amplitude function. The diagram follows <code>CarrierAmplitude.amp</code> and <code>HadamardPhase.ampCore</code>; it is an explanatory SVG, not a proposed efficient evaluation algorithm.</figcaption>
+</figure>
+<p>The record definition in Lean has precisely these six fields:</p>
+<pre><code class="language-lean">structure KernelSumState (n : ℕ) where
+  m  : ℕ
+  h  : ℕ
+  Q  : DiagPhase (n + h) m
+  c  : ℂ
+  L  : Submodule (ZMod 2) (Pauli n)
+  x₀ : Fin n → ZMod 2
+</code></pre>
+<p><code>DiagPhase (n + h) m</code> records the polynomial&#39;s variables and precision in its type. <code>Fin n → ZMod 2</code> is an <math><mi>n</mi></math>-bit word. The raw record type stores the data; the separate predicate <code>IsCarrier</code> imposes the admissibility conditions just described.</p>
+<h3 id="two-records-for-the-same-bell-pair">Two records for the same Bell pair</h3>
+<p>Return to <math><mrow><mo form="prefix" stretchy="false">|</mo><msup><mrow><mi mathvariant="normal">Φ</mi><mspace></mspace></mrow><mo form="prefix" stretchy="false">+</mo></msup><mo form="postfix" stretchy="false">⟩</mo></mrow></math>. One record enforces equal output bits geometrically. Another permits all four output words and makes the unequal ones cancel. In the table, spans are over the two-element field, and the Pauli names denote their phase-free labels.</p>
+<table>
+<thead>
+<tr>
+<th scope="col">Field</th>
+<th scope="col">Geometric presentation <math><msub><mi>𝒞</mi><mrow><mi mathvariant="normal">g</mi><mspace></mspace></mrow></msub></math></th>
+<th scope="col">Sum presentation <math><msub><mi>𝒞</mi><mrow><mi mathvariant="normal">s</mi><mspace></mspace></mrow></msub></math></th>
+</tr>
+</thead>
+<tbody><tr>
+<td><math><mi>m</mi></math></td>
+<td><math><mn>1</mn></math></td>
+<td><math><mn>1</mn></math></td>
+</tr>
+<tr>
+<td><math><mi>h</mi></math></td>
+<td><math><mn>0</mn></math></td>
+<td><math><mn>1</mn></math></td>
+</tr>
+<tr>
+<td><math><mi>Q</mi></math></td>
+<td><math><mn>0</mn></math></td>
+<td><math><mrow><mrow><mo fence="true" form="prefix" stretchy="false">(</mo><msub><mi>w</mi><mn>1</mn></msub><mo>+</mo><msub><mi>w</mi><mn>2</mn></msub><mo fence="true" form="postfix" stretchy="false">)</mo></mrow><mi>y</mi></mrow></math> modulo two</td>
+</tr>
+<tr>
+<td><math><mi>c</mi></math></td>
+<td><math><mrow><mn>1</mn><mi>/</mi><msqrt><mn>2</mn></msqrt></mrow></math></td>
+<td><math><mrow><mn>1</mn><mi>/</mi><mn>2</mn></mrow></math></td>
+</tr>
+<tr>
+<td><math><mi>L</mi></math></td>
+<td><math><mrow><mi>span</mi><mo>⁡</mo><mrow><mo fence="true" form="prefix" stretchy="false">{</mo><mi>X</mi><mi>X</mi><mo separator="true">,</mo><mi>Z</mi><mi>Z</mi><mo fence="true" form="postfix" stretchy="false">}</mo></mrow></mrow></math></td>
+<td><math><mrow><mi>span</mi><mo>⁡</mo><mrow><mo fence="true" form="prefix" stretchy="false">{</mo><mi>X</mi><mi>I</mi><mo separator="true">,</mo><mi>I</mi><mi>X</mi><mo fence="true" form="postfix" stretchy="false">}</mo></mrow></mrow></math></td>
+</tr>
+<tr>
+<td><math><msub><mi>x</mi><mn>0</mn></msub></math></td>
+<td><math><mn>00</mn></math></td>
+<td><math><mn>00</mn></math></td>
+</tr>
+<tr>
+<td>Support envelope</td>
+<td><math><mrow><mo fence="true" form="prefix" stretchy="false">{</mo><mn>00,11</mn><mo fence="true" form="postfix" stretchy="false">}</mo></mrow></math></td>
+<td><math><mrow><mo fence="true" form="prefix" stretchy="false">{</mo><mn>00,01,10,11</mn><mo fence="true" form="postfix" stretchy="false">}</mo></mrow></math></td>
+</tr>
+</tbody></table>
+<p>For the geometric presentation, there is no bound bit and the permitted words simply receive amplitude <math><mrow><mn>1</mn><mi>/</mi><msqrt><mn>2</mn></msqrt></mrow></math>. For the sum presentation, <math><mrow><msub><mi>ζ</mi><mn>1</mn></msub><mo>=</mo><mo form="prefix" stretchy="false">−</mo><mn>1</mn></mrow></math>, and each bound alternative contributes a sign:</p>
+<table>
+<thead>
+<tr>
+<th scope="col">Visible word</th>
+<th scope="col">Phase for <math><mrow><mi>y</mi><mo>=</mo><mn>0</mn></mrow></math></th>
+<th scope="col">Phase for <math><mrow><mi>y</mi><mo>=</mo><mn>1</mn></mrow></math></th>
+<th scope="col">Sum</th>
+<th scope="col">Amplitude after scaling</th>
+</tr>
+</thead>
+<tbody><tr>
+<td><math><mn>00</mn></math></td>
+<td><math><mrow><mo form="prefix" stretchy="false">+</mo><mn>1</mn></mrow></math></td>
+<td><math><mrow><mo form="prefix" stretchy="false">+</mo><mn>1</mn></mrow></math></td>
+<td><math><mn>2</mn></math></td>
+<td><math><mrow><mn>1</mn><mi>/</mi><msqrt><mn>2</mn></msqrt></mrow></math></td>
+</tr>
+<tr>
+<td><math><mn>01</mn></math></td>
+<td><math><mrow><mo form="prefix" stretchy="false">+</mo><mn>1</mn></mrow></math></td>
+<td><math><mrow><mo form="prefix" stretchy="false">−</mo><mn>1</mn></mrow></math></td>
+<td><math><mn>0</mn></math></td>
+<td><math><mn>0</mn></math></td>
+</tr>
+<tr>
+<td><math><mn>10</mn></math></td>
+<td><math><mrow><mo form="prefix" stretchy="false">+</mo><mn>1</mn></mrow></math></td>
+<td><math><mrow><mo form="prefix" stretchy="false">−</mo><mn>1</mn></mrow></math></td>
+<td><math><mn>0</mn></math></td>
+<td><math><mn>0</mn></math></td>
+</tr>
+<tr>
+<td><math><mn>11</mn></math></td>
+<td><math><mrow><mo form="prefix" stretchy="false">+</mo><mn>1</mn></mrow></math></td>
+<td><math><mrow><mo form="prefix" stretchy="false">+</mo><mn>1</mn></mrow></math></td>
+<td><math><mn>2</mn></math></td>
+<td><math><mrow><mn>1</mn><mi>/</mi><msqrt><mn>2</mn></msqrt></mrow></math></td>
+</tr>
+</tbody></table>
+<p>The common multiplier in the last column is <math><mrow><mi>c</mi><mi>/</mi><msup><mrow><mo fence="true" form="prefix" stretchy="false">(</mo><msqrt><mn>2</mn></msqrt><mo fence="true" form="postfix" stretchy="false">)</mo></mrow><mi>h</mi></msup><mo>=</mo><mn>1</mn><mi>/</mi><mrow><mo fence="true" form="prefix" stretchy="false">(</mo><mn>2</mn><msqrt><mn>2</mn></msqrt><mo fence="true" form="postfix" stretchy="false">)</mo></mrow></mrow></math>. Thus the records differ in geometry, polynomial, scale, and bound-bit count, but <math><mrow><msub><mi>ψ</mi><msub><mi>𝒞</mi><mrow><mi mathvariant="normal">g</mi><mspace></mspace></mrow></msub></msub><mo>=</mo><msub><mi>ψ</mi><msub><mi>𝒞</mi><mrow><mi mathvariant="normal">s</mi><mspace></mspace></mrow></msub></msub></mrow></math>. The extra bit in the second presentation encodes cancellation; it does not turn the Bell pair into a three-qubit state. This is a small, explicit example of the representational freedom that a rewrite calculus must understand.</p>
+<h3 id="how-gates-act-on-a-carrier">How gates act on a carrier</h3>
+<p>For a gate <math><mi>U</mi></math>, write <math><msub><mi>𝒢</mi><mi>U</mi></msub></math> for its operation on records. The correctness obligation is</p>
+<math display="block"><mrow><msub><mi>ψ</mi><mrow><msub><mi>𝒢</mi><mi>U</mi></msub><mrow><mo fence="true" form="prefix" stretchy="false">(</mo><mi>𝒞</mi><mo fence="true" form="postfix" stretchy="false">)</mo></mrow></mrow></msub><mo>=</mo><mi>U</mi><msub><mi>ψ</mi><mi>𝒞</mi></msub><mi>.</mi></mrow></math>
+<p>This is different from a rewrite between two presentations of the same state: a gate generally changes the amplitude function, while a representational rewrite preserves it. The library&#39;s gate words use three kinds of letter—diagonal gates, CNOT, and Hadamard—and each exposes a different part of the record.</p>
+<p><strong>A diagonal gate changes phases.</strong> If <math><mrow><msub><mi>U</mi><mi>D</mi></msub><mo form="prefix" stretchy="false">|</mo><mi>w</mi><mo form="postfix" stretchy="false">⟩</mo><mo>=</mo><msubsup><mi>ζ</mi><mi>m</mi><mrow><mi>D</mi><mo form="prefix" stretchy="false">(</mo><mi>w</mi><mo form="postfix" stretchy="false" lspace="0em" rspace="0em">)</mo></mrow></msubsup><mo form="prefix" stretchy="false">|</mo><mi>w</mi><mo form="postfix" stretchy="false">⟩</mo></mrow></math>, add its polynomial to the visible part of the exponent:</p>
+<math display="block"><mrow><msub><mi>Q</mi><mpadded lspace="0"><mi>new</mi></mpadded></msub><mrow><mo fence="true" form="prefix" stretchy="false">(</mo><mi>w</mi><mo separator="true">,</mo><mi>y</mi><mo fence="true" form="postfix" stretchy="false">)</mo></mrow><mo>=</mo><mi>Q</mi><mrow><mo fence="true" form="prefix" stretchy="false">(</mo><mi>w</mi><mo separator="true">,</mo><mi>y</mi><mo fence="true" form="postfix" stretchy="false">)</mo></mrow><mo>+</mo><mi>D</mi><mrow><mo fence="true" form="prefix" stretchy="false">(</mo><mi>w</mi><mo fence="true" form="postfix" stretchy="false">)</mo></mrow><mi>.</mi></mrow></math>
+<p>The direct sum rule keeps <math><mrow><mi>m</mi><mo separator="true">,</mo><mi>h</mi><mo separator="true">,</mo><mi>c</mi><mo separator="true">,</mo><mi>L</mi><mo separator="true">,</mo><msub><mi>x</mi><mn>0</mn></msub></mrow></math> unchanged. At precision one, applying <math><mi>Z</mi></math> to the first Bell qubit adds <math><msub><mi>w</mi><mn>1</mn></msub></math> and changes the sign of the <math><mn>11</mn></math> amplitude. At precision three, <math><mi>T</mi></math> adds <math><msub><mi>w</mi><mn>1</mn></msub></math> and multiplies that amplitude by <math><mrow><mrow><mi>exp</mi><mo>⁡</mo></mrow><mrow><mo fence="true" form="prefix" stretchy="false">(</mo><mi>i</mi><mi>π</mi><mi>/</mi><mn>4</mn><mo fence="true" form="postfix" stretchy="false">)</mo></mrow></mrow></math>. To express the same original phases at higher precision, the existing exponent must be rescaled: lifting from <math><mi>m</mi></math> to <math><mi>M</mi></math> replaces <math><mi>Q</mi></math> by <math><mrow><msup><mn>2</mn><mrow><mi>M</mi><mo>−</mo><mi>m</mi></mrow></msup><mi>Q</mi></mrow></math>. Merely changing the precision field would change the state.</p>
+<p><strong>CNOT relabels visible words.</strong> With control one and target two, let <math><mrow><mi>P</mi><mrow><mo fence="true" form="prefix" stretchy="false">(</mo><msub><mi>w</mi><mn>1</mn></msub><mo separator="true">,</mo><msub><mi>w</mi><mn>2</mn></msub><mo fence="true" form="postfix" stretchy="false">)</mo></mrow><mo>=</mo><mrow><mo fence="true" form="prefix" stretchy="false">(</mo><msub><mi>w</mi><mn>1</mn></msub><mo separator="true">,</mo><msub><mi>w</mi><mn>2</mn></msub><mo lspace="0.2222em" rspace="0.2222em">⊕︎</mo><msub><mi>w</mi><mn>1</mn></msub><mo fence="true" form="postfix" stretchy="false">)</mo></mrow></mrow></math>. Since <math><mi>P</mi></math> is its own inverse, the output amplitude at <math><mi>w</mi></math> is the old amplitude at <math><mrow><mi>P</mi><mrow><mo fence="true" form="prefix" stretchy="false">(</mo><mi>w</mi><mo fence="true" form="postfix" stretchy="false">)</mo></mrow></mrow></math>. The record substitutes this bit map into <math><mi>Q</mi></math>, sends <math><msub><mi>x</mi><mn>0</mn></msub></math> to <math><mrow><mi>P</mi><mrow><mo fence="true" form="prefix" stretchy="false">(</mo><msub><mi>x</mi><mn>0</mn></msub><mo fence="true" form="postfix" stretchy="false">)</mo></mrow></mrow></math>, and transforms <math><mi>L</mi></math> by the corresponding symplectic Pauli map. The bound-bit count and scalar stay the same. For the geometric Bell record, the permitted words <math><mn>00,11</mn></math> become <math><mn>00,10</mn></math>, giving <math><mrow><mo form="prefix" stretchy="false">|</mo><mo form="prefix" stretchy="false">+</mo><mn>0</mn><mo form="postfix" stretchy="false">⟩</mo></mrow></math>. Polynomial substitution must represent binary XOR at the record&#39;s precision; ordinary integer addition is not interchangeable with it.</p>
+<p><strong>Hadamard mixes amplitudes.</strong> Its action on bit <math><mi>k</mi></math> is</p>
+<math display="block"><mrow><mrow><mo fence="true" form="prefix" stretchy="false">(</mo><msub><mi>H</mi><mi>k</mi></msub><mi>ψ</mi><mo fence="true" form="postfix" stretchy="false">)</mo></mrow><mrow><mo fence="true" form="prefix" stretchy="false">(</mo><mi>w</mi><mo fence="true" form="postfix" stretchy="false">)</mo></mrow><mo>=</mo><mfrac><mn>1</mn><msqrt><mn>2</mn></msqrt></mfrac><mrow><munder><mo movablelimits="false">∑</mo><mrow><mi>b</mi><mo>∈</mo><mrow><mo fence="true" form="prefix" stretchy="false">{</mo><mn>0,1</mn><mo fence="true" form="postfix" stretchy="false">}</mo></mrow></mrow></munder></mrow><msup><mrow><mo fence="true" form="prefix" stretchy="false">(</mo><mo form="prefix" stretchy="false">−</mo><mn>1</mn><mo fence="true" form="postfix" stretchy="false">)</mo></mrow><mrow><msub><mi>w</mi><mi>k</mi></msub><mi>b</mi></mrow></msup><mi>ψ</mi><mrow><mo fence="true" form="prefix" stretchy="false">(</mo><mi>w</mi><mrow><mo fence="true" form="prefix" stretchy="false">[</mo><mi>k</mi><mo stretchy="false">←</mo><mi>b</mi><mo fence="true" form="postfix" stretchy="false">]</mo></mrow><mo fence="true" form="postfix" stretchy="false">)</mo></mrow><mi>.</mi></mrow></math>
+<p>Here <math><mrow><mi>w</mi><mrow><mo fence="true" form="prefix" stretchy="false">[</mo><mi>k</mi><mo stretchy="false">←</mo><mi>b</mi><mo fence="true" form="postfix" stretchy="false">]</mo></mrow></mrow></math> means replace the <math><mi>k</mi></math>th bit by <math><mi>b</mi></math>. When the support envelope is closed under flipping that bit, the library&#39;s free rule can absorb this sum into the record: adjoin <math><mi>b</mi></math> as a bound bit, replace the old visible coordinate by <math><mi>b</mi></math> in <math><mi>Q</mi></math>, and add <math><mrow><msup><mn>2</mn><mrow><mi>m</mi><mo>−</mo><mn>1</mn></mrow></msup><msub><mi>w</mi><mi>k</mi></msub><mi>b</mi></mrow></math> to the exponent. Increasing <math><mi>h</mi></math> by one supplies the required factor <math><mrow><mn>1</mn><mi>/</mi><msqrt><mn>2</mn></msqrt></mrow></math>. The general gate runner uses a different, support-changing rule when that flip-closure condition fails; Hadamard does not always add a bound bit.</p>
+<p>For example, present <math><mrow><mo form="prefix" stretchy="false">|</mo><mo form="prefix" stretchy="false">+</mo><mo form="postfix" stretchy="false">⟩</mo></mrow></math> by <math><mrow><mi>m</mi><mo>=</mo><mn>1</mn></mrow></math>, <math><mrow><mi>h</mi><mo>=</mo><mn>0</mn></mrow></math>, <math><mrow><mi>Q</mi><mo>=</mo><mn>0</mn></mrow></math>, <math><mrow><mi>c</mi><mo>=</mo><mn>1</mn><mi>/</mi><msqrt><mn>2</mn></msqrt></mrow></math>, and full one-bit support. The free Hadamard rule gives <math><mrow><mi>h</mi><mo>=</mo><mn>1</mn></mrow></math> and <math><mrow><mi>Q</mi><mrow><mo fence="true" form="prefix" stretchy="false">(</mo><mi>w</mi><mo separator="true">,</mo><mi>b</mi><mo fence="true" form="postfix" stretchy="false">)</mo></mrow><mo>=</mo><mi>w</mi><mi>b</mi></mrow></math>:</p>
+<math display="block"><mrow><msub><mi>ψ</mi><mrow><msub><mi>𝒢</mi><mi>H</mi></msub><mrow><mo fence="true" form="prefix" stretchy="false">(</mo><msub><mi>𝒞</mi><mo form="prefix" stretchy="false" lspace="0em" rspace="0em">+</mo></msub><mo fence="true" form="postfix" stretchy="false">)</mo></mrow></mrow></msub><mrow><mo fence="true" form="prefix" stretchy="false">(</mo><mi>w</mi><mo fence="true" form="postfix" stretchy="false">)</mo></mrow><mo>=</mo><mfrac><mn>1</mn><mn>2</mn></mfrac><mrow><munder><mo movablelimits="false">∑</mo><mrow><mi>b</mi><mo>∈</mo><mrow><mo fence="true" form="prefix" stretchy="false">{</mo><mn>0,1</mn><mo fence="true" form="postfix" stretchy="false">}</mo></mrow></mrow></munder></mrow><msup><mrow><mo fence="true" form="prefix" stretchy="false">(</mo><mo form="prefix" stretchy="false">−</mo><mn>1</mn><mo fence="true" form="postfix" stretchy="false">)</mo></mrow><mrow><mi>w</mi><mi>b</mi></mrow></msup><mi>.</mi></mrow></math>
+<p>At <math><mrow><mi>w</mi><mo>=</mo><mn>0</mn></mrow></math> the two signs add, giving one; at <math><mrow><mi>w</mi><mo>=</mo><mn>1</mn></mrow></math> they cancel, giving zero. The output is <math><mrow><mo form="prefix" stretchy="false">|</mo><mn>0</mn><mo form="postfix" stretchy="false">⟩</mo></mrow></math>. Its record still permits both visible words, even though only one has nonzero amplitude. A later rewrite may express the same output with no bound bit and support envelope <math><mrow><mo fence="true" form="prefix" stretchy="false">{</mo><mn>0</mn><mo fence="true" form="postfix" stretchy="false">}</mo></mrow></math>.</p>
+<p>The summed bit labels the input basis components whose amplitudes interfere. It is neither an extra physical qubit nor a measurement record. The carrier retains an unevaluated sum; simplifying that sum changes the description without changing the state. Actually measuring the qubit in the computational basis before applying the Hadamard would change the experiment: the interference responsible for the certain zero output would disappear.</p>
+<p>An <strong>ideal computational-basis measurement</strong> distinguishes the alternatives zero and one and produces a classical outcome. It does not merely reveal a bit value that the superposition already possessed. Mathematically, let <math><msub><mi>P</mi><mi>b</mi></msub></math> retain the basis components in which the measured bit equals <math><mi>b</mi></math>, setting the others to zero. For a normalized input <math><mrow><mo form="prefix" stretchy="false">|</mo><mi>ψ</mi><mo form="postfix" stretchy="false">⟩</mo></mrow></math>, the Born rule gives</p>
+<math display="block"><mrow><msub><mi>p</mi><mi>b</mi></msub><mo>=</mo><mo form="prefix" stretchy="false">‖</mo><msub><mi>P</mi><mi>b</mi></msub><mo form="prefix" stretchy="false">|</mo><mi>ψ</mi><mo form="postfix" stretchy="false">⟩</mo><msup><mo form="postfix" stretchy="false">‖</mo><mn>2</mn></msup><mi>.</mi></mrow></math>
+<p>If outcome <math><mi>b</mi></math> occurs and <math><mrow><msub><mi>p</mi><mi>b</mi></msub><mo>&gt;</mo><mn>0</mn></mrow></math>, the conditional state is <math><mrow><msub><mi>P</mi><mi>b</mi></msub><mo form="prefix" stretchy="false">|</mo><mi>ψ</mi><mo form="postfix" stretchy="false">⟩</mo><mi>/</mi><msqrt><msub><mi>p</mi><mi>b</mi></msub></msqrt></mrow></math>. The projection selects a branch; its squared norm gives the probability; dividing by <math><msqrt><msub><mi>p</mi><mi>b</mi></msub></msqrt></math> normalizes the selected branch. This describes this particular ideal measurement. Other measurement bases distinguish other alternatives.</p>
+<p>For <math><mrow><mo form="prefix" stretchy="false">|</mo><mo form="prefix" stretchy="false">+</mo><mo form="postfix" stretchy="false">⟩</mo></mrow></math>, the two outcomes each have probability one half, leaving <math><mrow><mo form="prefix" stretchy="false">|</mo><mn>0</mn><mo form="postfix" stretchy="false">⟩</mo></mrow></math> or <math><mrow><mo form="prefix" stretchy="false">|</mo><mn>1</mn><mo form="postfix" stretchy="false">⟩</mo></mrow></math> respectively. Applying <math><mi>H</mi></math> afterwards therefore produces <math><mrow><mo form="prefix" stretchy="false">|</mo><mo form="prefix" stretchy="false">+</mo><mo form="postfix" stretchy="false">⟩</mo></mrow></math> or <math><mrow><mo form="prefix" stretchy="false">|</mo><mo form="prefix" stretchy="false">−</mo><mo form="postfix" stretchy="false">⟩</mo></mrow></math>, where <math><mrow><mo form="prefix" stretchy="false">|</mo><mo form="prefix" stretchy="false">−</mo><mo form="postfix" stretchy="false">⟩</mo><mo>=</mo><mo form="prefix" stretchy="false">(</mo><mo form="prefix" stretchy="false">|</mo><mn>0</mn><mo form="postfix" stretchy="false">⟩</mo><mo>−</mo><mo form="prefix" stretchy="false">|</mo><mn>1</mn><mo form="postfix" stretchy="false">⟩</mo><mo form="postfix" stretchy="false">)</mo><mi>/</mi><msqrt><mn>2</mn></msqrt></mrow></math>. A final computational-basis measurement gives zero and one with equal probability in either case. Without the intervening measurement, the same final test gives zero with certainty.</p>
+<p>Keeping the classical outcome lets us describe the state conditional on it and choose a later correction. Forgetting the outcome means averaging the branches with their probabilities; it does not mean adding their amplitudes back into a superposition. Physically, an apparatus can become correlated with the measured alternatives. When its distinguishing record is treated as classical or left unread, the qubit alone no longer has the coherence needed for the original cancellation. By contrast, the bound bit in the carrier sum creates no such record: its alternatives remain terms in a coherent amplitude calculation. The later discussion of protocols and unread information makes this distinction explicit for larger registers.</p>
+<figure>
+<svg xmlns="http://www.w3.org/2000/svg" role="img" width="680" height="440" viewBox="0 0 680 440" font-family="-apple-system, BlinkMacSystemFont, system-ui, sans-serif">
+<title>Three gate effects. A diagonal gate changes the phase of a permitted word, illustrated by Z on a Bell pair. CNOT relabels its permitted words from 00 and 11 to 00 and 10. A free Hadamard introduces a summed alternative, illustrated by interference turning a plus state into zero.</title>
+<text x="340" y="26" text-anchor="middle" font-size="22" fill="#1C1B1A">Three ways to transform a carrier</text>
+<line x1="35" y1="48" x2="645" y2="48" stroke="#CECDC3" stroke-width="1.5"/>
+<line x1="35" y1="174" x2="645" y2="174" stroke="#CECDC3" stroke-width="1.5"/>
+<line x1="35" y1="300" x2="645" y2="300" stroke="#CECDC3" stroke-width="1.5"/>
+<text x="52" y="80" text-anchor="start" font-size="20" fill="#1C1B1A">Diagonal</text>
+<text x="52" y="107" text-anchor="start" font-size="16" fill="#6F6E69">Change phases</text>
+<rect x="263" y="66" width="80" height="40" fill="none" stroke="#CECDC3"/>
+<text x="303" y="94" text-anchor="middle" font-size="22" fill="#1C1B1A">00</text>
+<rect x="471" y="66" width="80" height="40" fill="none" stroke="#CECDC3"/>
+<text x="511" y="94" text-anchor="middle" font-size="22" fill="#1C1B1A">11</text>
+<text x="303" y="137" text-anchor="middle" font-size="15" fill="#6F6E69">phase unchanged</text>
+<text x="511" y="137" text-anchor="middle" font-size="15" fill="#1A4F8C">phase negated by Z</text>
+<text x="52" y="208" text-anchor="start" font-size="20" fill="#1C1B1A">CNOT</text>
+<text x="52" y="235" text-anchor="start" font-size="16" fill="#6F6E69">Relabel words</text>
+<text x="303" y="210" text-anchor="middle" font-size="22" fill="#1C1B1A">00</text>
+<line x1="351" y1="203" x2="462" y2="203" stroke="#1A4F8C" stroke-width="1.5"/>
+<path d="M455 198L462 203L455 208" stroke="#1A4F8C" stroke-width="1.5" fill="none"/>
+<text x="511" y="210" text-anchor="middle" font-size="22" fill="#1A4F8C">00</text>
+<text x="303" y="257" text-anchor="middle" font-size="22" fill="#1C1B1A">11</text>
+<line x1="351" y1="250" x2="462" y2="250" stroke="#1A4F8C" stroke-width="1.5"/>
+<path d="M455 245L462 250L455 255" stroke="#1A4F8C" stroke-width="1.5" fill="none"/>
+<text x="511" y="257" text-anchor="middle" font-size="22" fill="#1A4F8C">10</text>
+<text x="52" y="335" text-anchor="start" font-size="20" fill="#1C1B1A">Hadamard</text>
+<text x="52" y="362" text-anchor="start" font-size="16" fill="#6F6E69">Mix alternatives</text>
+<text x="292" y="330" text-anchor="middle" font-size="16" fill="#6F6E69">output zero</text>
+<text x="510" y="330" text-anchor="middle" font-size="16" fill="#6F6E69">output one</text>
+<text x="292" y="363" text-anchor="middle" font-size="24" fill="#1A4F8C">+    +</text>
+<text x="510" y="363" text-anchor="middle" font-size="24" fill="#6F6E69">+    −</text>
+<text x="292" y="398" text-anchor="middle" font-size="17" fill="#1A4F8C">reinforce</text>
+<text x="510" y="398" text-anchor="middle" font-size="17" fill="#6F6E69">cancel</text>
+<text x="340" y="433" text-anchor="middle" font-size="15" fill="#6F6E69">Gate action changes the state; a rewrite changes its presentation</text>
+</svg>
+<figcaption><b>Figure 6.</b>The three gate actions at the level of a record: modify phase values, relabel visible words and their support, or mix alternatives through a Hadamard sum. The rightmost column gives the examples developed in the text. Original SVG schematic of the verified gate semantics; the Hadamard row depicts the free-rule case.</figcaption>
+</figure>
+<p>The Lean definition of the action on amplitude functions mirrors this account:</p>
+<pre><code class="language-lean">noncomputable def letterAmp {m : ℕ} (g : GateLetter n m) (f : (Fin n → ZMod 2) → ℂ) :
+    (Fin n → ZMod 2) → ℂ :=
+  match g with
+  | .hadamard k =&gt; walshTransform k f
+  | .diagonal D =&gt; fun w =&gt; charOf m (D.eval w) * f w
+  | .cnot i j _ =&gt; fun w =&gt; f (cnotBitMap i j w)
+</code></pre>
+<p>The source then proves that running the corresponding record operations has exactly this amplitude action and preserves <code>IsCarrier</code>, when the record and word have matching precision. Those results are <code>amp_run</code> and <code>isCarrier_run</code> in <code>Carrier.GateWord</code>. The formula, table, and diagram therefore describe both an intuitive calculation and the meaning against which the implementation is proved correct.</p>
+<p>A calculus supplies rules for changing a representation. A rule is sound when it preserves the specified meaning. For example, eliminating a summed variable is sound only when the resulting expression accounts correctly for cancellation, normalization, and any remaining phase. A locally plausible manipulation can fail if one of those factors is omitted.</p>
+<figure>
+<svg xmlns="http://www.w3.org/2000/svg" role="img" width="680" height="270" viewBox="0 0 680 270" font-family="-apple-system, BlinkMacSystemFont, system-ui, sans-serif">
+  <title>A correctness diagram: the original and transformed descriptions each have an interpretation. A semantic proof establishes that these interpretations give the same specified action on every input.</title>
+  <defs>
+    <marker id="semantics-arrow" markerWidth="8" markerHeight="8" refX="6" refY="3" orient="auto" markerUnits="strokeWidth"><path d="M0 0L6 3L0 6" fill="none" stroke="#6F6E69" stroke-width="1"/></marker>
+  </defs>
+  <text x="152" y="49" text-anchor="middle" font-size="20" fill="#1C1B1A">Original description</text>
+  <text x="528" y="49" text-anchor="middle" font-size="20" fill="#1C1B1A">Transformed description</text>
+  <path d="M271 43H398" fill="none" stroke="#6F6E69" stroke-width="1.6" marker-end="url(#semantics-arrow)"/>
+  <text x="335" y="24" text-anchor="middle" font-size="16" fill="#6F6E69">transform</text>
+  <path d="M152 75V150" fill="none" stroke="#6F6E69" stroke-width="1.6" marker-end="url(#semantics-arrow)"/>
+  <path d="M528 75V150" fill="none" stroke="#6F6E69" stroke-width="1.6" marker-end="url(#semantics-arrow)"/>
+  <text x="166" y="117" font-size="17" fill="#6F6E69">interpret</text>
+  <text x="542" y="117" font-size="17" fill="#6F6E69">interpret</text>
+  <text x="152" y="189" text-anchor="middle" font-size="20" fill="#1C1B1A">Specified action</text>
+  <text x="528" y="189" text-anchor="middle" font-size="20" fill="#1C1B1A">Specified action</text>
+  <path d="M263 181H416 M263 189H416" fill="none" stroke="#1A4F8C" stroke-width="2"/>
+  <text x="340" y="245" text-anchor="middle" font-size="19" fill="#1A4F8C">Proof: the same action on every input</text>
+</svg>
+<figcaption><b>Figure 7.</b>A semantic correctness statement. A transformation changes the description of a process; its proof establishes that the two descriptions have the same specified action. The diagram expresses the obligation, not an automatic verification procedure. Original SVG diagram for this essay.</figcaption>
+</figure>
+<p>Soundness answers whether the rules are safe. Completeness asks a converse question: when two descriptions have the same meaning, can the rules connect them? ftqclib gives an exact answer for its carrier rules, including a restriction on scale.</p>
+<p>The recorded scale multiplies the whole finite sum. Different presentations can distribute factors differently between this scale and the sum, even when their amplitudes agree. Precision controls which roots of unity may appear as phases. The theorem concerns the library&#39;s specified class of admissible carrier presentations, defined by <code>IsCarrier</code>; these have positive precision, prescribed support geometry, and a nonzero amplitude function. They need not be normalized states.</p>
+<section class="theorem" aria-label="Theorem — Carrier rewrite completeness">
+<p><strong>Theorem — Carrier rewrite completeness.</strong></p>
+<p>Let <math><mi>S</mi></math> and <math><mi>T</mi></math> be admissible carrier presentations as specified above. A finite chain of carrier rules, allowing either direction of a rule, connects <math><mi>S</mi></math> and <math><mi>T</mi></math> if and only if their amplitude functions are equal and the ratio of their recorded scales is dyadic. Here a dyadic ratio means a root of unity of power-of-two order multiplied by an integer power of <math><msqrt><mn>2</mn></msqrt></math>.</p>
+</section>
+<p>The equality is exact equality of amplitudes. The scale condition refers to the presentations themselves. Equal amplitudes alone do not guarantee that these particular rules connect two presentations. The source also proves conservativity: related carrier states at the same precision can be connected by a chain staying within carrier states at that precision. <a href="#ref-completeness">4</a></p>
+<section class="proof-sketch" aria-label="Proof sketch">
+<p><strong>Proof sketch.</strong></p>
+<p>Soundness gives one direction: each rule preserves amplitudes and changes the scale only by an allowed factor. For the other direction, the proof puts the presentations into forms that can be compared and reduces their comparison to algebraic relations among roots of unity. It then realizes those relations using the rewrite rules. The conservativity argument carries out the matching at the states&#39; original precision. The source contains the detailed arithmetic and constructions needed for these steps.</p>
+</section>
+<p>Completeness provides a foundation for equational reasoning. Finding a short derivation or a useful simplification strategy is a further algorithmic problem. A formal calculus gives such algorithms a precise target: a proposed transformation can be checked against a defined meaning and justified by established results.</p>
+<p>Here is the theorem and its final proof from <code>Carrier.RewriteCompleteness</code>:</p>
+<pre><code class="language-lean">theorem rewrite_complete {S T : KernelSumState n} (hS : IsCarrier S) (hT : IsCarrier T) :
+    Relation.EqvGen CarrierRule S T ↔ StateEq S T ∧ IsDyadicRatio (T.c / S.c) := by
+  constructor
+  · intro hST
+    obtain ⟨hs, r, hr, hc⟩ := stateEq_scale_of_eqvGen hST
+    refine ⟨hs, ?_⟩
+    rw [hc, mul_div_assoc, div_self (c_ne_zero_of_isCarrier hS), mul_one]
+    exact hr
+  · rintro ⟨hs, hd⟩
+    exact eqvGen_of_stateEq hS hT hs hd
+</code></pre>
+<p>The symbol <code>↔</code> divides the two directions of the equivalence, while <code>∧</code> joins amplitude equality to the scale condition. <code>Relation.EqvGen</code> permits finite chains of rules in either direction. After <code>by</code>, <code>constructor</code> starts the two directions of the proof. Each bullet supplies one. The short final proof rests on substantial earlier lemmas: its brevity shows how completed arguments can become reusable components, rather than how little mathematics was required.</p>
+<h2 id="measurement-and-information-left-unread">Measurement and information left unread</h2>
+<p>A fault-tolerant computation includes measurements and operations chosen from their outcomes. ftqclib represents a protocol as a sequence of gate words and conditioning steps. A conditioning step introduces an outcome bit. Later operations may depend on outcome bits already present, and evaluating the outcome bits selects a branch. The development proves agreement with amplitude semantics and conservation of the total branch weight. <a href="#ref-protocol">5</a></p>
+<p>Keeping an outcome as a coherent register and treating it as a classical record are different operations. This distinction can be seen in the Bell example. Measuring both Bell qubits in the computational basis produces equal outcomes with probabilities one half each. The resulting distribution records those probabilities, but it does not retain the relative coherence of the original superposition.</p>
+<p>Forgetting a subsystem can be expressed directly in terms of amplitudes. Write <math><mrow><mi>f</mi><mrow><mo fence="true" form="prefix" stretchy="false">(</mo><mi>x</mi><mo separator="true">,</mo><mi>u</mi><mo fence="true" form="postfix" stretchy="false">)</mo></mrow></mrow></math> for an amplitude, with <math><mi>x</mi></math> denoting retained bits and <math><mi>u</mi></math> unread bits. The retained system is described by</p>
+<math display="block"><mrow><mi>ρ</mi><mrow><mo fence="true" form="prefix" stretchy="false">(</mo><mi>x</mi><mo separator="true">,</mo><mi>y</mi><mo fence="true" form="postfix" stretchy="false">)</mo></mrow><mo>=</mo><mrow><munder><mo movablelimits="false">∑</mo><mi>u</mi></munder></mrow><mi>f</mi><mrow><mo fence="true" form="prefix" stretchy="false">(</mo><mi>x</mi><mo separator="true">,</mo><mi>u</mi><mo fence="true" form="postfix" stretchy="false">)</mo></mrow><mspace width="0.1667em"></mspace><mi>f</mi><msup><mrow><mo fence="true" form="prefix" stretchy="false">(</mo><mi>y</mi><mo separator="true">,</mo><mi>u</mi><mo fence="true" form="postfix" stretchy="false">)</mo></mrow><mo form="prefix" stretchy="false" lspace="0em" rspace="0em">∗</mo></msup><mi>.</mi></mrow></math>
+<p>Here the star denotes complex conjugation. This Gram matrix sums over the unread alternatives. For a Bell pair with its second qubit unread, it gives equal diagonal entries and zero off-diagonal entries: the first qubit alone is maximally mixed. The off-diagonal contribution vanishes because the environmental states paired with its two values are orthogonal.</p>
+<figure>
+<svg xmlns="http://www.w3.org/2000/svg" role="img" width="680" height="280" viewBox="0 0 680 280" font-family="-apple-system, BlinkMacSystemFont, system-ui, sans-serif">
+<title>The retained Bell qubit is correlated with an unread qubit. The unread states zero and one are orthogonal, so cross terms vanish and the retained density matrix has only two equal diagonal entries.</title>
+<text x="167" y="29" text-anchor="middle" font-size="20" fill="#1C1B1A">Bell correlations</text>
+<text x="505" y="29" text-anchor="middle" font-size="20" fill="#1C1B1A">Retained density matrix</text>
+<text x="78" y="65" text-anchor="middle" font-size="16" fill="#6F6E69">kept</text>
+<text x="253" y="65" text-anchor="middle" font-size="16" fill="#6F6E69">unread</text>
+<text x="78" y="113" text-anchor="middle" font-size="25" fill="#1C1B1A">0</text>
+<line x1="107" y1="106" x2="224" y2="106" stroke="#1A4F8C" stroke-width="2"/>
+<text x="253" y="113" text-anchor="middle" font-size="25" fill="#1C1B1A">0</text>
+<text x="78" y="193" text-anchor="middle" font-size="25" fill="#1C1B1A">1</text>
+<line x1="107" y1="186" x2="224" y2="186" stroke="#1A4F8C" stroke-width="2"/>
+<text x="253" y="193" text-anchor="middle" font-size="25" fill="#1C1B1A">1</text>
+<text x="168" y="249" text-anchor="middle" font-size="16" fill="#6F6E69">Different unread states</text>
+<line x1="304" y1="151" x2="360" y2="151" stroke="#6F6E69" stroke-width="1.5"/>
+<path d="M353 146L360 151L353 156" stroke="#6F6E69" stroke-width="1.5" fill="none"/>
+<rect x="421" y="70" width="72" height="72" fill="#1A4F8C" stroke="none"/>
+<text x="457" y="115" text-anchor="middle" font-size="25" fill="#fff">½</text>
+<rect x="501" y="70" width="72" height="72" fill="#E6E4D9" stroke="none"/>
+<text x="537" y="115" text-anchor="middle" font-size="25" fill="#6F6E69">0</text>
+<rect x="421" y="150" width="72" height="72" fill="#E6E4D9" stroke="none"/>
+<text x="457" y="195" text-anchor="middle" font-size="25" fill="#6F6E69">0</text>
+<rect x="501" y="150" width="72" height="72" fill="#1A4F8C" stroke="none"/>
+<text x="537" y="195" text-anchor="middle" font-size="25" fill="#fff">½</text>
+<text x="500" y="249" text-anchor="middle" font-size="18" fill="#1A4F8C">Cross terms vanish</text>
+</svg>
+<figcaption><b>Figure 8.</b>What remains when the second Bell qubit is unread. The two alternatives are correlated with orthogonal unread states. Tracing over that qubit leaves equal populations and no off-diagonal coherence in the retained qubit. Original SVG diagram of the Gram-matrix calculation.</figcaption>
+</figure>
+<p>The implementation follows the formula directly:</p>
+<pre><code class="language-lean">noncomputable def gram {k : ℕ} (f : (Fin (n + k) → ZMod 2) → ℂ) (x y : Fin n → ZMod 2) : ℂ :=
+  ∑ u : Fin k → ZMod 2, f (Fin.append x u) * starRingEnd ℂ (f (Fin.append y u))
+</code></pre>
+<p><code>Fin k → ZMod 2</code> is a string of <math><mi>k</mi></math> bits; <code>Fin.append x u</code> joins retained and unread bits. <code>starRingEnd ℂ</code> takes complex conjugates. The word <code>noncomputable</code> permits a mathematical definition using the ambient complex-number infrastructure without promising an executable numerical procedure.</p>
+<p>The distinction between exact amplitudes and unread information then becomes a theorem:</p>
+<pre><code class="language-lean">theorem unreadEq_of_stateEq {k : ℕ} {S T : KernelSumState (n + k)} (h : StateEq S T) :
+    UnreadEq k S T := by
+  intro x y
+  unfold StateEq at h
+  rw [h]
+</code></pre>
+<p>This proof from <code>Carrier.UnreadBits</code> introduces the two retained strings, unfolds the hypothesis of exact amplitude equality, and rewrites with it. Equal amplitudes therefore give equal Gram data. The converse would be stronger and is false in general: even an overall phase disappears from the Gram data. A small proof can make the direction of a translation quite explicit.</p>
+<p>The library develops equality under this unread-bit interpretation, purification, and channels obtained from protocol dilations. Applying a protocol to one half of a Bell pair for each input qubit gives a Choi representation through which channel equality can be studied. It treats coherent and measured readings separately. For each read-outcome branch, it also relates descriptions of the channel in a Pauli basis. These offer different ways of recording its action, connected by a Fourier identity. <a href="#ref-channels">6</a></p>
+<p>This extends the common foundation from pure-state computation to observable processes with discarded information. It also exposes boundaries of the gate language: the development proves arithmetic restrictions on channels realizable by its protocols. This snapshot does not prove the general converse needed to turn these restrictions into an exact synthesis theorem.</p>
+<h2 id="error-correction-as-a-mathematical-construction">Error correction as a mathematical construction</h2>
+<p>Two surface-code errors can produce the same syndrome. For either Pauli type, their difference is a cycle, relative to the relevant boundaries on a planar patch. A recovery succeeds when that difference acts trivially on the encoded information; a nontrivial logical string defeats it. The distinction between cycles and boundaries makes this familiar picture precise.</p>
+<p>ftqclib constructs CSS codes from based chain complexes and identifies their logical spaces with homology and cohomology. It develops tensor products, relative complexes, and other constructions used to build codes. For its square-lattice toric and planar families, it proves the encoded-qubit counts and distance: two logical qubits on the torus, one on the planar patch, and distance <math><mi>L</mi></math> at linear size <math><mi>L</mi></math>. The distance arguments include both lower bounds and explicit logical operators attaining them. <a href="#ref-surface">7</a></p>
+<p>The encoding development starts from commuting signed Pauli generators whose phase-free binary labels are independent. It proves existence of a Clifford encoder and establishes how encoded states and logical Paulis behave, including the arrangement of multiple code blocks. The recovery theory proves a Knill–Laflamme equivalence: a specified family of errors is correctable exactly when its action on an encoded space satisfies the appropriate inner-product conditions. This expresses the requirement that information distinguishing errors must not reveal the protected logical state. <a href="#ref-encoding">8</a></p>
+<p>The channel and Fourier mathematics meet coding theory again in quantum weight enumerators, MacWilliams identities, and bounds on code parameters. The development includes a Singleton bound for the stated stabilizer-code setting and a Hamming bound under nondegeneracy conditions. Those hypotheses are part of the results. <a href="#ref-coding">9</a></p>
+<p>Such results can support new constructions without determining them in advance. A researcher might propose another chain complex, identify its logical operators, construct an encoder, and prove a distance bound using the existing infrastructure. A decoder requires its own algorithm and correctness argument. ECCLib already supplies verified classical decoders; using one in a quantum recovery procedure requires a proved connection to the quantum error model and code. The distinction helps locate the work still needed.</p>
+<h2 id="verification-as-computations-grow">Verification as computations grow</h2>
+<p>An arbitrary pure state of <math><mi>n</mi></math> qubits has <math><msup><mn>2</mn><mi>n</mi></msup></math> complex amplitudes. Directly storing and evolving all of them becomes expensive rapidly. Yet qubit count alone is not a test of classical difficulty: structure can make a large computation tractable, as stabilizer methods demonstrate. There is no universal transition at fifty qubits.</p>
+<p>As useful computations enter regimes where direct simulation is infeasible, verification must draw on evidence other than exhaustive reproduction of their behavior. A theorem may quantify over every input to a transformation or over a whole family of codes. Checking that theorem does not require simulating every instance it covers. A proved circuit transformation can therefore remain applicable when calculating a particular circuit&#39;s output is difficult.</p>
+<p>Formal proof has costs of its own. Definitions must express the intended problem, and difficult constructions can require difficult proofs. The advantage is that assumptions and dependencies become explicit, and checked results can be reused. Related projects pursue complementary parts of this task: VOQC verifies circuit optimizations, while Lean-QEC develops checked distance certificates for concrete code families. <a href="#ref-related">10</a></p>
+<p>A mathematical guarantee also has a physical boundary. A proof establishes a relationship between a model and its specification. Calibration, device characterization, and experiments establish how faithfully hardware realizes that model. Fault-tolerant engineering needs these forms of evidence to work together. A proof about a specified noise model cannot by itself establish that a device has that noise.</p>
+<p>For builders, a shared foundation creates concrete opportunities: check a transformation before applying it widely; establish an encoder&#39;s action on logical information; reuse code identities to constrain a proposed construction; or verify that a protocol&#39;s conditional corrections implement its intended process. Correctness then becomes something that can be carried through successive stages of development.</p>
+<h2 id="from-the-surface-code-to-a-verified-memory">From the surface code to a verified memory</h2>
+<p>The surface code provides a useful place to see how the work continues. Its geometry makes the abstract definitions visible, while using it as a memory requires the other parts of the library to meet: encoding, Pauli errors, measured syndromes, a decoder, and conditional correction.</p>
+<figure>
+<svg xmlns="http://www.w3.org/2000/svg" role="img" width="680" height="390" viewBox="0 0 680 390" font-family="-apple-system, BlinkMacSystemFont, system-ui, sans-serif">
+<title>Two copies of the unrotated distance-three planar patch. Each has thirteen edge qubits: nine vertical and four interior horizontal. A four-edge loop bounds a face and is a stabilizer; a three-edge vertical string joins the rough boundaries and is a logical Z. Dashed boundary guides are not data-qubit edges.</title>
+<text x="170" y="28" text-anchor="middle" font-size="20" fill="#1C1B1A">A stabilizer boundary</text>
+<line x1="70" y1="85" x2="70" y2="285" stroke="#CECDC3" stroke-width="1.5"/>
+<circle cx="70" cy="118.33333333333334" r="4" fill="#6F6E69"/>
+<circle cx="70" cy="185.0" r="4" fill="#6F6E69"/>
+<circle cx="70" cy="251.66666666666666" r="4" fill="#6F6E69"/>
+<line x1="170" y1="85" x2="170" y2="285" stroke="#CECDC3" stroke-width="1.5"/>
+<circle cx="170" cy="118.33333333333334" r="4" fill="#6F6E69"/>
+<circle cx="170" cy="185.0" r="4" fill="#6F6E69"/>
+<circle cx="170" cy="251.66666666666666" r="4" fill="#6F6E69"/>
+<line x1="270" y1="85" x2="270" y2="285" stroke="#CECDC3" stroke-width="1.5"/>
+<circle cx="270" cy="118.33333333333334" r="4" fill="#6F6E69"/>
+<circle cx="270" cy="185.0" r="4" fill="#6F6E69"/>
+<circle cx="270" cy="251.66666666666666" r="4" fill="#6F6E69"/>
+<line x1="70" y1="151.66666666666669" x2="270" y2="151.66666666666669" stroke="#CECDC3" stroke-width="1.5"/>
+<circle cx="120" cy="151.66666666666669" r="4" fill="#6F6E69"/>
+<circle cx="220" cy="151.66666666666669" r="4" fill="#6F6E69"/>
+<line x1="70" y1="218.33333333333334" x2="270" y2="218.33333333333334" stroke="#CECDC3" stroke-width="1.5"/>
+<circle cx="120" cy="218.33333333333334" r="4" fill="#6F6E69"/>
+<circle cx="220" cy="218.33333333333334" r="4" fill="#6F6E69"/>
+<line x1="55" y1="85" x2="285" y2="85" stroke="#1C1B1A" stroke-width="1.5" stroke-dasharray="5 4"/>
+<line x1="55" y1="285" x2="285" y2="285" stroke="#1C1B1A" stroke-width="1.5" stroke-dasharray="5 4"/>
+<text x="170" y="65" text-anchor="middle" font-size="16" fill="#6F6E69">rough boundary</text>
+<text x="170" y="312" text-anchor="middle" font-size="16" fill="#6F6E69">rough boundary</text>
+<text x="510" y="28" text-anchor="middle" font-size="20" fill="#1C1B1A">A logical string</text>
+<line x1="410" y1="85" x2="410" y2="285" stroke="#CECDC3" stroke-width="1.5"/>
+<circle cx="410" cy="118.33333333333334" r="4" fill="#6F6E69"/>
+<circle cx="410" cy="185.0" r="4" fill="#6F6E69"/>
+<circle cx="410" cy="251.66666666666666" r="4" fill="#6F6E69"/>
+<line x1="510" y1="85" x2="510" y2="285" stroke="#CECDC3" stroke-width="1.5"/>
+<circle cx="510" cy="118.33333333333334" r="4" fill="#6F6E69"/>
+<circle cx="510" cy="185.0" r="4" fill="#6F6E69"/>
+<circle cx="510" cy="251.66666666666666" r="4" fill="#6F6E69"/>
+<line x1="610" y1="85" x2="610" y2="285" stroke="#CECDC3" stroke-width="1.5"/>
+<circle cx="610" cy="118.33333333333334" r="4" fill="#6F6E69"/>
+<circle cx="610" cy="185.0" r="4" fill="#6F6E69"/>
+<circle cx="610" cy="251.66666666666666" r="4" fill="#6F6E69"/>
+<line x1="410" y1="151.66666666666669" x2="610" y2="151.66666666666669" stroke="#CECDC3" stroke-width="1.5"/>
+<circle cx="460" cy="151.66666666666669" r="4" fill="#6F6E69"/>
+<circle cx="560" cy="151.66666666666669" r="4" fill="#6F6E69"/>
+<line x1="410" y1="218.33333333333334" x2="610" y2="218.33333333333334" stroke="#CECDC3" stroke-width="1.5"/>
+<circle cx="460" cy="218.33333333333334" r="4" fill="#6F6E69"/>
+<circle cx="560" cy="218.33333333333334" r="4" fill="#6F6E69"/>
+<line x1="395" y1="85" x2="625" y2="85" stroke="#1C1B1A" stroke-width="1.5" stroke-dasharray="5 4"/>
+<line x1="395" y1="285" x2="625" y2="285" stroke="#1C1B1A" stroke-width="1.5" stroke-dasharray="5 4"/>
+<text x="510" y="65" text-anchor="middle" font-size="16" fill="#6F6E69">rough boundary</text>
+<text x="510" y="312" text-anchor="middle" font-size="16" fill="#6F6E69">rough boundary</text>
+<path d="M70 151.667H170V218.333H70Z" stroke="#1A4F8C" stroke-width="4" fill="none"/>
+<path d="M510 85V285" stroke="#1A4F8C" stroke-width="4" fill="none"/>
+<circle cx="120" cy="151.667" r="5" fill="#1A4F8C"/>
+<circle cx="120" cy="218.333" r="5" fill="#1A4F8C"/>
+<circle cx="70" cy="185" r="5" fill="#1A4F8C"/>
+<circle cx="170" cy="185" r="5" fill="#1A4F8C"/>
+<circle cx="510" cy="118.333" r="5" fill="#1A4F8C"/>
+<circle cx="510" cy="185" r="5" fill="#1A4F8C"/>
+<circle cx="510" cy="251.667" r="5" fill="#1A4F8C"/>
+<text x="170" y="354" text-anchor="middle" font-size="17" fill="#1A4F8C">Bounds a collection of faces</text>
+<text x="510" y="354" text-anchor="middle" font-size="17" fill="#1A4F8C">Joins distinct rough boundaries</text>
+<text x="340" y="384" text-anchor="middle" font-size="15" fill="#6F6E69">Dots mark data qubits; dashed lines mark boundary guides</text>
+</svg>
+<figcaption><b>Figure 9.</b>Two zero-syndrome possibilities on the library&#39;s unrotated <math><mrow><mi>L</mi><mo>=</mo><mn>3</mn></mrow></math> planar patch, with thirteen data qubits on edges. The left loop bounds a face and acts as a stabilizer. The right three-edge string joins distinct rough boundaries and acts as a logical <math><mi>Z</mi></math>: its endpoints lie where the relevant checks are absent. Dashed lines are boundary guides, not additional data-qubit edges. The complementary <math><mi>X</mi></math> picture uses the dual geometry and smooth boundaries. Original SVG diagram following the relative patch in <code>CSS.SurfaceCode</code>.</figcaption>
+</figure>
+<p>One completed result says that the planar family has one logical qubit. Its final Lean proof reads:</p>
+<pre><code class="language-lean">theorem planarCode_k [NeZero L] :
+    Module.finrank (ZMod 2) (cssZLogical (planarCode L).1 (planarCode L).2) = 1 := by
+  -- `k = n - rk H_X - rk H_Z` with every star and every plaquette independent: the source&#39;s
+  -- `L² + (L - 1)² - 2L(L - 1) = 1`.
+  have hcss : IsCSSPair (planarCode L).1 (planarCode L).2 := cssOfComplex_isCSSPair _ _
+  rw [finrank_cssZLogical hcss, rank_planarCode_fst, rank_planarCode_snd]
+  have h := planarComplex_cells_one L
+  omega
+</code></pre>
+<p><code>[NeZero L]</code> requires a positive lattice size. <code>Module.finrank</code> is vector-space dimension, here over the two-element field. The proof rewrites the logical dimension in terms of the qubit count and check ranks, then uses the established lattice counts. Its final <code>omega</code> is Lean&#39;s arithmetic tactic; it is unrelated to the symplectic function named <code>omega</code> earlier. The distance theorem goes further: it gives lower bounds for both Pauli types and explicit logical strings attaining length <math><mi>L</mi></math>. <a href="#ref-surface">7</a></p>
+<p>A distance theorem already contains the central idea of a recovery argument. For one Pauli type, let <math><mi>e</mi></math> be an error and let <math><mi>c</mi></math> be a minimum-weight correction with the same syndrome. Binary addition cancels edges occurring twice. Their sum has zero syndrome, and the minimum-weight property bounds its size.</p>
+<section class="proposition" aria-label="Proposition — The distance argument for correction">
+<p><strong>Proposition — The distance argument for correction.</strong></p>
+<p>Suppose a surface code has distance <math><mi>L</mi></math> and its syndrome is measured without error. For either Pauli type, a minimum-weight correction recovers every error of weight at most <math><mi>t</mi></math> whenever <math><mrow><mn>2</mn><mi>t</mi><mo>&lt;</mo><mi>L</mi></mrow></math>, up to a stabilizer and an overall phase.</p>
+</section>
+<section class="proof" aria-label="Proof">
+<p><strong>Proof.</strong></p>
+<p>The error itself is a candidate with the observed syndrome, so the chosen correction has weight at most that of the error. Their sum is a cycle (a relative cycle on the planar patch), and</p>
+<math display="block"><mrow><mi>wt</mi><mo>⁡</mo><mrow><mo fence="true" form="prefix" stretchy="false">(</mo><mi>c</mi><mo>+</mo><mi>e</mi><mo fence="true" form="postfix" stretchy="false">)</mo></mrow><mo>≤</mo><mi>wt</mi><mo>⁡</mo><mrow><mo fence="true" form="prefix" stretchy="false">(</mo><mi>c</mi><mo fence="true" form="postfix" stretchy="false">)</mo></mrow><mo>+</mo><mi>wt</mi><mo>⁡</mo><mrow><mo fence="true" form="prefix" stretchy="false">(</mo><mi>e</mi><mo fence="true" form="postfix" stretchy="false">)</mo></mrow><mo>≤</mo><mn>2</mn><mi>t</mi><mo>&lt;</mo><mi>L</mi><mi>.</mi></mrow></math>
+<p>By the distance bound, a cycle this small cannot represent a nontrivial logical operator. It is therefore a stabilizer boundary; for the complementary Pauli type, the same argument uses cocycles and coboundaries. Applying the correction preserves the encoded information. The two CSS error types can be treated separately.</p>
+</section>
+<p>This is an explanatory proof of the geometric argument. Making it a theorem about an entire implemented protocol requires more: a proof that the ancilla circuit really extracts the specified syndrome, a proved connection between the decoder and the existing outcome-controlled Pauli word, and a proof that the corrected branches have the intended state and weight.</p>
+<p>The inspected plan separates these stages. It marks the surface-code geometry and distance result <strong>T34</strong>, the encoding development <strong>T29</strong>, and Pauli errors and protocol locations <strong>T64</strong> as proved. It marks syndrome extraction <strong>T30</strong>, correction controlled by a decoder <strong>T31</strong>, and the integrated surface-code memory theorem <strong>T65</strong> as not done. These are statuses reported by the plan at the time of this revision. <a href="#ref-plan">11</a></p>
+<figure>
+<svg xmlns="http://www.w3.org/2000/svg" role="img" width="680" height="520" viewBox="0 0 680 520" font-family="-apple-system, BlinkMacSystemFont, system-ui, sans-serif">
+<title>Selected plan targets. Proved foundations include surface-code geometry, encoding and Pauli errors. Planned syndrome extraction and correction lead toward the surface-code memory theorem. Further planned work includes noisy rounds, detector models and lattice surgery. This is a reading guide, not the complete dependency graph.</title>
+<text x="340" y="28" text-anchor="middle" font-size="22" fill="#1C1B1A">From a code to a verified memory</text>
+<rect x="40" y="60" width="600" height="76" fill="none" stroke="#1C1B1A"/>
+<circle cx="61" cy="81" r="5" fill="#1C1B1A"/>
+<text x="82" y="86" text-anchor="start" font-size="14" fill="#6F6E69">PROVED</text>
+<text x="620" y="86" text-anchor="end" font-size="14" fill="#6F6E69">T34 · T29 · T64</text>
+<text x="340" y="116" text-anchor="middle" font-size="18" fill="#1C1B1A">Geometry and distance · encoding · Pauli errors</text>
+<rect x="40" y="168" width="600" height="76" fill="none" stroke="#CECDC3"/>
+<circle cx="61" cy="189" r="5" fill="#fff"/>
+<rect x="56" y="184" width="10" height="10" fill="none" stroke="#6F6E69"/>
+<text x="82" y="194" text-anchor="start" font-size="14" fill="#6F6E69">PLANNED</text>
+<text x="620" y="194" text-anchor="end" font-size="14" fill="#6F6E69">T30 · T31</text>
+<text x="340" y="224" text-anchor="middle" font-size="18" fill="#1C1B1A">Syndrome extraction and decoder-controlled correction</text>
+<rect x="40" y="276" width="600" height="76" fill="none" stroke="#CECDC3"/>
+<circle cx="61" cy="297" r="5" fill="#fff"/>
+<rect x="56" y="292" width="10" height="10" fill="none" stroke="#6F6E69"/>
+<text x="82" y="302" text-anchor="start" font-size="14" fill="#6F6E69">PLANNED</text>
+<text x="620" y="302" text-anchor="end" font-size="14" fill="#6F6E69">T65</text>
+<text x="340" y="332" text-anchor="middle" font-size="18" fill="#1C1B1A">One-round surface-code memory theorem</text>
+<rect x="40" y="411" width="600" height="76" fill="none" stroke="#CECDC3"/>
+<circle cx="61" cy="432" r="5" fill="#fff"/>
+<rect x="56" y="427" width="10" height="10" fill="none" stroke="#6F6E69"/>
+<text x="82" y="437" text-anchor="start" font-size="14" fill="#6F6E69">FURTHER WORK</text>
+<text x="620" y="437" text-anchor="end" font-size="14" fill="#6F6E69">T53 · T61</text>
+<text x="340" y="467" text-anchor="middle" font-size="18" fill="#1C1B1A">Noisy rounds and detectors · lattice surgery</text>
+<line x1="340" y1="136" x2="340" y2="168" stroke="#6F6E69" stroke-width="1.5"/>
+<path d="M335 161L340 168L345 161" stroke="#6F6E69" stroke-width="1.5" fill="none"/>
+<line x1="340" y1="244" x2="340" y2="276" stroke="#6F6E69" stroke-width="1.5"/>
+<path d="M335 269L340 276L345 269" stroke="#6F6E69" stroke-width="1.5" fill="none"/>
+<text x="340" y="389" text-anchor="middle" font-size="16" fill="#6F6E69">The programme then extends to repeated operations</text>
+<text x="340" y="514" text-anchor="middle" font-size="14" fill="#6F6E69">Status from the plan inspected on 5 October 2026</text>
+</svg>
+<figcaption><b>Figure 10.</b>Selected steps from the inspected plan. The completed geometry and encoding results supply ingredients for the planned one-round memory theorem. Further work includes repeated noisy syndrome rounds, detector models, and lattice surgery. This is a guide to the programme, not the full dependency graph. Original SVG diagram based on targets T29–T31, T34, T53, T61, T64, and T65.</figcaption>
+</figure>
+<p>The planned memory theorem assembles the stages into one statement: encode an input, apply a bounded-weight Pauli error, extract one ideal syndrome round, and apply a minimum-weight correction. Each nonzero branch should recover the encoded input up to a fourth root of unity determined by the error and correction. The decoder here is specified by its minimum-weight property; proving an efficient algorithm that realizes that specification is further work.</p>
+<p>Beyond this one-round result, <strong>T53</strong> introduces repeated rounds, faults, and detector information in spacetime for the specified Clifford protocols. <strong>T61</strong> treats lattice surgery through the seam joining codes and the algebraic construction of the merged code, aiming to relate merge-and-split protocols to their logical action. These targets remain planned. The surgery target takes a logical-qubit-count hypothesis and does not by itself establish preservation of distance; noisy-round threshold guarantees also lie beyond the memory theorem. The plan places decoder implementation and hardware work in the companion <code>veriecc</code> programme.</p>
+<p>This continuation shows what the common foundation is for. A proof about geometry becomes an ingredient in a recovery proof; a recovery proof becomes an ingredient in a statement about a measured, conditional computation. At each step, the new claim has a definite interface with the mathematics already established.</p>
+<h2 id="participation-and-the-purpose-of-the-project">Participation and the purpose of the project</h2>
+<p>The breadth of ftqclib serves an organizing purpose. A useful foundation for fault-tolerant quantum computing must let ideas cross the boundaries between algebra, geometry, algorithms, measurement, and noise. The current development provides substantial parts of that foundation, with further connections and applications still to be built.</p>
+<p>Making those connections explicit can widen participation. A mathematician familiar with finite fields can approach quantum phases through polynomial arithmetic. A coding theorist can follow duality into stabilizer bounds. A computer scientist can approach circuit transformations through semantics. Accessible exposition gives these readers an entrance; formal definitions and proofs provide a place for their contributions to meet.</p>
+<p>The aspiration is that a growing body of shared, verified mathematics will make exploration more dependable and its results easier to combine. Better codes and algorithms still require invention, and useful systems still require engineering. A foundation can reduce duplicated reasoning, expose assumptions, and allow later work to begin from guarantees already established. Helping more people contribute on those terms is a practical step toward quantum computation with broad public benefit.</p>
+<h2 id="sources-and-scope">Sources and scope</h2>
+<p>This essay describes the source snapshot labelled <strong><code>d66ec2b</code></strong> in the <a href="https://ftqclib.pages.dev/">published ftqclib source browser</a>. The browser embeds 519 Lean modules; the relevant source files and theorem statements were inspected for this essay. The continuation also draws on the separately published plan, inspected on 5 October 2026. Its topic groupings are guides rather than an exhaustive account of the library. The essay is an exposition of that source, not a report of an independent Lean rebuild or a full audit of its proof dependencies. The Bell-state and minimum-weight-correction propositions are self-contained explanatory arguments. Lean excerpts reproduce source definitions or proofs, with surrounding file context omitted.</p>
+<p>The references identify modules in the source browser. Select a module, then open its <strong>Lean file</strong> tab to read the embedded source. The module numbers in the links refer to this published snapshot; the browser does not automatically select a module from the URL fragment.</p>
+<h3 id="ref-stabilizers">1. Stabilizers and their representations</h3>
+<p><a href="https://ftqclib.pages.dev/">FTQCLib source browser</a>: the <code>Pauli</code>, <code>Stabilizer</code>, and <code>Hilbert</code> developments, including the symplectic commutation form, signed stabilizers, and their operator interpretations. Foundational context: D. Gottesman, <a href="https://arxiv.org/abs/quant-ph/9705052"><em>Stabilizer Codes and Quantum Error Correction</em></a>.</p>
+<h3 id="ref-hierarchy">2. Diagonal gates and the hierarchy</h3>
+<p><code>FTQCLib.Hilbert.CGKCoverage</code> and the two-sided classification in <code>CGKTwoSided</code>, available through the <a href="https://ftqclib.pages.dev/">source browser</a>. Context: S. X. Cui, D. Gottesman, and A. Krishna, <a href="https://arxiv.org/abs/1608.06596"><em>Diagonal gates in the Clifford hierarchy</em></a>. The repository&#39;s coverage is for qubits and records its phase conventions and corrections explicitly.</p>
+<h3 id="ref-ecclib">3. Fourier and classical coding mathematics</h3>
+<p>The <code>ECCLib</code> modules in the <a href="https://ftqclib.pages.dev/">source browser</a>, including finite and higher-order Fourier analysis, Gowers norms, Gauss sums, the Weil representation, code families, coding bounds, and decoding. <code>FTQCLib.Bridge.HOFBridge</code> connects finite differences and quantum phase polynomials.</p>
+<h3 id="ref-completeness">4. The carrier calculus</h3>
+<p><a href="https://ftqclib.pages.dev/#m-436"><code>FTQCLib.Carrier.RewriteCompleteness</code></a>: <code>rewrite_complete</code> and <code>rewrite_conservative</code>. <a href="https://ftqclib.pages.dev/#m-471"><code>PropCompleteness</code></a> gives the corresponding statement for presentations of morphisms. Prior mathematical context includes R. Vilmart, <a href="https://arxiv.org/abs/2205.02600"><em>Completeness of Sum-Over-Paths for Toffoli-Hadamard and the Dyadic Fragments of Quantum Computation</em></a>.</p>
+<p>The carrier definition and gate examples use <a href="https://ftqclib.pages.dev/#m-295"><code>HadamardPhase</code></a>, <a href="https://ftqclib.pages.dev/#m-328"><code>CharSumGates</code></a>, <a href="https://ftqclib.pages.dev/#m-346"><code>CarrierAmplitude</code></a>, <a href="https://ftqclib.pages.dev/#m-367"><code>CarrierState</code></a>, <a href="https://ftqclib.pages.dev/#m-380"><code>PrecisionGauge</code></a>, and <a href="https://ftqclib.pages.dev/#m-427"><code>GateWord</code></a>. The two Bell records are explanatory instances of these definitions. Calligraphic <math><mi>𝒞</mi></math> names a record in this essay; it is not a new library type.</p>
+<h3 id="ref-protocol">5. Measurement protocols</h3>
+<p><a href="https://ftqclib.pages.dev/#m-446"><code>FTQCLib.Carrier.Protocol</code></a>: <code>amp_interpret</code>, <code>branch_weights_sum</code>, and the qualified <code>protocol_complete</code> theorem. The outcome register is part of the protocol interpretation.</p>
+<h3 id="ref-channels">6. Environments and channels</h3>
+<p><a href="https://ftqclib.pages.dev/#m-473"><code>UnreadBits</code></a>, <a href="https://ftqclib.pages.dev/#m-481"><code>Doubling</code></a>, and <a href="https://ftqclib.pages.dev/#m-490"><code>PauliTransfer</code></a>. In particular, <code>choi_eq_iff</code> concerns the coherent reading, <code>choi_measured_eq_iff</code> the measured reading, and <code>choi_mem_dyadic</code> a necessary arithmetic condition rather than a general synthesis converse. <code>PauliTransfer</code> connects Kraus operators&#39; Pauli coefficients, the <math><mi>χ</mi></math> matrix, and the Pauli transfer matrix per read-outcome branch, including a Fourier relation between their diagonals.</p>
+<h3 id="ref-surface">7. Chain complexes and surface codes</h3>
+<p><a href="https://ftqclib.pages.dev/#m-275"><code>FTQCLib.CSS.BasedComplex</code></a> and <a href="https://ftqclib.pages.dev/#m-308"><code>SurfaceCode</code></a>: logical-space correspondences, <code>toricCode_k</code>, <code>planarCode_k</code>, <code>toricCode_distance</code>, and <code>planarCode_distance</code>, for the constructions and positive lattice sizes defined there.</p>
+<h3 id="ref-encoding">8. Encoding and correctability</h3>
+<p><a href="https://ftqclib.pages.dev/#m-493"><code>FTQCLib.Codes.Encoding</code></a>: <code>encoder_exists</code> and the encoded-state and logical-action results. <a href="https://ftqclib.pages.dev/#m-498"><code>Carrier.DoublingCorollaries</code></a>: <code>knillLaflamme_iff</code> and <code>knillLaflamme_stabilizer_iff</code>. Context: E. Knill and R. Laflamme, <a href="https://arxiv.org/abs/quant-ph/9604034"><em>A Theory of Quantum Error-Correcting Codes</em></a>.</p>
+<h3 id="ref-coding">9. Quantum coding identities and bounds</h3>
+<p><a href="https://ftqclib.pages.dev/#m-498"><code>FTQCLib.Carrier.DoublingCorollaries</code></a>: <code>quantum_macwilliams</code> and <code>pauli_twirl</code>. The bundled Singleton conclusion assumes at least one logical qubit; the Hamming conclusion requires the stated minimum-weight condition on nonzero normalizer elements.</p>
+<h3 id="ref-related">10. Related verification work</h3>
+<p>K. Hietala et al., <a href="https://arxiv.org/abs/1912.02250"><em>A Verified Optimizer for Quantum Circuits</em></a>. M. Ehatamm et al., <a href="https://arxiv.org/abs/2605.16523"><em>End-to-End Formalization of Quantum Error Correction</em></a>. These illustrate complementary uses of formal verification; no priority or performance comparison is asserted here.</p>
+<h3 id="ref-plan">11. Continuing work</h3>
+<p><a href="https://ftqclib.pages.dev/plan/">The ftqclib plan</a> (access-controlled), inspected on 5 October 2026. The page identifies its inputs as <code>docs/TARGETS.md</code> at <code>08f4171e1623</code> and <code>docs/STEPS.json</code> at <code>78711b2a934e</code>. The surface-code continuation uses targets T29–T31, T34, T53, T61, T64, and T65. Status labels describe this inspected version of the plan; planned statements are not presented as completed Lean theorems.</p>
+</main>
+<footer>
+<p class="meta">Source snapshot: d66ec2b, as published at ftqclib.pages.dev. Prepared <time datetime="2026-10-05">5 October 2026</time>. Editable Markdown and SVG sources accompany this self-contained reading edition.</p>
+</footer>
+</body>
+</html>

@@ -1,0 +1,40 @@
+<svg xmlns="http://www.w3.org/2000/svg" role="img" width="680" height="440" viewBox="0 0 680 440" font-family="-apple-system, BlinkMacSystemFont, system-ui, sans-serif">
+<title>Evaluate a carrier at a fixed visible word. Outside the support envelope the amplitude is zero. Inside, enumerate the bound alternatives, read their phases, sum them and multiply by the scalar and the normalization factor. The illustrated two alternatives are the case of one bound bit.</title>
+<text x="340" y="27" text-anchor="middle" font-size="22" fill="#1C1B1A">Read one amplitude from the record</text>
+<rect x="40" y="56" width="265" height="53" fill="none" stroke="#CECDC3"/>
+<text x="172" y="89" text-anchor="middle" font-size="19" fill="#1C1B1A">Fix a visible word</text>
+<line x1="305" y1="82" x2="369" y2="82" stroke="#6F6E69" stroke-width="1.5"/>
+<path d="M362 77L369 82L362 87" stroke="#6F6E69" stroke-width="1.5" fill="none"/>
+<rect x="370" y="56" width="270" height="53" fill="none" stroke="#CECDC3"/>
+<text x="505" y="78" text-anchor="middle" font-size="18" fill="#1C1B1A">Test the support envelope</text>
+<text x="505" y="99" text-anchor="middle" font-size="15" fill="#6F6E69">using geometry and offset</text>
+<line x1="505" y1="109" x2="505" y2="148" stroke="#6F6E69" stroke-width="1.5"/>
+<path d="M500 141L505 148L510 141" stroke="#6F6E69" stroke-width="1.5" fill="none"/>
+<text x="555" y="135" text-anchor="middle" font-size="15" fill="#6F6E69">outside</text>
+<text x="505" y="171" text-anchor="middle" font-size="19" fill="#6F6E69">Amplitude zero</text>
+<path d="M370 92H340V196H300" stroke="#6F6E69" stroke-width="1.5" fill="none"/>
+<text x="315" y="159" text-anchor="middle" font-size="15" fill="#6F6E69">inside</text>
+<rect x="40" y="183" width="260" height="78" fill="none" stroke="#CECDC3"/>
+<text x="170" y="205" text-anchor="middle" font-size="17" fill="#1C1B1A">Read each bound alternative</text>
+<circle cx="108" cy="234" r="12" fill="#E6E4D9"/>
+<text x="108" y="240" text-anchor="middle" font-size="17" fill="#1C1B1A">0</text>
+<circle cx="226" cy="234" r="12" fill="#E6E4D9"/>
+<text x="226" y="240" text-anchor="middle" font-size="17" fill="#1C1B1A">1</text>
+<line x1="300" y1="223" x2="369" y2="223" stroke="#6F6E69" stroke-width="1.5"/>
+<path d="M362 218L369 223L362 228" stroke="#6F6E69" stroke-width="1.5" fill="none"/>
+<rect x="370" y="190" width="270" height="65" fill="none" stroke="#CECDC3"/>
+<text x="505" y="217" text-anchor="middle" font-size="19" fill="#1C1B1A">Evaluate its phase</text>
+<text x="505" y="240" text-anchor="middle" font-size="15" fill="#6F6E69">from polynomial and precision</text>
+<path d="M505 255V285H170V308" stroke="#6F6E69" stroke-width="1.5" fill="none"/>
+<rect x="40" y="309" width="260" height="57" fill="none" stroke="#CECDC3"/>
+<text x="170" y="342" text-anchor="middle" font-size="19" fill="#1A4F8C">Add the phases</text>
+<line x1="300" y1="337" x2="369" y2="337" stroke="#6F6E69" stroke-width="1.5"/>
+<path d="M362 332L369 337L362 342" stroke="#6F6E69" stroke-width="1.5" fill="none"/>
+<rect x="370" y="309" width="270" height="57" fill="none" stroke="#CECDC3"/>
+<text x="505" y="332" text-anchor="middle" font-size="18" fill="#1C1B1A">Apply scale and</text>
+<text x="505" y="353" text-anchor="middle" font-size="18" fill="#1C1B1A">bound-bit normalization</text>
+<line x1="505" y1="366" x2="505" y2="399" stroke="#6F6E69" stroke-width="1.5"/>
+<path d="M500 392L505 399L510 392" stroke="#6F6E69" stroke-width="1.5" fill="none"/>
+<text x="505" y="425" text-anchor="middle" font-size="19" fill="#1A4F8C">One complex amplitude</text>
+<text x="170" y="409" text-anchor="middle" font-size="15" fill="#6F6E69">Repeat for each visible word</text>
+</svg>
