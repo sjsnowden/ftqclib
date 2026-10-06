@@ -50,14 +50,6 @@ lemma iterMderiv_mul (hs : List V) (f g : V → ℂ) :
   | nil => rfl
   | cons h hs ih => rw [iterMderiv_cons, iterMderiv_cons, iterMderiv_cons, ih, mderiv_mul]
 
-/-- `IsPolyDegLE` is closed under negation. -/
-theorem IsPolyDegLE.neg {d : ℕ} {P : V → G} (h : IsPolyDegLE d P) :
-    IsPolyDegLE d (fun x => -(P x)) := by
-  intro ys
-  rw [show (fun x => -(P x)) = (⇑(-AddMonoidHom.id G)) ∘ P from rfl,
-      iteratedFwdDiff_comp_addMonoidHom, h ys]
-  funext x; simp
-
 /-- **The `(s+1)`-fold multiplicative derivative of a degree-`≤s` phase is the constant `1`.** -/
 lemma iterMderiv_phase_one (ψ : AddChar G ℂ) (hψ : ∀ t, star (ψ t) = ψ (-t))
     {s : ℕ} {P : V → G} (hP : IsPolyDegLE s P) (ys : Fin (s + 1) → V) :

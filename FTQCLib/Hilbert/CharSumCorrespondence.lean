@@ -6,7 +6,7 @@ Authors: Sam Snowden
 import FTQCLib.Hilbert.HadamardCharSumBridge
 import FTQCLib.Hilbert.FrameConditioning
 import FTQCLib.Hilbert.Diagonal
-import FTQCLib.Examples.CharSumGates
+import FTQCLib.Carrier.CharSumGates
 
 /-! # The above-floor certificate: the character-sum representation equals the intended Hilbert state
 
@@ -22,7 +22,7 @@ The raw-amplitude engine is `HadamardCharSumBridge`; this file adds the support 
 absolute correspondence.
 
 **Related.** The frame-pure alphabet `NormalGate` with `runNormal`
-(`FTQCLib/Examples/CliffordWordFloor.lean`) keeps a height-zero floor at height zero on well-formed
+(`FTQCLib/Carrier/CliffordWordFloor.lean`) keeps a height-zero floor at height zero on well-formed
 Clifford words and agrees with this module's Hilbert circuit letter by letter (`F_runNormal`,
 `CliffordWordFloorCheck.lean`). The relation between `Gate` / `runFrame` here (tail-first, `Diag`
 with the Lagrangian unchanged) and `NormalGate` / `runNormal` (head-first, the shear as data) is
@@ -163,7 +163,7 @@ theorem F_applyDiagSum (S : KernelSumState n) (D : DiagPhase n S.m) :
 /-! ### CNOT (grade 0, moves the support). -/
 
 /- `cnotBitMap_castAdd_append`, `ampCore_affinePushforward` and `cnotSum_support` are in
-`FTQCLib/Examples/CharSumGates.lean` (frame-pure). -/
+`FTQCLib/Carrier/CharSumGates.lean` (frame-pure). -/
 
 /-- **CNOT step.** `F` intertwines the frame CNOT with the Hilbert `cnotGate` (`cnotBitMap = cnotPerm`). -/
 theorem F_applyCnotSum (i j : Fin n) (hij : i ≠ j) (S : KernelSumState n) :

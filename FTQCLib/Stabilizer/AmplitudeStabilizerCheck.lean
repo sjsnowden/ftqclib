@@ -328,4 +328,52 @@ Classical.choice, Quot.sound] -/
 #guard_msgs in
 #print axioms eq_of_stabilizedBy_of_stabilizedBy
 
+
+/-! ## Axiom sweep: made public or moved here (docs/STEPS.md, entry 2026-09-30h) -/
+
+/-- info: 'FTQCLib.Stabilizer.StabilizedBy.mono' depends on axioms:
+[propext, Classical.choice, Quot.sound] -/
+#guard_msgs (whitespace := lax) in
+#print axioms FTQCLib.Stabilizer.StabilizedBy.mono
+
+/-- info: 'FTQCLib.Stabilizer.eq_of_I_pow_val_eq' depends on axioms:
+[propext, Classical.choice, Quot.sound] -/
+#guard_msgs (whitespace := lax) in
+#print axioms FTQCLib.Stabilizer.eq_of_I_pow_val_eq
+
+/-- info: 'FTQCLib.Stabilizer.eq_of_pauliAct_eq' depends on axioms:
+[propext, Classical.choice, Quot.sound] -/
+#guard_msgs (whitespace := lax) in
+#print axioms FTQCLib.Stabilizer.eq_of_pauliAct_eq
+
+/-- info: 'FTQCLib.Stabilizer.eq_zero_of_I_pow_val_eq_one' depends on axioms:
+[propext, Classical.choice, Quot.sound] -/
+#guard_msgs (whitespace := lax) in
+#print axioms FTQCLib.Stabilizer.eq_zero_of_I_pow_val_eq_one
+
+/-- info: 'FTQCLib.Stabilizer.exists_sign_of_mul_self' depends on axioms:
+[propext, Classical.choice, Quot.sound] -/
+#guard_msgs (whitespace := lax) in
+#print axioms FTQCLib.Stabilizer.exists_sign_of_mul_self
+
+/-- info: 'FTQCLib.Stabilizer.exists_sign_of_pauliAct_eq' depends on axioms:
+[propext, Classical.choice, Quot.sound] -/
+#guard_msgs (whitespace := lax) in
+#print axioms FTQCLib.Stabilizer.exists_sign_of_pauliAct_eq
+
+/-- info: 'FTQCLib.Stabilizer.pauliAct_anticomm' depends on axioms:
+[propext, Classical.choice, Quot.sound] -/
+#guard_msgs (whitespace := lax) in
+#print axioms FTQCLib.Stabilizer.pauliAct_anticomm
+
+/-- info: 'FTQCLib.Stabilizer.pauliAct_comm' depends on axioms:
+[propext, Classical.choice, Quot.sound] -/
+#guard_msgs (whitespace := lax) in
+#print axioms FTQCLib.Stabilizer.pauliAct_comm
+
+/-- info: 'FTQCLib.Stabilizer.stabilizedBy_sup' depends on axioms:
+[propext, Classical.choice, Quot.sound] -/
+#guard_msgs (whitespace := lax) in
+#print axioms FTQCLib.Stabilizer.stabilizedBy_sup
+
 end FTQCLib.Stabilizer

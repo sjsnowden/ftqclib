@@ -429,4 +429,62 @@ theorem paulix_add_pauliz_Z (i : Fin n) :
     (paulix i + pauliz i : FTQCLib.Pauli n).Z = Pi.single i 1 := by
   simp [FTQCLib.Pauli.Z_add]
 
+/-! ## Reading the `Q`-coefficient
+
+For `Q ∉ L` and an anticommuting witness `M ∈ L` (`ω(M, Q) = 1`), every `g ∈ pauliCondition L Q`
+is `k + c • Q` with `k ∈ L ⊓ Q^⊥`, and `ω(M, ·)` reads `c`. Moved here from
+`FTQCLib/Hilbert/MeasurementCollapse.lean`, which uses them unchanged, so that the frame-pure
+measurement rule (`FTQCLib/Stabilizer/SignedCondition.lean`) needs no Hilbert module. -/
+
+/-- **Reading the `Q`-coefficient.** For `g ∈ pauliCondition L Q` with `δ(g) := ω(M, g) = 1` (the
+anticommuting witness `M ∈ L`, `ω(M, Q) = 1`), the shifted element `g + Q` lands back in
+`K = L ⊓ Q^⊥`. In the decomposition `g = k + c • Q`, `ω(M, ·)` reads the coefficient `c` (it
+vanishes on `K ⊆ L` by isotropy and is `1` on `Q`), so `δ(g) = 1` forces `c = 1` and
+`g + Q = k ∈ K`. -/
+theorem mem_K_of_omega_M_one {L : Submodule (ZMod 2) (Pauli n)}
+    (hS : IsStabilizer L) {Q M : Pauli n} (hQ : Q ∉ L) (hM : M ∈ L)
+    (hMQ : omega M Q = 1) {g : Pauli n} (hg : g ∈ pauliCondition L Q)
+    (hδ : omega M g = 1) :
+    g + Q ∈ L ⊓ LinearMap.BilinForm.orthogonal omegaBilin
+      (Submodule.span (ZMod 2) ({Q} : Set (Pauli n))) := by
+  rw [pauliCondition_of_not_mem hQ, Submodule.mem_sup] at hg
+  obtain ⟨k, hk, r, hr, hkr⟩ := hg
+  rw [Submodule.mem_span_singleton] at hr
+  obtain ⟨c, rfl⟩ := hr
+  have hkL : k ∈ L := (Submodule.mem_inf.mp hk).1
+  have hMk : omega M k = 0 := hS M hM k hkL
+  -- `δ(g) = ω(M, k) + c · ω(M, Q) = c`, so `c = 1`.
+  have hc : c = 1 := by
+    rw [← hkr, omega_add_right, omega_smul_right, hMk, hMQ, mul_one, zero_add] at hδ
+    exact hδ
+  subst hc
+  -- `g + Q = k + 1 • Q + Q = k`.
+  have hgk : k + (1 : ZMod 2) • Q + Q = k := by
+    rw [one_smul, add_assoc, ← two_smul (ZMod 2) Q, show (2 : ZMod 2) = 0 from rfl, zero_smul,
+      add_zero]
+  rw [← hkr, hgk]
+  exact hk
+
+/-- **Reading the `Q`-coefficient, `δ = 0` case.** For `g ∈ pauliCondition L Q` with
+`δ(g) := ω(M, g) = 0`, `g` itself lies in `K = L ⊓ Q^⊥` (hence in `L`): the coefficient `c` read by
+`ω(M, ·)` is `0`, so `g = k ∈ K`. -/
+theorem mem_K_of_omega_M_zero {L : Submodule (ZMod 2) (Pauli n)}
+    (hS : IsStabilizer L) {Q M : Pauli n} (hQ : Q ∉ L) (hM : M ∈ L)
+    (hMQ : omega M Q = 1) {g : Pauli n} (hg : g ∈ pauliCondition L Q)
+    (hδ : omega M g = 0) :
+    g ∈ L ⊓ LinearMap.BilinForm.orthogonal omegaBilin
+      (Submodule.span (ZMod 2) ({Q} : Set (Pauli n))) := by
+  rw [pauliCondition_of_not_mem hQ, Submodule.mem_sup] at hg
+  obtain ⟨k, hk, r, hr, hkr⟩ := hg
+  rw [Submodule.mem_span_singleton] at hr
+  obtain ⟨c, rfl⟩ := hr
+  have hkL : k ∈ L := (Submodule.mem_inf.mp hk).1
+  have hMk : omega M k = 0 := hS M hM k hkL
+  have hc : c = 0 := by
+    rw [← hkr, omega_add_right, omega_smul_right, hMk, hMQ, mul_one, zero_add] at hδ
+    exact hδ
+  subst hc
+  rw [← hkr, zero_smul, add_zero]
+  exact hk
+
 end FTQCLib.Stabilizer

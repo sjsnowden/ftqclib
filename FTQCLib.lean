@@ -23,6 +23,10 @@ import FTQCLib.CSS.Defs
 import FTQCLib.CSS.Logical
 import FTQCLib.CSS.Distance
 import FTQCLib.CSS.Rank
+import FTQCLib.CSS.Kunneth
+import FTQCLib.CSS.BasedComplex
+import FTQCLib.CSS.SurfaceCode
+import FTQCLib.CSS.SurfaceCodeDistance
 import FTQCLib.Aut.Defs
 import FTQCLib.Gates.Hadamard
 import FTQCLib.Gates.Phase
@@ -42,9 +46,11 @@ import FTQCLib.Hierarchy.FuncDeriv
 import FTQCLib.Hierarchy.BoolReduce
 import FTQCLib.Hierarchy.BooleanMobius
 import FTQCLib.Hierarchy.EffectiveLevel
+import FTQCLib.Hierarchy.PrecisionLift
 import FTQCLib.Hierarchy.AffinePushforward
 import FTQCLib.Gates.CCNOT
 import FTQCLib.Stabilizer.PauliCondition
+import FTQCLib.Stabilizer.SignedCondition
 import FTQCLib.Stabilizer.GottesmanKnill
 import FTQCLib.Codes.Transversal
 import FTQCLib.Codes.CSSCnot
@@ -76,6 +82,7 @@ import FTQCLib.Hilbert.StabilizerState
 import FTQCLib.Hilbert.BornCollapse
 import FTQCLib.Hilbert.Separation
 import FTQCLib.Hilbert.StabilizerEquiv
+import FTQCLib.Pauli.SubmoduleCard
 import FTQCLib.Hilbert.LemSpan
 import FTQCLib.Hilbert.StabilizerTheory
 import FTQCLib.Hilbert.MeasurementCollapse
@@ -123,3 +130,38 @@ import FTQCLib.Examples.CCZ.KernelFrame
 -- Bridge — the Klein-word chart into the ECCLib Delsarte-scheme layer
 import FTQCLib.Bridge.PauliKlein
 import FTQCLib.Bridge.PauliKleinCheck
+
+-- Carrier — the frame's rewriting equivalence at every precision
+import FTQCLib.Carrier.SqrtTwo
+import FTQCLib.Carrier.FinAppend
+import FTQCLib.Carrier.ZModTwo
+import FTQCLib.Carrier.AntipodalKernel
+import FTQCLib.Carrier.ScaleMatching
+import FTQCLib.Carrier.GateWord
+import FTQCLib.Carrier.GateWordPrecision
+import FTQCLib.Carrier.ControlledHadamard
+import FTQCLib.Carrier.ControlledHadamardMinimal
+import FTQCLib.Carrier.RowSumBounds
+import FTQCLib.Carrier.Conditioning
+import FTQCLib.Carrier.OutcomeWeight
+import FTQCLib.Carrier.ConditionFloor
+import FTQCLib.Carrier.FeedForward
+import FTQCLib.Carrier.Protocol
+import FTQCLib.Carrier.CarrierScale
+import FTQCLib.Carrier.HInject
+import FTQCLib.Carrier.RemoteCH
+import FTQCLib.Carrier.DiagonalInjection
+import FTQCLib.Carrier.GramIsometry
+import FTQCLib.Carrier.UnreadBits
+import FTQCLib.Carrier.FrameCategory
+import FTQCLib.Carrier.PropCompleteness
+import FTQCLib.Carrier.Doubling
+import FTQCLib.Carrier.PauliTransfer
+import FTQCLib.Carrier.DoublingCorollaries
+import FTQCLib.Carrier.PauliError
+import FTQCLib.Codes.Encoding
+import FTQCLib.Hilbert.ProtocolSemantics
+import FTQCLib.Hilbert.LetterSoundness
+import FTQCLib.Hilbert.ConditionSoundness
+import FTQCLib.Hilbert.BranchSoundness
+import FTQCLib.Hilbert.ProtocolChannel

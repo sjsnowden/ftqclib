@@ -3,7 +3,7 @@ Copyright (c) 2026 Sam Snowden. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Sam Snowden
 -/
-import FTQCLib.Examples.RegisterWalkthrough
+import FTQCLib.Carrier.RegisterWalkthrough
 import FTQCLib.Hierarchy.RzApprox
 
 set_option linter.unusedSectionVars false
@@ -12,7 +12,7 @@ set_option linter.style.longLine false
 /-! # The Rz approximation, composed in the walkthrough's table format
 
 Machine-checked companion to the Rz approximation theorem (`FTQCLib/Hierarchy/RzApprox.lean`), staged as a
-register-walkthrough table (`FTQCLib/Examples/RegisterWalkthrough.lean`): put one bit in superposition, then
+register-walkthrough table (`FTQCLib/Carrier/RegisterWalkthrough.lean`): put one bit in superposition, then
 apply the root-of-`Z` tower gates row by row — one row per binary digit of the rounded angle — reading the
 `KernelState` exponent column at each step. Everything is literal `KernelState`/`DiagPhase` data; the rows
 rewrite the carrier exponent directly.

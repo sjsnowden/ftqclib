@@ -9,8 +9,7 @@ set_option linter.unusedSectionVars false
 
 /-! # Dyadic logical-angle classification under trans-logical uniform angle
 
-This file proves: under non-degeneracy of the X-stabiliser structure,
-a well-supported logical `g_L`, the trans-logical uniform-angle
+This file proves: under a well-supported logical `g_L`, the trans-logical uniform-angle
 hypothesis on `linearPhase (fun _ => θ)`, and `θ` expressible as
 `2π · k_0 / m_0` in lowest terms, the **logical** angle
 `θ_L := wt(g_L) · θ` is a dyadic multiple of `2π`.
@@ -57,7 +56,7 @@ these hypotheses alone.
 
 ## What this file proves
 
-1. **`oddPart_dvd_wt_gL`** — under non-degen, well-supported,
+1. **`oddPart_dvd_wt_gL`** — under well-supported,
    trans-logical, and the lowest-terms hypothesis
    `gcd(k_0, m_0) = 1`, the odd part of `m_0` (i.e., `ordCompl[2] m_0`)
    divides `wt(g_L)`.
@@ -68,7 +67,7 @@ these hypotheses alone.
    multiple of `2π`.
 
 3. **`dyadic_logical_angle_of_trans_logical_uniform`** — the main theorem:
-   under non-degen, trans-logical uniform-angle, well-supported `g_L`,
+   under trans-logical uniform-angle, well-supported `g_L`,
    and lowest-terms rational form for `θ`, the logical angle
    `wt(g_L) · θ` is a dyadic multiple of `2π`.
 
@@ -251,28 +250,26 @@ theorem logical_angle_dyadic_of_oddPart_dvd
   push_cast
   field_simp
 
-/-! ## Main theorem: AJO 2014 Theorem 1 — logical-angle form
+/-! ## Main theorem: the logical-angle analogue of AJO 2014 Theorem 1
 
-The main result. Under all AJO hypotheses (non-degeneracy,
-trans-logical uniform-angle, well-supported `g_L`), with the additional
-hypothesis that `θ = 2π · k_0 / m_0` is in lowest terms
-(`gcd(k_0, m_0) = 1`), the **logical** angle `wt(g_L) · θ` is a dyadic
-multiple of `2π`.
+The main result. Under trans-logical uniform angle, a well-supported
+`g_L`, and `θ = 2π · k_0 / m_0` in lowest terms (`gcd(k_0, m_0) = 1`),
+the **logical** angle `wt(g_L) · θ` is a dyadic multiple of `2π`.
 
-The lowest-terms hypothesis is harmless: every rational has a
-lowest-terms form, and the rational form of `θ/(2π)` is supplied by
-`ajo_uniform_rational_of_nondegen` from non-degeneracy. -/
+Non-degeneracy is not a hypothesis here: the theorem assumes the
+rational form of `θ/(2π)` directly. Under non-degeneracy that form is
+supplied by `ajo_uniform_rational_of_nondegen`, and every rational has a
+lowest-terms form. -/
 
-/-- **AJO 2014 Theorem 1 — logical-angle form.** Under non-degeneracy,
+/-- **Logical-angle analogue of AJO 2014 Theorem 1.** Under
 well-supported `g_L`, trans-logical uniform-angle `θ`, and lowest-terms
 rational form `θ = 2π · k_0 / m_0` with `gcd(k_0, m_0) = 1`, the
 LOGICAL angle `θ_L := wt(g_L) · θ` is a dyadic multiple of `2π`.
 
-This is the correct AJO 2014 statement: the conclusion is about the
-logical gate's angle (which determines the Clifford-hierarchy level of
-the LOGICAL action), not the physical per-qubit angle. Physical `θ`
-need not be dyadic (e.g., `θ = π/3` on a 6-qubit code with
-`wt(g_L) = 3` gives `θ_L = π`, dyadic).
+This is strictly weaker than AJO 2014 Theorem 1, which concludes that
+the physical angle `θ` is dyadic (see the file header). Physical `θ`
+dyadic implies `θ_L` dyadic, but not conversely: `θ = π/3` on a code
+with `wt(g_L) = 3` gives `θ_L = π`, dyadic, while `θ` is not.
 
 No non-triviality hypothesis is needed: the conclusion holds
 unconditionally (trivially when `θ_L = 0`, in particular with
@@ -296,13 +293,12 @@ theorem dyadic_logical_angle_of_trans_logical_uniform
   -- Step 2: pure-arithmetic computation yields the dyadic form.
   exact logical_angle_dyadic_of_oddPart_dvd hm_0 hθ h_dvd
 
-/-! ## Packaging variant: full AJO hypotheses
+/-! ## Packaging variant: rational form as an existence
 
-A convenience restatement that takes the non-degeneracy hypothesis
-directly (rather than the rational form). The rational form is
-obtained from non-degeneracy via `ajo_uniform_theta_eq_of_nondegen`,
-which gives a `(k_0, m_0)` but not necessarily in lowest terms; we
-record both versions. -/
+A convenience restatement that takes the lowest-terms rational form as
+an existence rather than as concrete `(k_0, m_0)`. Under non-degeneracy
+a rational form comes from `ajo_uniform_theta_eq_of_nondegen` (not
+necessarily in lowest terms) or `ajo_uniform_rational_of_nondegen`. -/
 
 /-- **Logical-angle dyadic (rational-form variant).** Same conclusion as
 `dyadic_logical_angle_of_trans_logical_uniform`, packaged with the rational form

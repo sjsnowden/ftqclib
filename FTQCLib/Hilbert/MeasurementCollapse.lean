@@ -145,7 +145,10 @@ theorem exists_phase_coboundary {W : Submodule (ZMod 2) (Pauli n)}
       linear_combination (β p * β q) * hv
     rwa [hsqp, hsqq, one_mul, one_mul] at hmul
 
-/-! ### Reading the `Q`-coset coefficient by `δ = ω(M, ·)` -/
+/-! ### Reading the `Q`-coset coefficient by `δ = ω(M, ·)`
+
+The readers themselves, `mem_K_of_omega_M_one` and `mem_K_of_omega_M_zero`, are frame-pure and
+live in `FTQCLib/Stabilizer/PauliCondition.lean`. -/
 
 /-- The conditioned Lagrangian `pauliCondition L Q` is isotropic against `Q`: `ω(g, Q) = 0` for
 every `g` in it (`Q` lies in the isotropic `pauliCondition L Q`). This is why the `Q`-coset
@@ -154,56 +157,6 @@ theorem omega_self_pauliCondition {L : Submodule (ZMod 2) (Pauli n)}
     (hS : FTQCLib.Stabilizer.IsStabilizer L) (Q : Pauli n) {g : Pauli n}
     (hg : g ∈ FTQCLib.Stabilizer.pauliCondition L Q) : omega g Q = 0 :=
   pauliCondition_isStabilizer hS Q g hg Q (pauliCondition_mem L Q)
-
-/-- **Reading the `Q`-coefficient.** For `g ∈ pauliCondition L Q` with `δ(g) := ω(M, g) = 1` (the
-anticommuting witness `M ∈ L`, `ω(M, Q) = 1`), the shifted element `g + Q` lands back in
-`K = L ⊓ Q^⊥`. In the unique decomposition `g = k + c • Q` (the summands meet in `⊥`,
-`pauliCondition_K_inf_span_eq_bot`), `ω(M, ·)` reads the coefficient `c` (it vanishes on `K ⊆ L` by
-isotropy and is `1` on `Q`), so `δ(g) = 1` forces `c = 1` and `g + Q = k ∈ K`. -/
-theorem mem_K_of_omega_M_one {L : Submodule (ZMod 2) (Pauli n)}
-    (hS : FTQCLib.Stabilizer.IsStabilizer L) {Q M : Pauli n} (hQ : Q ∉ L) (hM : M ∈ L)
-    (hMQ : omega M Q = 1) {g : Pauli n} (hg : g ∈ FTQCLib.Stabilizer.pauliCondition L Q)
-    (hδ : omega M g = 1) :
-    g + Q ∈ L ⊓ LinearMap.BilinForm.orthogonal omegaBilin
-      (Submodule.span (ZMod 2) ({Q} : Set (Pauli n))) := by
-  rw [pauliCondition_of_not_mem hQ, Submodule.mem_sup] at hg
-  obtain ⟨k, hk, r, hr, hkr⟩ := hg
-  rw [Submodule.mem_span_singleton] at hr
-  obtain ⟨c, rfl⟩ := hr
-  have hkL : k ∈ L := (Submodule.mem_inf.mp hk).1
-  have hMk : omega M k = 0 := hS M hM k hkL
-  -- `δ(g) = ω(M, k) + c · ω(M, Q) = c`, so `c = 1`.
-  have hc : c = 1 := by
-    rw [← hkr, omega_add_right, omega_smul_right, hMk, hMQ, mul_one, zero_add] at hδ
-    exact hδ
-  subst hc
-  -- `g + Q = k + 1 • Q + Q = k`.
-  have hgk : k + (1 : ZMod 2) • Q + Q = k := by
-    rw [one_smul, add_assoc, pauli_add_self, add_zero]
-  rw [← hkr, hgk]
-  exact hk
-
-/-- **Reading the `Q`-coefficient, `δ = 0` case.** For `g ∈ pauliCondition L Q` with
-`δ(g) := ω(M, g) = 0`, `g` itself lies in `K = L ⊓ Q^⊥` (hence in `L`): the coefficient `c` read by
-`ω(M, ·)` is `0`, so `g = k ∈ K`. -/
-theorem mem_K_of_omega_M_zero {L : Submodule (ZMod 2) (Pauli n)}
-    (hS : FTQCLib.Stabilizer.IsStabilizer L) {Q M : Pauli n} (hQ : Q ∉ L) (hM : M ∈ L)
-    (hMQ : omega M Q = 1) {g : Pauli n} (hg : g ∈ FTQCLib.Stabilizer.pauliCondition L Q)
-    (hδ : omega M g = 0) :
-    g ∈ L ⊓ LinearMap.BilinForm.orthogonal omegaBilin
-      (Submodule.span (ZMod 2) ({Q} : Set (Pauli n))) := by
-  rw [pauliCondition_of_not_mem hQ, Submodule.mem_sup] at hg
-  obtain ⟨k, hk, r, hr, hkr⟩ := hg
-  rw [Submodule.mem_span_singleton] at hr
-  obtain ⟨c, rfl⟩ := hr
-  have hkL : k ∈ L := (Submodule.mem_inf.mp hk).1
-  have hMk : omega M k = 0 := hS M hM k hkL
-  have hc : c = 0 := by
-    rw [← hkr, omega_add_right, omega_smul_right, hMk, hMQ, mul_one, zero_add] at hδ
-    exact hδ
-  subst hc
-  rw [← hkr, zero_smul, add_zero]
-  exact hk
 
 /-! ### Cross-coset phase identities (the `valid` cocycle)
 

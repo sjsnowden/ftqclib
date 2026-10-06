@@ -3,7 +3,7 @@ Copyright (c) 2026 Sam Snowden. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Sam Snowden
 -/
-import FTQCLib.Examples.CharSumGates
+import FTQCLib.Carrier.CharSumGates
 
 /-! # The footprint of the three motions on the carrier (frame-pure, Step 0)
 

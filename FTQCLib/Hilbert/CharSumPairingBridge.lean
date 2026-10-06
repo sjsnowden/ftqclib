@@ -3,7 +3,7 @@ Copyright (c) 2026 Sam Snowden. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Sam Snowden
 -/
-import FTQCLib.Examples.CharSumPairing
+import FTQCLib.Carrier.CharSumPairing
 import FTQCLib.Hilbert.Inner
 
 set_option linter.unusedSectionVars false
@@ -12,7 +12,7 @@ set_option linter.style.longLine false
 /-! # The canonical isometry bridge: the native Gauss-sum pairing IS the `QState` ℓ² geometry
 
 The **separable Hilbert-side certificate** for Appendage G. The frame-native Gauss-sum pairing
-(`FTQCLib/Examples/CharSumPairing.lean`, frame-pure) is reconstructed from the frame's own character data; this
+(`FTQCLib/Carrier/CharSumPairing.lean`, frame-pure) is reconstructed from the frame's own character data; this
 file states the one bridge that makes the bundled operator / spectral API borrowable on demand: the raw
 amplitude embedding `embed S = toQState (ampFun S)` into `QState n = EuclideanSpace ℂ (Fin n → ZMod 2)`
 carries the native norm, pairing, and distance to the `QState` ones, on the nose.

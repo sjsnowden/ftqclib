@@ -6,6 +6,7 @@ Authors: Sam Snowden
 -- Higher-order Fourier foundations
 import ECCLib.Derivative
 import ECCLib.Polynomial
+import ECCLib.PolynomialCheck
 import ECCLib.GowersNorm
 import ECCLib.DepthTower
 import ECCLib.PhaseObstruction

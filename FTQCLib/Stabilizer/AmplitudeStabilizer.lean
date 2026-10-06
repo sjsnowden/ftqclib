@@ -239,4 +239,89 @@ theorem eq_of_stabilizedBy_of_stabilizedBy {L₁ L₂ : Submodule (ZMod 2) (Paul
   have e₂ : L₂ = L₁ ⊔ L₂ := Submodule.eq_of_le_of_finrank_le le_sup_right (by omega)
   exact e₁.trans e₂.symm
 
+/-- A complex number that squares to one is a sign. -/
+theorem exists_sign_of_mul_self {c : ℂ} (h : c * c = 1) :
+    ∃ s : ZMod 2, c = (-1 : ℂ) ^ s.val := by
+  rcases mul_self_eq_one_iff.mp h with h1 | h1
+  · exact ⟨0, by rw [h1, ZMod.val_zero, pow_zero]⟩
+  · exact ⟨1, by rw [h1, show (1 : ZMod 2).val = 1 from rfl, pow_one]⟩
+
+/-- A Pauli that acts on a nonzero amplitude as a scalar acts as a sign: it is an involution. -/
+theorem exists_sign_of_pauliAct_eq {g : Pauli n} {f : (Fin n → ZMod 2) → ℂ} (hf : f ≠ 0)
+    {c : ℂ} (h : pauliAct g f = fun w => c * f w) :
+    ∃ s : ZMod 2, pauliAct g f = fun w => (-1 : ℂ) ^ s.val * f w := by
+  have hinv := pauliAct_pauliAct g f
+  rw [h, pauliAct_mul_left, h] at hinv
+  obtain ⟨w, hw⟩ := Function.ne_iff.mp hf
+  have hw' : f w ≠ 0 := hw
+  have hcc : c * c * f w = 1 * f w := by
+    rw [one_mul]
+    linear_combination congrFun hinv w
+  obtain ⟨s, hs⟩ := exists_sign_of_mul_self (mul_right_cancel₀ hw' hcc)
+  exact ⟨s, by rw [h, hs]⟩
+
+/-- The join of two subspaces that stabilize a nonzero amplitude stabilizes it. -/
+theorem stabilizedBy_sup {A B : Submodule (ZMod 2) (Pauli n)}
+    {f : (Fin n → ZMod 2) → ℂ} (hf : f ≠ 0) (hA : StabilizedBy A f) (hB : StabilizedBy B f) :
+    StabilizedBy (A ⊔ B) f := by
+  intro g hg
+  obtain ⟨a, ha, b, hb, rfl⟩ := Submodule.mem_sup.mp hg
+  obtain ⟨sa, hsa⟩ := hA a ha
+  obtain ⟨sb, hsb⟩ := hB b hb
+  have hcomp := pauliAct_add a b f
+  rw [hsb, pauliAct_mul_left, hsa] at hcomp
+  have hI : Complex.I ^ (betaFrame b a).val ≠ 0 := pow_ne_zero _ Complex.I_ne_zero
+  refine exists_sign_of_pauliAct_eq hf
+    (c := (Complex.I ^ (betaFrame b a).val)⁻¹ * ((-1 : ℂ) ^ sb.val * (-1 : ℂ) ^ sa.val)) ?_
+  funext w
+  have hw := congrFun hcomp w
+  field_simp
+  linear_combination -hw
+
+/-- Two Paulis with `ω = 0` act commutingly on amplitude functions. -/
+theorem pauliAct_comm {g p : Pauli n} (h : omega g p = 0) (f : (Fin n → ZMod 2) → ℂ) :
+    pauliAct g (pauliAct p f) = pauliAct p (pauliAct g f) := by
+  rw [pauliAct_add, pauliAct_add, add_comm p g, betaFrame_swap g p, h, ZMod.val_zero,
+    Nat.cast_zero, mul_zero, add_zero]
+
+/-- On a nonzero amplitude a Pauli has at most one eigenvalue. -/
+theorem eq_of_pauliAct_eq {g : Pauli n} {f : (Fin n → ZMod 2) → ℂ} (hf : f ≠ 0)
+    {c d : ℂ} (hc : pauliAct g f = fun w => c * f w) (hd : pauliAct g f = fun w => d * f w) :
+    c = d := by
+  obtain ⟨w, hw⟩ := Function.ne_iff.mp hf
+  have hw' : f w ≠ 0 := hw
+  exact mul_right_cancel₀ hw' (congrFun (hc.symm.trans hd) w)
+
+/-- A power of `i` that is one has exponent zero in `ZMod 4`. -/
+theorem eq_zero_of_I_pow_val_eq_one {c : ZMod 4} (h : Complex.I ^ c.val = 1) : c = 0 := by
+  fin_cases c
+  · rfl
+  · exact absurd (show Complex.I ^ 1 = 1 from h) (by norm_num [Complex.ext_iff])
+  · exact absurd (show Complex.I ^ 2 = 1 from h) (by norm_num [Complex.ext_iff])
+  · exact absurd (show Complex.I ^ 3 = 1 from h) (by norm_num [pow_succ, Complex.ext_iff])
+
+/-- A power of `i` determines its exponent in `ZMod 4`. -/
+theorem eq_of_I_pow_val_eq {a b : ZMod 4} (h : Complex.I ^ a.val = Complex.I ^ b.val) :
+    a = b := by
+  have hb : Complex.I ^ b.val ≠ 0 := pow_ne_zero _ Complex.I_ne_zero
+  have hsplit : Complex.I ^ a.val = Complex.I ^ b.val * Complex.I ^ (a - b).val := by
+    rw [← I_pow_val_add, add_sub_cancel]
+  rw [h] at hsplit
+  have h1 : Complex.I ^ (a - b).val = 1 :=
+    mul_left_cancel₀ hb (hsplit.symm.trans (mul_one _).symm)
+  exact sub_eq_zero.mp (eq_zero_of_I_pow_val_eq_one h1)
+
+/-- **Anticommuting Paulis.** When `ω(p, g) = 1`, applying `p` and then `g` is minus applying
+`g` and then `p`: the composition law in both orders, with `betaFrame_swap`. -/
+theorem pauliAct_anticomm {p g : Pauli n} (h : omega p g = 1)
+    (f : (Fin n → ZMod 2) → ℂ) (w : Fin n → ZMod 2) :
+    pauliAct g (pauliAct p f) w = -pauliAct p (pauliAct g f) w := by
+  have h1 := congrFun (pauliAct_add g p f) w
+  have h2 := congrFun (pauliAct_add p g f) w
+  simp only at h1 h2
+  rw [h1, h2, add_comm g p, betaFrame_swap p g, I_pow_val_add, h]
+  have htwo' : (2 * (((1 : ZMod 2).val : ℕ) : ZMod 4)).val = 2 := rfl
+  rw [htwo', Complex.I_sq]
+  ring
+
 end FTQCLib.Stabilizer

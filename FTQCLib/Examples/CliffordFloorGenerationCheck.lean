@@ -4,7 +4,7 @@ Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Sam Snowden
 -/
 import FTQCLib.Examples.CliffordFloorGeneration
-import FTQCLib.Examples.CarrierStateCheck
+import FTQCLib.Carrier.CarrierStateCheck
 
 /-!
 # Check: every symplectic map is a Clifford word on the floor

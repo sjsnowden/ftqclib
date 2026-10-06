@@ -42,8 +42,8 @@ open FTQCLib.Pauli FTQCLib.CSS FTQCLib.Codes Matrix
 variable {n r_X r_Z : ℕ}
 
 /-- **Dyadic logical angle for a codespace-preserving uniform-angle
-diagonal gate.** For a CSS code with non-degenerate X-stabilisers and
-a well-supported logical representative `g_L`, if the uniform-angle
+diagonal gate.** For a CSS code with a well-supported logical
+representative `g_L` and `θ = 2π · k_0 / m_0` in lowest terms, if the uniform-angle
 diagonal gate `diagonalGate (linearPhase (λ _, θ))` preserves the
 codespace, then the logical angle `wt(g_L) · θ` is a dyadic multiple
 of `2π`.

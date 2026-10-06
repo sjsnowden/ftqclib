@@ -10,8 +10,6 @@ import Mathlib.Algebra.MvPolynomial.Degrees
 import Mathlib.Algebra.MvPolynomial.Monad
 import Mathlib.Data.ZMod.Basic
 
-set_option linter.unusedSectionVars false
-
 /-! # Diagonal hierarchy elements as polynomial phase functions
 
 A diagonal unitary on `n` qubits is determined by a phase function
@@ -118,6 +116,11 @@ theorem eval_add {N m : ℕ} (A B : DiagPhase N m) (v : Fin N → ZMod 2) :
     DiagPhase.eval (A + B) v = DiagPhase.eval A v + DiagPhase.eval B v := by
   simp [DiagPhase.eval]
 
+/-- `DiagPhase.eval` commutes with negation. -/
+theorem eval_neg {N m : ℕ} (A : DiagPhase N m) (v : Fin N → ZMod 2) :
+    DiagPhase.eval (-A) v = -DiagPhase.eval A v := by
+  simp [DiagPhase.eval]
+
 /-- `DiagPhase.eval` is multiplicative. -/
 theorem eval_mul {N m : ℕ} (A B : DiagPhase N m) (v : Fin N → ZMod 2) :
     DiagPhase.eval (A * B) v = DiagPhase.eval A v * DiagPhase.eval B v := by
@@ -132,6 +135,80 @@ theorem eval_C {N m : ℕ} (a : ZMod (2 ^ m)) (v : Fin N → ZMod 2) :
 theorem eval_X {N m : ℕ} (j : Fin N) (v : Fin N → ZMod 2) :
     DiagPhase.eval (MvPolynomial.X j : DiagPhase N m) v = ((v j).val : ZMod (2 ^ m)) := by
   simp [DiagPhase.eval, DiagPhase.liftBinary]
+
+/-- `DiagPhase.eval` of a renamed exponent: renaming the variables along `g` reads the word
+through `g`. -/
+theorem eval_rename {N N' m : ℕ} (g : Fin N → Fin N') (P : DiagPhase N m) (v : Fin N' → ZMod 2) :
+    DiagPhase.eval (MvPolynomial.rename g P) v = DiagPhase.eval P (v ∘ g) := by
+  unfold DiagPhase.eval
+  rw [MvPolynomial.eval_rename]
+  rfl
+
+/-- The indicator of the point `v₀`: a product of `X i` (where `v₀ i = 1`) or `1 - X i` (where
+`v₀ i = 0`). The one copy in the library: `CarrierRules.lean`, `BackwardConstructions.lean`,
+`RewriteCompleteness.lean` and `ConditionFloor.lean` each restated it before it moved here
+(docs/STEPS.md, entry 2026-09-30h). -/
+noncomputable def pointPoly {N m : ℕ} (v₀ : Fin N → ZMod 2) : DiagPhase N m :=
+  ∏ i : Fin N, (if v₀ i = 1 then (MvPolynomial.X i : DiagPhase N m) else 1 - MvPolynomial.X i)
+
+/-- Each factor of `pointPoly` evaluates to `1` where the coordinates agree, `0` otherwise. -/
+theorem eval_pointFactor {N m : ℕ} (v₀ v : Fin N → ZMod 2) (i : Fin N) :
+    DiagPhase.eval
+        (if v₀ i = 1 then (MvPolynomial.X i : DiagPhase N m) else 1 - MvPolynomial.X i) v
+      = if v i = v₀ i then (1 : ZMod (2 ^ m)) else 0 := by
+  have h00 : ((0 : ZMod 2).val : ℕ) = 0 := rfl
+  have h11 : ((1 : ZMod 2).val : ℕ) = 1 := rfl
+  have hsub : ∀ A B : DiagPhase N m,
+      DiagPhase.eval (A - B) v = DiagPhase.eval A v - DiagPhase.eval B v :=
+    fun A B => by simp [DiagPhase.eval]
+  have hone : DiagPhase.eval (1 : DiagPhase N m) v = 1 := by simp [DiagPhase.eval]
+  have hcases : ∀ z : ZMod 2, z = 0 ∨ z = 1 := by decide
+  rcases hcases (v₀ i) with h0 | h0 <;> rw [h0] <;>
+    rcases hcases (v i) with h1 | h1 <;> rw [h1]
+  · rw [if_neg (by decide), if_pos rfl, hsub, hone, DiagPhase.eval_X, h1, h00]
+    norm_num
+  · rw [if_neg (by decide), if_neg (by decide), hsub, hone, DiagPhase.eval_X, h1, h11]
+    norm_num
+  · rw [if_pos rfl, if_neg (by decide), DiagPhase.eval_X, h1, h00]; norm_num
+  · rw [if_pos rfl, if_pos rfl, DiagPhase.eval_X, h1, h11]; norm_num
+
+/-- `pointPoly` evaluates to the indicator of its point. -/
+theorem eval_pointPoly {N m : ℕ} (v₀ v : Fin N → ZMod 2) :
+    DiagPhase.eval (pointPoly v₀ : DiagPhase N m) v = if v = v₀ then 1 else 0 := by
+  unfold pointPoly
+  rw [show DiagPhase.eval
+      (∏ i : Fin N, (if v₀ i = 1 then (MvPolynomial.X i : DiagPhase N m) else 1 - MvPolynomial.X i))
+      v = ∏ i : Fin N, DiagPhase.eval
+        (if v₀ i = 1 then (MvPolynomial.X i : DiagPhase N m) else 1 - MvPolynomial.X i) v
+    from by unfold DiagPhase.eval; rw [map_prod]]
+  simp_rw [eval_pointFactor]
+  by_cases hv : v = v₀
+  · rw [if_pos hv]
+    refine Finset.prod_eq_one (fun i _ => ?_)
+    rw [if_pos (by rw [hv])]
+  · rw [if_neg hv]
+    have : ∃ i, v i ≠ v₀ i := by
+      by_contra hc
+      exact hv (funext (fun i => by_contra (fun hne => hc ⟨i, hne⟩)))
+    obtain ⟨i, hi⟩ := this
+    exact Finset.prod_eq_zero (Finset.mem_univ i) (if_neg hi)
+
+/-- **Representability.** Every function of the words of `N` bits into `ZMod (2^m)` is the value
+of an exponent. -/
+theorem exists_diagPhase_eval {N m : ℕ} (g : (Fin N → ZMod 2) → ZMod (2 ^ m)) :
+    ∃ G : DiagPhase N m, ∀ v : Fin N → ZMod 2, DiagPhase.eval G v = g v := by
+  classical
+  refine ⟨∑ v₀ : Fin N → ZMod 2, MvPolynomial.C (g v₀) * pointPoly v₀, fun v => ?_⟩
+  rw [show DiagPhase.eval (∑ v₀ : Fin N → ZMod 2, MvPolynomial.C (g v₀) * pointPoly v₀) v
+      = ∑ v₀ : Fin N → ZMod 2, DiagPhase.eval (MvPolynomial.C (g v₀) * pointPoly v₀) v
+    from by unfold DiagPhase.eval; rw [map_sum]]
+  simp_rw [DiagPhase.eval_mul, DiagPhase.eval_C, eval_pointPoly]
+  rw [Finset.sum_eq_single v]
+  · rw [if_pos rfl, mul_one]
+  · intro v₀ _ hne
+    rw [if_neg (Ne.symm hne), mul_zero]
+  · intro hc
+    exact absurd (Finset.mem_univ v) hc
 
 end DiagPhase
 

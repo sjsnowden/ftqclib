@@ -8,9 +8,10 @@ import FTQCLib.Hierarchy.Defs
 /-!
 # Check: the diagonal phase substrate
 
-Axiom rows for every declaration of `FTQCLib.Hierarchy.Defs`, each under a build-failing `#guard_msgs`.
-The substrate every later Hierarchy module is stated over: `DiagPhase`, `liftBinary`, `eval`
-with its four algebraic laws, `level` and `discreteDeriv`.
+Axiom rows for every declaration of `FTQCLib.Hierarchy.Defs`, each under a build-failing
+`#guard_msgs`. The substrate every later Hierarchy module is stated over: `DiagPhase`,
+`liftBinary`, `eval` with its five algebraic laws (sum, negation, product, constant, variable),
+`level` and `discreteDeriv`.
 
 The witness rows for these objects live beside their consumers; this module is the sweep.
 -/
@@ -46,6 +47,11 @@ Quot.sound] -/
 #guard_msgs (whitespace := lax) in
 #print axioms eval_add
 
+/-- info: 'FTQCLib.Hierarchy.DiagPhase.eval_neg' depends on axioms: [propext, Classical.choice,
+Quot.sound] -/
+#guard_msgs (whitespace := lax) in
+#print axioms eval_neg
+
 /-- info: 'FTQCLib.Hierarchy.DiagPhase.eval_mul' depends on axioms: [propext, Classical.choice,
 Quot.sound] -/
 #guard_msgs (whitespace := lax) in
@@ -60,5 +66,28 @@ Quot.sound] -/
 Quot.sound] -/
 #guard_msgs (whitespace := lax) in
 #print axioms eval_X
+
+
+/-! ## Axiom sweep: made public or moved here (docs/STEPS.md, entry 2026-09-30h) -/
+
+/-- info: 'FTQCLib.Hierarchy.DiagPhase.eval_pointFactor' depends on axioms:
+[propext, Classical.choice, Quot.sound] -/
+#guard_msgs (whitespace := lax) in
+#print axioms FTQCLib.Hierarchy.DiagPhase.eval_pointFactor
+
+/-- info: 'FTQCLib.Hierarchy.DiagPhase.eval_pointPoly' depends on axioms:
+[propext, Classical.choice, Quot.sound] -/
+#guard_msgs (whitespace := lax) in
+#print axioms FTQCLib.Hierarchy.DiagPhase.eval_pointPoly
+
+/-- info: 'FTQCLib.Hierarchy.DiagPhase.exists_diagPhase_eval' depends on axioms:
+[propext, Classical.choice, Quot.sound] -/
+#guard_msgs (whitespace := lax) in
+#print axioms FTQCLib.Hierarchy.DiagPhase.exists_diagPhase_eval
+
+/-- info: 'FTQCLib.Hierarchy.DiagPhase.eval_rename' depends on axioms:
+[propext, Classical.choice, Quot.sound] -/
+#guard_msgs (whitespace := lax) in
+#print axioms FTQCLib.Hierarchy.DiagPhase.eval_rename
 
 end FTQCLib.Hierarchy.DiagPhase

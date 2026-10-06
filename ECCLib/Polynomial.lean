@@ -56,6 +56,34 @@ theorem IsPolyDegLE.iteratedFwdDiff_eq_zero {d : ℕ} {f : V → G} (h : IsPolyD
     · intro p hp1 hp2
       simp only [List.getElem_ofFn, List.get_eq_getElem, Fin.cast_mk]] at hkey
 
+/-- `IsPolyDegLE` is closed under negation. -/
+theorem IsPolyDegLE.neg {d : ℕ} {P : V → G} (h : IsPolyDegLE d P) :
+    IsPolyDegLE d (fun x => -(P x)) := by
+  intro ys
+  rw [show (fun x => -(P x)) = (⇑(-AddMonoidHom.id G)) ∘ P from rfl,
+      iteratedFwdDiff_comp_addMonoidHom, h ys]
+  funext x; simp
+
+/-- **A difference lowers the degree by one:** a difference of a function of degree `≤ d + 1`
+has degree `≤ d`. -/
+theorem IsPolyDegLE.fwdDiff {d : ℕ} {P : V → G} (h : IsPolyDegLE (d + 1) P) (c : V) :
+    IsPolyDegLE d (_root_.fwdDiff c P) := by
+  intro ys
+  have hc : _root_.fwdDiff c P = iteratedFwdDiff [c] P := rfl
+  have hlen : d + 1 + 1 ≤ (List.ofFn ys ++ [c]).length := by
+    rw [List.length_append, List.length_ofFn, List.length_singleton]
+  rw [hc, ← iteratedFwdDiff_append]
+  exact h.iteratedFwdDiff_eq_zero hlen
+
+/-- **Precomposing with an additive map does not raise the degree.** -/
+theorem IsPolyDegLE.comp_addMonoidHom_right {W : Type*} [AddCommGroup W] (L : V →+ W)
+    {P : W → G} {d : ℕ} (h : IsPolyDegLE d P) : IsPolyDegLE d (P ∘ L) := by
+  intro ys
+  have hlen : d + 1 ≤ ((List.ofFn ys).map L).length := by
+    rw [List.length_map, List.length_ofFn]
+  rw [iteratedFwdDiff_comp_addMonoidHom_right, h.iteratedFwdDiff_eq_zero hlen]
+  rfl
+
 /-!
 ## The mother example — a genuine nonclassical polynomial over `ℝ/ℤ`
 

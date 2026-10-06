@@ -118,6 +118,20 @@ lemma iteratedFwdDiff_comp_addMonoidHom (φ : G →+ G') (ys : List V) (f : V �
   | nil => rfl
   | cons y ys ih => simp only [iteratedFwdDiff_cons, ih, fwdDiff_comp_addMonoidHom]
 
+/-- **Precomposing with an additive map** turns each difference into the difference along the
+image direction: `D_y (f ∘ L) = (D_{L y} f) ∘ L`, iterated. -/
+lemma iteratedFwdDiff_comp_addMonoidHom_right {W : Type*} [AddCommGroup W] (L : V →+ W)
+    (f : W → G) (ys : List V) :
+    iteratedFwdDiff ys (f ∘ L) = iteratedFwdDiff (ys.map L) f ∘ L := by
+  induction ys with
+  | nil => rfl
+  | cons y ys ih =>
+    rw [List.map_cons, iteratedFwdDiff_cons, iteratedFwdDiff_cons, ih]
+    funext x
+    change iteratedFwdDiff (ys.map L) f (L (x + y)) - iteratedFwdDiff (ys.map L) f (L x)
+      = iteratedFwdDiff (ys.map L) f (L x + L y) - iteratedFwdDiff (ys.map L) f (L x)
+    rw [map_add]
+
 /-! ### The composition law and list-structural lemmas
 
 The seed of the Aichinger–Moosbauer reduction (arbitrary directions ⟺ standard-basis directions): the forward
