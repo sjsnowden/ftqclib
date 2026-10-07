@@ -110,3 +110,53 @@ Run `test_retrieval_loop.py` for pure protocol controls. Run
 scope-exclusion, immutable-identity, missing/stale-index and shared-budget tests.
 The adapter's array-schema and zero-tool checks use a local synthetic provider;
 no live model calls are needed for these controls.
+
+## Opt-in typed evidence needs (protocol 3)
+
+`chain_study.py prepare --evidence-needs` pins `policy.protocol = 3` in a new
+manifest and its initial Work IR. Omit the flag to retain protocol 2. Existing
+protocol-2 manifests and the historical proof/retrieval protocols keep their
+schemas and dispatch policy; source-pinned runs still require their original
+source bytes. Unknown protocol versions are refused.
+
+`evidence_protocol.py` exposes `SCHEMA`, `INSTRUCTIONS`, `packet(...)`, and
+`Session(backend, max_requests, snapshot_id, initial=())`. The model returns six
+required fields, without a tool catalogue:
+
+```json
+{"outcome":"need","proof":null,"need":"declaration_names","names":["ECCLib.Coding.IsCosetLeaderMap"],"fragment":null,"reason":null}
+```
+
+`outcome` is `candidate`, `need`, or `blocked`. A candidate supplies `proof`; a
+blocked outcome supplies `reason`. A need supplies either `declaration_names`
+and one to four distinct exact `names`, or `name_fragment` and one literal
+identifier `fragment`. A need may also supply a bounded explanatory `reason`;
+the owner ignores that explanation when resolving evidence. All other inactive
+fields are null. Candidate proof and blocked reason bounds are 16384 and 2048
+UTF-8 bytes; names are at most 256 bytes each and fragments at most 240 bytes.
+Ordinary Unicode identifiers and dots are admitted; quoted Lean names, prose,
+paths and query syntax are outside this prototype.
+
+The deterministic owner maps declaration names to its fixed declaration reader
+and fragments to a JSON-quoted literal search. Model values never select a
+backend, executable, path, or arbitrary query. Protocol 2's receipt validation,
+snapshot binding, cumulative evidence, initial-evidence deduplication, cached
+request refusal, pre-effect budget reservation, and all-or-none batch admission
+are shared. Candidate outcomes still enter the existing protected checker;
+returning a candidate alone never establishes proof acceptance.
+An unavailable declaration lookup without a name now preserves its backend
+status (such as `timed_out`), rather than misreporting a declaration-name mismatch;
+successful and missing lookups still require the exact requested name.
+
+Run `python3 -B test_evidence_protocol.py` for scripted owner dispatch and
+candidate-check routing, including invalid needs with no effects, literal
+quoting, caches, budgets, and optional need explanations. `test_work_program.py`
+checks both explicit versions survive the native Work IR round trip. These
+scripted controls are not live-model or Lean acceptance evidence.
+
+On 2026-10-07, compact JSON serialization of schema plus UTF-8 instructions was
+1555 bytes for protocol 2 (487 + 1068), and 1236 for protocol 3 (553 + 683):
+319 fewer bytes. This excludes evidence packets and provider framing. No local
+`tiktoken` module was available in the WSL test runtime; no tokenizer estimate or
+model-token saving is claimed. The change is a bounded protocol experiment,
+not evidence of improved proof success or model cost.

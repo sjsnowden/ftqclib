@@ -194,7 +194,7 @@ def make_manifest(args, spec, execution, seed, build, store):
 
 
 def proof_policy(args):
-    return {"concurrency": 1, "protocol": 2, "max_calls": args.max_calls,
+    return {"concurrency": 1, "protocol": 3 if getattr(args, "evidence_needs", False) else 2, "max_calls": args.max_calls,
             "max_requests": args.max_requests, "node_token_limit": args.node_token_limit,
             "max_retrieval_rounds": args.max_retrieval_rounds,
             "max_ineffective_rounds": args.max_ineffective_rounds,
@@ -430,6 +430,7 @@ def main():
     create.add_argument("--continue-from", type=Path)
     create.add_argument("--program", type=Path, help="Named model functions and bounded blocked-question routes")
     create.add_argument("--typed-interaction", action="store_true", help="Pin typed local-owner submission contracts")
+    create.add_argument("--evidence-needs", action="store_true", help="Opt into proof outcome/evidence-need protocol 3")
     create.add_argument("--runtime-pin", type=Path, help="Explicit owner-maintained runtime pin; full audit is separate")
     create.add_argument("--controls-from", type=Path, help="Reuse matching closed control receipts; otherwise run controls")
     for field, default, low, high in (("deadline-seconds", 180, 1, 3600),

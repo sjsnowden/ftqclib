@@ -11,6 +11,7 @@ import uuid
 
 import chain_check
 import chain_protocol as protocol
+import evidence_protocol
 import proof_loop
 import study
 import proof_program
@@ -69,11 +70,18 @@ def context(manifest, node, issue, ledger):
             "failed_candidates": ledger[-6:], "semantic_notes": node.get("evidence_notes", [])}
 
 
+def selected_protocol(manifest):
+    version = manifest["policy"].get("protocol", 2)
+    if type(version) is not int or version not in (2, 3):
+        raise ValueError("unsupported proof protocol version")
+    return evidence_protocol if version == 3 else protocol
+
+
 def build_packet(manifest, node, issue, ledger, session, latest, requests_left):
     """Project current evidence only; immutable identity bindings stay in owner receipts."""
     formalism = {"schema": 1, "modules": [], "anchors": [],
                  "semantic_notes": manifest["formalism"]["semantic_notes"]}
-    return protocol.packet(context(manifest, node, issue, ledger), formalism, session.snapshot_id,
+    return selected_protocol(manifest).packet(context(manifest, node, issue, ledger), formalism, session.snapshot_id,
                            requests_left=requests_left, latest=latest,
                            retrieved={"initial": session.initial, "retained": session.retrieved})
 
@@ -105,7 +113,8 @@ class Runner:
         return evidence
 
     def launch(self, job, number, packet):
-        return self.invoke(job, number, packet, protocol.SCHEMA, protocol.INSTRUCTIONS,
+        selected = selected_protocol(self.manifest)
+        return self.invoke(job, number, packet, selected.SCHEMA, selected.INSTRUCTIONS,
                            "proof-proposal", job["step"]["id"])
 
     def invoke(self, job, number, packet, schema, instructions, role, slot):
@@ -142,8 +151,9 @@ class Runner:
 
     def retrieve(self, session, text, node, number, rounds):
         limit = self.manifest["policy"].get("max_retrieval_rounds", 2)
-        selected, _ = protocol.action(text)
-        retrieval = selected and selected["action"] in ("search_name", "read_declarations")
+        selected, _ = selected_protocol(self.manifest).action(text)
+        retrieval = selected and (selected.get("outcome") == "need" or
+                                  selected.get("action") in ("search_name", "read_declarations"))
         if retrieval and rounds >= limit:
             action = session.outcome("refused", reason="retrieval round limit reached; propose a proof or report the missing premise")
         else:
@@ -166,7 +176,7 @@ class Runner:
 
     def rounds(self, job, node, initial):
         policy = self.manifest["policy"]
-        session = protocol.Session(self.backend, policy["max_requests"], self.backend.snapshot, initial)
+        session = selected_protocol(self.manifest).Session(self.backend, policy["max_requests"], self.backend.snapshot, initial)
         records, ledger, checked, latest, retrieval_rounds, repeats = [], [], {}, None, 0, 0
         assessment, reason = None, "per-node model-call limit reached"
         for number in range(1, policy["max_calls"] + 1):

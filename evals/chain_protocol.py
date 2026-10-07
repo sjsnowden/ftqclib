@@ -242,7 +242,8 @@ class Session:
             limits.bounded_json(response, limits.RETRIEVED_BYTES_MAX)
             captured = response
             projected = self.validate(response)
-            if kind == "read_declarations" and projected.get("name") != payload:
+            if (kind == "read_declarations" and projected["status"] in ("ok", "missing")
+                    and projected.get("name") != payload):
                 raise ValueError("lookup returned a different declaration name")
             return response, projected, None
         except (OSError, ValueError, TypeError, UnicodeError, RecursionError) as error:
@@ -261,7 +262,12 @@ class Session:
             cache[payload] = response
             evidence.append(projected)
             if projected["status"] not in ("ok", "missing", "empty"):
-                return self.outcome("retrieval_failed", reason="retrieval returned " + projected["status"],
+                detail = projected.get("reason")
+                detail = detail.get("text") if isinstance(detail, dict) else detail
+                reason = "retrieval returned " + projected["status"]
+                if isinstance(detail, str) and detail:
+                    reason += ": " + limits.bounded_text(detail, 1024)["text"]
+                return self.outcome("retrieval_failed", reason=reason,
                                     responses=responses, operation=kind)
             names = [hit["name"] for hit in projected.get("hits", [])]
             if kind == "read_declarations" and projected["status"] == "ok":
@@ -283,6 +289,10 @@ class Session:
         selected, reason = action(raw)
         if reason:
             return self.outcome("refused", reason=reason)
+        return self.dispatch_selected(selected)
+
+    def dispatch_selected(self, selected):
+        """Dispatch an owner-validated value; callers must validate before crossing this boundary."""
         kind = selected["action"]
         if kind == "check_candidate":
             return self.outcome("candidate", proof=selected["proof"])

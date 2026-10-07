@@ -155,9 +155,9 @@ def validate_execution(execution):
 
 
 def validate_policy(policy):
-    bounds = {"max_calls": (1, 32), "max_requests": (0, 8), "node_token_limit": (1, 1000000),
+    bounds = {"protocol": (2, 3), "max_calls": (1, 32), "max_requests": (0, 8), "node_token_limit": (1, 1000000),
               "max_retrieval_rounds": (0, 8), "max_ineffective_rounds": (1, 8)}
-    fixed = {"concurrency": 1, "protocol": 2, "input_bytes_max": 32768,
+    fixed = {"concurrency": 1, "input_bytes_max": 32768,
              "unknown_usage_stops_admission": True,
              "token_limit": "soft admission threshold; one in-flight call can exceed it", "automatic_escalations": 0}
     require(isinstance(policy, dict) and set(policy) == set(bounds) | set(fixed), "unknown proof policy fields")

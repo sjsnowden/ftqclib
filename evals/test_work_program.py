@@ -213,7 +213,25 @@ def initial_binding(directory):
     check("legacy manifest requires no IR artifact", True)
 
 
+def evidence_versions():
+    for version in (2, 3):
+        execution = copy.deepcopy(EXECUTION)
+        execution["proof_policy"]["protocol"] = version
+        lowered = work_program.lower(work_program.from_proof(SPEC, execution, None))
+        check("explicit proof protocol round trips " + str(version),
+              lowered["ok"] and lowered["execution"]["proof_policy"]["protocol"] == version)
+    for version in (1, 4, True, "3"):
+        policy = {**EXECUTION["proof_policy"], "protocol": version}
+        try:
+            work_program.validate_policy(policy)
+        except ValueError:
+            pass
+        else:
+            raise AssertionError("invalid evidence protocol version admitted")
+
+
 if __name__ == "__main__":
+    evidence_versions()
     roundtrip()
     disagreements()
     endpoint_order()

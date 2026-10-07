@@ -130,6 +130,10 @@ def supplied():
 
 
 def failures():
+    owner, backend = session([{"status": "unavailable", "reason": "timed_out", "snapshot": SNAPSHOT, "receipt": RECEIPT}])
+    result = owner.dispatch(request("read_declarations"))
+    assert result["status"] == "retrieval_failed" and "timed_out" in result["reason"]
+    assert owner.requests_used == 1 and len(backend.calls) == 1
     owner, backend = session(budget=1)
     assert owner.dispatch(request("read_declarations", names=["A", "B"]))["status"] == "refused"
     assert not backend.calls and owner.requests_used == 0
