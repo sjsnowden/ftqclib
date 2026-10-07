@@ -66,6 +66,21 @@ def config(program):
                 node: [program["functions"][name]["step"]] for node, name in program["on_blocked"].items()}}
 
 
+def interaction_config(program, nodes, scope):
+    """Opt-in owner declarations; legacy program/config encodings remain unchanged."""
+    endpoints = {node["id"]: {
+        "schema": "ontologic.endpoint/v1", "requests": {"input": "value:ProofInput"},
+        "replies": {"outcome": "result:ProofOutcome"}, "capability": "proof_input", "scope": scope}
+        for node in nodes}
+    for function in program["functions"].values():
+        endpoints[function["step"]] = {
+            "schema": "ontologic.endpoint/v1", "requests": {"assess": "value:ProofQuestion"},
+            "replies": {"advice": "result:ProofAdvice"}, "capability": "proof_advice", "scope": scope}
+    callers = {node: ["proof_advice"] for node in program["on_blocked"]}
+    return {"typed_endpoints": endpoints,
+            "typed_callers": {**callers, "local-owner": ["proof_input", "proof_advice"]}}
+
+
 def result(raw):
     if not isinstance(raw, str) or len(raw.encode()) > 16384:
         raise ValueError("function result byte bound")

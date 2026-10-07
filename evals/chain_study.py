@@ -142,6 +142,10 @@ def prepare_locked(args, spec, root, kernel):
         manifest["proof_program"] = program
         manifest["sources"][str(args.program.resolve())] = store.put(args.program.read_bytes())
         manifest["kernel_config"].update(proof_program.config(program))
+        if getattr(args, "typed_interaction", False):
+            manifest["kernel_config"].update(proof_program.interaction_config(program, spec["nodes"], args.id))
+    elif getattr(args, "typed_interaction", False):
+        raise ValueError("typed interaction requires a declared proof program")
     if args.runtime_pin:
         manifest["runtime_pin"] = runtime_pin.admit(args.runtime_pin, manifest, store)
     if args.controls_from:
@@ -425,6 +429,7 @@ def main():
     create.add_argument("--effort", default="medium")
     create.add_argument("--continue-from", type=Path)
     create.add_argument("--program", type=Path, help="Named model functions and bounded blocked-question routes")
+    create.add_argument("--typed-interaction", action="store_true", help="Pin typed local-owner submission contracts")
     create.add_argument("--runtime-pin", type=Path, help="Explicit owner-maintained runtime pin; full audit is separate")
     create.add_argument("--controls-from", type=Path, help="Reuse matching closed control receipts; otherwise run controls")
     for field, default, low, high in (("deadline-seconds", 180, 1, 3600),

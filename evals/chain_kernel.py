@@ -117,6 +117,10 @@ def make_kernel(root, manifest, study_store, runner, validate_result):
         import proof_program
         proof_program.validate(manifest["proof_program"], manifest["nodes"])
         config.update(proof_program.config(manifest["proof_program"]))
+        if "typed_endpoints" in manifest["kernel_config"] or "typed_callers" in manifest["kernel_config"]:
+            expected = proof_program.interaction_config(manifest["proof_program"], manifest["nodes"], manifest["id"])
+            if any(manifest["kernel_config"].get(key) != value for key, value in expected.items()):
+                raise ValueError("pinned typed interaction declarations differ from the proof program")
     host_type = type("ChainKernel", (ChainEffects, module.Kernel), {})
     host = host_type(str(root), manifest["id"], config, attempt_runner=runner)
     host.native = module

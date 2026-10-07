@@ -38,6 +38,11 @@ def question_result(runner, job, result):
     request = runner.questions.pop(job["issue"]["hash"], None)
     if request is None:
         return result
+    contract = runner.kernel.config.get("typed_endpoints", {}).get(request["to"])
+    if contract is not None:
+        import typed_interaction
+        request = {**request, "typed": {"endpoint_version": typed_interaction.endpoint_version(contract),
+                                       "variant": "assess", "payload": json.loads(request["body"])}}
     envelope = runner.store.put(study.canonical({"schema": 1, "issue": job["issue"]["hash"],
                                                "request": request, "outputs": []}))
     runner.event("trial_worker", slot=job["step"]["id"], phase="waiting",
@@ -47,14 +52,25 @@ def question_result(runner, job, result):
             "mailbox": {"schema": 1, "request": envelope, "candidate": envelope, "checked": False}}
 
 
+def answer_context(runner, job, question):
+    """An owner question binds an explicit obligation; it never fabricates a proof issue."""
+    if question.get("source") == "control":
+        source = job["issue"]
+        source_id = question["evidence_source"]
+    else:
+        source = next(e for e in runner.kernel.entries() if e["hash"] == question["sender"])
+        source_id = question["step"]
+    sender = node_for(runner, {"step": {"id": source_id}, "issue": source})
+    return sender, source, source_id
+
+
 def answer(runner, job):
     import chain_runner
     program = runner.manifest["proof_program"]
     name = job["step"]["model_function"]
     function = program["functions"][name]
     question = next(e for e in runner.kernel.entries() if e["hash"] == job["issue"]["question"])
-    source = next(e for e in runner.kernel.entries() if e["hash"] == question["sender"])
-    sender = node_for(runner, {"step": {"id": question["step"]}, "issue": source})
+    sender, source, source_id = answer_context(runner, job, question)
     initial = runner.prefetch({"evidence": [*sender["evidence"],
                                           *[s.split(".") for s in function["evidence"]]]})
     session = chain_protocol.Session(runner.backend, 0, runner.backend.snapshot, initial)
@@ -64,12 +80,16 @@ def answer(runner, job):
               "accepted_predecessors": chain_runner.predecessor_evidence(runner.manifest, source),
               "limits": "Advice only; changed obligations require owner admission."}
     result = runner.invoke(job, 1, packet, proof_program.RESULT_SCHEMA, INSTRUCTIONS,
-                           "function:" + name, question["step"])
+                           "function:" + name, source_id)
     refusal, reply = result.get("reason"), None
     if result.get("finished") and proof_loop.usage_sum([result.get("usage")]) is not None:
         try:
             value = proof_program.result(result["text"])
             reply = {"schema": 1, "in_reply_to": question["hash"], "body": json.dumps(value)}
+            if "interaction" in question:
+                envelope = json.loads(runner.kernel.store.get(question["interaction"]))
+                reply["typed"] = {"endpoint_version": envelope["endpoint_version"],
+                                  "correlation": envelope["correlation"], "variant": "advice", "payload": value}
         except (ValueError, TypeError, RecursionError) as error:
             refusal = str(error)
     else:
