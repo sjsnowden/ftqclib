@@ -23,6 +23,7 @@ import local_retrieval
 import runtime_pin
 import study
 import proof_program
+import work_program
 
 PROFILE = '''"""Frozen proof-chain host: checks are executed by the isolated owner adapter."""
 GATED_KINDS = ("proof", "run")
@@ -70,20 +71,13 @@ def validate_spec(spec):
         names.add(node["name"])
 
 
-def plan_files(worktree, spec, execution, *, replace=False, program=None):
-    agent = {"model": execution["model"], "effort": execution["effort"]}
-    steps = [{"id": node["id"], "target": "T01", "kind": "proof", "scheduled": True,
-              "title": node["purpose"], "artifact": node["path"], "gate": "Protected Lean type and axiom checks",
-              "depends_on": node["deps"], "writes": [node["path"],
-              ".ontologic/certificates/" + node["id"] + ".json"], "agent": agent}
-             for node in spec["nodes"]]
-    steps += proof_program.compile_steps(program) if program else []
-    plan = {"steps": steps, "reviewed_steps": []}
+def plan_files(worktree, spec, execution, *, replace=False, program=None, prepared_plan=None):
+    plan = prepared_plan if prepared_plan is not None else work_program.legacy_plan(spec, execution, program)
     import plan_check
     import brief
     if plan_check.refusals(plan, ()):
         raise ValueError("native kernel refuses the proof plan")
-    for step in steps:
+    for step in plan["steps"]:
         brief.common(step, step["writes"])
     files = {".ontologic/plan.json": study.canonical(plan), ".ontologic/profile.py": PROFILE.encode(),
              ".ontologic/TARGETS.md": ("# T01 — Minimum-weight quantum decoder bridge\n\n" +
@@ -132,9 +126,18 @@ def prepare_locked(args, spec, root, kernel):
                  "observed_token_limit": args.token_limit}
     program = (proof_program.validate(json.loads(args.program.read_bytes()), spec["nodes"])
                if getattr(args, "program", None) else None)
-    seed = plan_files(worktree, spec, execution, replace=bool(args.continue_from), program=program)
+    initial = work_program.lower(work_program.from_proof(spec, {**execution, "proof_policy": proof_policy(args)}, program))
+    if not initial["ok"]:
+        raise ValueError("initial Work IR refused: " + json.dumps(initial["errors"]))
+    seed = plan_files(worktree, spec, execution, replace=bool(args.continue_from), program=program,
+                      prepared_plan=initial["plan"])
     build = json.loads(args.build.read_bytes())
     manifest = make_manifest(args, spec, execution, seed, build, store)
+    retained = store.put(study.canonical(initial["artifact"]))
+    if retained != initial["identity"]:
+        raise ValueError("initial Work IR storage identity differs")
+    manifest["initial_work_ir"] = {"schema": 1, "label": "initial program; later native plan versions are authoritative",
+                                   "artifact": retained, "identity": initial["identity"], "seed_commit": seed}
     if program:
         manifest["proof_program"] = program
         manifest["sources"][str(args.program.resolve())] = store.put(args.program.read_bytes())
@@ -183,13 +186,46 @@ def make_manifest(args, spec, execution, seed, build, store):
             "build_receipt": store.put(args.build.read_bytes()), "snapshot": str(snapshot), "snapshot_id": snapshot_id,
             "formalism": build["plan"], "controls_source": str(controls.resolve()),
             "consumers_source": str(consumers.resolve()),
-            "policy": {"concurrency": 1, "protocol": 2, "max_calls": args.max_calls,
-                       "max_requests": args.max_requests, "node_token_limit": args.node_token_limit,
-                       "max_retrieval_rounds": args.max_retrieval_rounds,
-                       "max_ineffective_rounds": args.max_ineffective_rounds,
-                       "input_bytes_max": 32768, "unknown_usage_stops_admission": True,
-                       "token_limit": "soft admission threshold; one in-flight call can exceed it",
-                       "automatic_escalations": 0}}
+            "policy": proof_policy(args)}
+
+
+def proof_policy(args):
+    return {"concurrency": 1, "protocol": 2, "max_calls": args.max_calls,
+            "max_requests": args.max_requests, "node_token_limit": args.node_token_limit,
+            "max_retrieval_rounds": args.max_retrieval_rounds,
+            "max_ineffective_rounds": args.max_ineffective_rounds,
+            "input_bytes_max": 32768, "unknown_usage_stops_admission": True,
+            "token_limit": "soft admission threshold; one in-flight call can exceed it", "automatic_escalations": 0}
+
+
+def verify_initial_program(root, manifest, store):
+    """Verify the immutable initial binding, never substitute it for an active plan."""
+    reference = manifest.get("initial_work_ir")
+    if reference is None:
+        return
+    if set(reference) != {"schema", "label", "artifact", "identity", "seed_commit"} or reference["schema"] != 1:
+        raise ValueError("initial Work IR reference shape differs")
+    data = store.get(reference["artifact"])
+    if study.digest(data) != reference["identity"] or reference["artifact"] != reference["identity"]:
+        raise ValueError("initial Work IR identity differs")
+    artifact = json.loads(data)
+    lowered = work_program.lower(artifact.get("program"))
+    if not lowered["ok"] or study.canonical(lowered["artifact"]) != data:
+        raise ValueError("initial Work IR compilation differs")
+    spec = json.loads(store.get(manifest["specification"]))
+    execution = {**manifest["execution"], "proof_policy": manifest["policy"]}
+    expected = work_program.build_initial(spec, execution, manifest.get("proof_program"),
+                                           artifact["program"]["metadata"]["function_order"])
+    if study.canonical(expected) != study.canonical(artifact["program"]) or spec["nodes"] != manifest["nodes"]:
+        raise ValueError("initial Work IR differs from frozen proof manifest")
+    if reference["seed_commit"] != manifest["seed_commit"]:
+        raise ValueError("initial Work IR seed binding differs")
+    initial_plan = study.git(root / "worktree", "show", reference["seed_commit"] + ":.ontologic/plan.json")
+    if initial_plan != study.canonical(lowered["plan"]):
+        raise ValueError("initial Work IR differs from native seed plan")
+    for key, value in lowered["config"].items():
+        if manifest["kernel_config"].get(key) != value:
+            raise ValueError("initial Work IR differs from native message configuration")
 
 
 def load(root):
@@ -198,6 +234,7 @@ def load(root):
     store = Store(str(root / "records"))
     if (root / "manifest.ref").read_text().strip() != store.put(study.canonical(manifest)):
         raise ValueError("manifest changed after preparation")
+    verify_initial_program(root, manifest, store)
     study.verify_sources(manifest)
     catalog = Path(manifest["execution"]["model_catalog"])
     if study.digest(catalog.read_bytes()) != manifest["execution"]["model_catalog_sha256"]:
