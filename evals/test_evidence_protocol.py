@@ -66,7 +66,7 @@ def invalid():
     bad += [response(names=names) for names in [None, [], ["A", "A"], ["A"] * 5, [1],
                                                ["Ω" * 129], ["../file"], ["«name»"]]]
     bad += [response(need="name_fragment", fragment=fragment) for fragment in
-            ["find a fact", '"fact"', "$(id)", "Ω" * 121, "a\x00b", "\ud800"]]
+            [None, "find a fact", '"fact"', "$(id)", "Ω" * 121, "a\x00b", "\ud800"]]
     bad += [response(proof="by rfl"), response(executable="bash"), response(outcome=[]),
             response(reason="x" * 2049), response(reason=""), response("candidate", reason="explanation"),
             response("candidate", proof="x" * 16385), response("blocked", reason=""),

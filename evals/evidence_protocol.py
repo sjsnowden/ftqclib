@@ -9,8 +9,9 @@ import chain_protocol as legacy
 
 INSTRUCTIONS = (
     "Return one JSON work outcome. candidate supplies a complete indented tactic body beginning with by. "
-    "If evidence is missing, need identifies declaration_names (up to four exact full Lean names) or "
-    "name_fragment (one literal identifier fragment). Fragments contain identifier characters and dots, "
+    "For missing evidence set outcome=need. Set need=declaration_names and names=[exact full Lean names] "
+    "(one to four), or need=name_fragment and fragment=one literal identifier fragment. "
+    "The selected payload must not be null. Fragments contain identifier characters and dots, "
     "never prose or query syntax. A need may include a brief reason; candidate reason is null. "
     "blocked gives the precise missing prerequisite. All other inactive fields "
     "are null. Use supplied evidence first; do not repeat needs. Accepted predecessor interfaces are "
@@ -62,7 +63,7 @@ def action(raw):
     elif "fragment" in active:
         reason = legacy.name_refusal(value["fragment"], legacy.QUERY_BYTES_MAX)
         if reason:
-            return None, reason
+            return None, "need=name_fragment requires a non-null literal in fragment: " + reason
     else:
         field = "proof" if kind == "candidate" else "reason"
         bound = legacy.PROOF_BYTES_MAX if field == "proof" else legacy.REASON_BYTES_MAX

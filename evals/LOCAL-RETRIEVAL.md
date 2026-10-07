@@ -155,8 +155,10 @@ checks both explicit versions survive the native Work IR round trip. These
 scripted controls are not live-model or Lean acceptance evidence.
 
 On 2026-10-07, compact JSON serialization of schema plus UTF-8 instructions was
-1555 bytes for protocol 2 (487 + 1068), and 1236 for protocol 3 (553 + 683):
-319 fewer bytes. This excludes evidence packets and provider framing. No local
+1555 bytes for protocol 2 (487 + 1068), and 1313 for protocol 3 (553 + 760):
+242 fewer bytes. Explicit field assignments were added after a live worker put
+its need only in explanatory prose while leaving the selected payload null.
+Such requests remain refused before effects. This excludes evidence packets and provider framing. No local
 `tiktoken` module was available in the WSL test runtime; no tokenizer estimate or
 model-token saving is claimed. The change is a bounded protocol experiment,
 not evidence of improved proof success or model cost.
