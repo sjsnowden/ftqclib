@@ -5,6 +5,7 @@ import chain_protocol
 import proof_loop
 import proof_program
 import study
+import proof_work_state
 
 INSTRUCTIONS = """Evaluate the declared function's request using the supplied evidence.
 Return the required JSON result only. Evidence supports advice, not proof acceptance.
@@ -79,8 +80,14 @@ def answer(runner, job):
               "evidence": session.initial, "semantic_notes": sender.get("evidence_notes", []),
               "accepted_predecessors": chain_runner.predecessor_evidence(runner.manifest, source),
               "limits": "Advice only; changed obligations require owner admission."}
-    result = runner.invoke(job, 1, packet, proof_program.RESULT_SCHEMA, INSTRUCTIONS,
-                           "function:" + name, source_id)
+    if runner.manifest.get("recovery_state", False):
+        packet["retained_work"] = proof_work_state.evidence(runner, sender, source)
+    if runner.manifest.get("recovery_state", False):
+        import proof_resolver
+        result, _ = proof_resolver.run(runner, job, sender, source, packet, initial)
+    else:
+        result = runner.invoke(job, 1, packet, proof_program.RESULT_SCHEMA, INSTRUCTIONS,
+                               "function:" + name, source_id)
     refusal, reply = result.get("reason"), None
     if result.get("finished") and proof_loop.usage_sum([result.get("usage")]) is not None:
         try:
@@ -96,7 +103,7 @@ def answer(runner, job):
         refusal = refusal or "unfinished function or unknown usage"
     usage = result.get("usage")
     agent = {**result, "tokens": sum(usage.values()) if proof_loop.usage_sum([usage]) is not None else None,
-             "cost_usd": None, "turns": 1}
+             "cost_usd": None, "turns": result.get("turns", 1)}
     answer_result = {"agent": agent, "reply": reply, "refusal": refusal}
     retain_answer(runner.kernel, job["issue"], answer_result)
     return answer_result

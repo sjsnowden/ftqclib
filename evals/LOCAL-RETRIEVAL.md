@@ -162,3 +162,11 @@ Such requests remain refused before effects. This excludes evidence packets and 
 `tiktoken` module was available in the WSL test runtime; no tokenizer estimate or
 model-token saving is claimed. The change is a bounded protocol experiment,
 not evidence of improved proof success or model cost.
+
+`--recovery-state` additionally records domain-neutral work states and restores
+same-contract evidence, attempted lookups and retrieval budgets across mailbox
+continuations. The Lean resolver can request evidence and submit original-goal
+candidates to the checker. Proposed supporting propositions are retained for
+trusted admission, never treated as accepted assumptions. New theorem nodes still
+require a new admitted study manifest. See OntolKernel's `docs/WORK-RECOVERY.md`
+and run `test_work_recovery.py` for the native recovery test without live models.

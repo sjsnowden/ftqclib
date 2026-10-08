@@ -16,6 +16,7 @@ import proof_loop
 import study
 import proof_program
 import proof_effects
+import proof_work_state
 
 
 def known_usage(store, identity):
@@ -152,6 +153,13 @@ class Runner:
     def retrieve(self, session, text, node, number, rounds):
         limit = self.manifest["policy"].get("max_retrieval_rounds", 2)
         selected, _ = selected_protocol(self.manifest).action(text)
+        if selected and self.manifest.get("recovery_state", False):
+            import proof_resolver
+            import work_state
+            route = work_state.route(proof_resolver.typed(selected, self.store), proof_work_state.REGISTRY,
+                                     {"check", "retrieve", "propose", "suspend"})
+            if route["status"] != "ready":
+                return session.outcome("refused", reason=route.get("reason", "owner admission required")), rounds
         retrieval = selected and (selected.get("outcome") == "need" or
                                   selected.get("action") in ("search_name", "read_declarations"))
         if retrieval and rounds >= limit:
@@ -177,6 +185,10 @@ class Runner:
     def rounds(self, job, node, initial):
         policy = self.manifest["policy"]
         session = selected_protocol(self.manifest).Session(self.backend, policy["max_requests"], self.backend.snapshot, initial)
+        recovery = self.manifest.get("recovery_state", False)
+        if recovery:
+            proof_work_state.restore(self, node, job["issue"], session)
+        requests_before = session.requests_used
         records, ledger, checked, latest, retrieval_rounds, repeats = [], [], {}, None, 0, 0
         assessment, reason = None, "per-node model-call limit reached"
         for number in range(1, policy["max_calls"] + 1):
@@ -186,6 +198,9 @@ class Runner:
                 break
             left = session.requests_left if retrieval_rounds < policy.get("max_retrieval_rounds", 2) else 0
             packet = build_packet(self.manifest, node, job["issue"], ledger, session, latest, left)
+            if recovery:
+                retained = proof_work_state.evidence(self, node, job["issue"])
+                packet["retained_work"] = {key: value for key, value in retained.items() if key != "retrieved"} if retained else None
             proof_effects.add_inputs(self, job, packet)
             result = self.launch(job, number, packet)
             if result["admitted"]:
@@ -194,6 +209,8 @@ class Runner:
                 reason = result.get("reason") or "worker usage is unknown"
                 break
             action, retrieval_rounds = self.retrieve(session, result["text"], node, number, retrieval_rounds)
+            if recovery:
+                proof_work_state.record(self, node, job["issue"], session, action)
             reason = "per-node model-call limit reached"
             if action["status"] == "retrieval_failed":
                 reason = "owner retrieval unavailable: " + str(action["reason"])
@@ -217,9 +234,12 @@ class Runner:
                 break
             proof = action["proof"]
             identity, assessment, repeated = self.assess(job, node, proof, number, checked)
+            if recovery:
+                proof_work_state.record(self, node, job["issue"], session,
+                                        {"kind": "check", "candidate": identity, "assessment": assessment})
             repeats += int(repeated)
             if assessment["accepted"]:
-                return records, assessment, None, session.requests_used, len(checked)
+                return records, assessment, None, session.requests_used - requests_before, len(checked)
             if assessment["status"] not in ("failed", "refused"):
                 reason = "protected compiler/examiner unavailable; no speculative retry"
                 break
@@ -230,7 +250,7 @@ class Runner:
             if repeats + session.ineffective_requests >= policy.get("max_ineffective_rounds", 2):
                 reason = "no new evidence: repeated rejected candidate"
                 break
-        return records, assessment, reason, session.requests_used, len(checked)
+        return records, assessment, reason, session.requests_used - requests_before, len(checked)
 
     def result(self, job, records, assessment, reason, searches, checks, elapsed):
         import verdict

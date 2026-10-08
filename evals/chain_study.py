@@ -133,6 +133,10 @@ def prepare_locked(args, spec, root, kernel):
                       prepared_plan=initial["plan"])
     build = json.loads(args.build.read_bytes())
     manifest = make_manifest(args, spec, execution, seed, build, store)
+    if getattr(args, "recovery_state", False):
+        if not args.evidence_needs:
+            raise ValueError("recovery state requires typed evidence needs")
+        manifest["recovery_state"] = True
     retained = store.put(study.canonical(initial["artifact"]))
     if retained != initial["identity"]:
         raise ValueError("initial Work IR storage identity differs")
@@ -431,6 +435,7 @@ def main():
     create.add_argument("--program", type=Path, help="Named model functions and bounded blocked-question routes")
     create.add_argument("--typed-interaction", action="store_true", help="Pin typed local-owner submission contracts")
     create.add_argument("--evidence-needs", action="store_true", help="Opt into proof outcome/evidence-need protocol 3")
+    create.add_argument("--recovery-state", action="store_true", help="Bind generic immutable work state across recovery")
     create.add_argument("--runtime-pin", type=Path, help="Explicit owner-maintained runtime pin; full audit is separate")
     create.add_argument("--controls-from", type=Path, help="Reuse matching closed control receipts; otherwise run controls")
     for field, default, low, high in (("deadline-seconds", 180, 1, 3600),
